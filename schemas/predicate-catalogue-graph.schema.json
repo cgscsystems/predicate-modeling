@@ -300,7 +300,7 @@
                           "minimum": 1
                         },
                         "mappingRevision": {
-                          "const": 6
+                          "const": 7
                         },
                         "sourceBatch": {
                           "type": "string",

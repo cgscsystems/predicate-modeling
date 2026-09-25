@@ -62,7 +62,7 @@ Use these terms consistently in code, UI and documentation.
 | `sql/Predicate-SQL-Mapping.json` | Per-predicate template, slot values and tag list. |
 | `docs/SQL-Implementation-Contracts.md` | Human reference for what individual tags mean. Link to it from the UI's help text; do not parse it. |
 
-`tools/validate_catalogue.py` must keep passing. Do not modify the catalogue, library or mapping files.
+`tools/validate_catalogue.py` must keep passing. Do not modify the catalogue, library or mapping files without the product owner's approval; any approved SQL change is a new library/mapping revision (revision 7 standardized every predicate's subject relation to `{{schema_name}}.{{table_name}}` or `{{subject_query}}`).
 
 ### Graph facts the app relies on
 
@@ -334,7 +334,7 @@ Start from the predicate's stage-one SQL. Fill tags in this order:
    Column tags apply only when the group is attached to a column. On table-level groups they stay unfilled.
 3. **Anything else stays as `{{tag}}`** in the output.
 
-Coverage with these rules: 44 of 364 predicates fill completely, 95 have one tag left (usually the value being tested, such as `selected_value` for M01), and the rest have more.
+Coverage with these rules (revision 7, column tags only on column-attached groups): 42 of 364 predicates fill completely, 99 have one tag left (usually the value being tested, such as `selected_value` for M01), and the rest have more.
 
 ### 10.3 Tag editor
 

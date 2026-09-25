@@ -10,7 +10,6 @@ Phase 0 of `docs/APPLICATION-DESIGN.md` (§6): each predicate's **output** (`par
 - A template counts as `partition` when it returns the rows of its subject relation (`t.*` or `p.*` built from `t.*`), with or without extra `profile_*` columns.
 - **Attachment** is to the relation whose rows the SQL returns or summarizes (the subject). The group is `column` when it is about one column's values, including a column tested against a companion column on the same row (start/end, value/deadline, x/y). Anchoring such pairs on a column keeps semantic-type and storage filtering (§9) useful. It is `table` when the group is about the record or several fields together.
 - **Cross-source** is true only when the SQL reads a second relation of records (reference, mapping, baseline, extract, event, edge or evidence tables and queries). Tags that supply a literal (`reference_value`), a same-row expression (`source_value`), entity column lists (`left_entity_columns`) or a declared value list (`*_set_query`) do not count.
-- Notes marked **UNCERTAIN** need a product-owner decision.
 
 ## Summary
 
@@ -22,7 +21,7 @@ Phase 0 of `docs/APPLICATION-DESIGN.md` (§6): each predicate's **output** (`par
 | Groups: column, cross-source | 37 |
 | Groups: table, same source | 12 |
 | Groups: table, cross-source | 15 |
-| Groups where the decision differs from the tag heuristic | 48 |
+| Groups where the decision differs from the tag heuristic | 53 |
 
 ## Templates
 
@@ -37,8 +36,8 @@ Phase 0 of `docs/APPLICATION-DESIGN.md` (§6): each predicate's **output** (`par
 | `oracle.scalar_membership` | 8 | partition |  |
 | `oracle.unrecognized_boolean` | 1 | partition |  |
 | `oracle.subject_category` | 2 | partition |  |
-| `oracle.related_existence` | 40 | partition | Returns rows of the subject relation. The subject is supplied by group-specific tags (e.g. source_schema/source_table, node_query), not {{schema_name}}.{{table_name}}. |
-| `oracle.join_match_count` | 5 | partition | Source rows plus profile_match_count; subject is {{source_schema}}.{{source_table}}. |
+| `oracle.related_existence` | 40 | partition | Returns rows of the subject relation ({{schema_name}}.{{table_name}}, or ({{subject_query}}) for the Y01–Y03 node dictionary). |
+| `oracle.join_match_count` | 5 | partition | Subject rows plus profile_match_count. |
 | `oracle.relationship_degree` | 4 | measure | Single summary row of degree maxima. |
 | `oracle.population_coverage` | 4 | measure | Single summary row of covered/missing counts. |
 | `oracle.selected_row_rule` | 22 | partition |  |
@@ -62,14 +61,14 @@ Phase 0 of `docs/APPLICATION-DESIGN.md` (§6): each predicate's **output** (`par
 | `oracle.temporal_row_filter` | 12 | partition |  |
 | `oracle.predecessor_profile` | 11 | partition | Source rows plus position/previous-value columns. |
 | `oracle.row_position_profile` | 6 | partition | Source rows plus profile_position. |
-| `oracle.reference_pair_filter` | 9 | partition | UNCERTAIN: returns t.* joined to matching reference rows, so a source row appears once per matched reference record (pair grain). Drilling in may therefore contain duplicated source rows. |
+| `oracle.reference_pair_filter` | 9 | partition | Returns t.* joined to matching reference rows, so a subject row appears once per matched reference record (pair grain); drilling in may repeat subject rows. The template carries a SQL comment saying so. |
 | `oracle.computed_document_evidence` | 40 | partition | Source rows plus profile_evidence. |
-| `oracle.evaluable_agreement` | 10 | partition | Rows of the investigator-supplied input query plus profile_agreement; a partition of the node only if that query selects from the node source. |
-| `oracle.explicit_authorization` | 2 | partition | Rows of authorization_subject_query. |
+| `oracle.evaluable_agreement` | 10 | partition | Rows of {{subject_query}} plus profile_agreement. |
+| `oracle.explicit_authorization` | 2 | partition | Subject rows that carry an explicit PERMIT/DENY decision. |
 | `oracle.extract_union_counts` | 7 | measure | One row per key with source/target occurrence counts. |
-| `oracle.unique_extract_agreement` | 2 | measure | UNCERTAIN: one row per matched key with investigator-chosen comparison_output_columns, not source rows. Could act as a partition only if the output columns are the full source row. |
-| `oracle.graph_cycle_participation` | 2 | measure | UNCERTAIN: returns a list of node_id values (one row per distinct node), not source rows. |
-| `oracle.graph_rooted_reachability` | 2 | measure | UNCERTAIN: returns a list of node_id values (one row per distinct node), not source rows. |
+| `oracle.unique_extract_agreement` | 2 | measure | One row per matched key with investigator-chosen comparison_output_columns, not subject rows. |
+| `oracle.graph_cycle_participation` | 2 | measure | Returns a list of node_id values (one row per distinct node), not subject rows. |
+| `oracle.graph_rooted_reachability` | 2 | measure | Returns a list of node_id values (one row per distinct node), not subject rows. |
 | `oracle.graph_shortest_depth` | 2 | measure | One row per reachable node with its depth. |
 | `oracle.declared_condition_rows` | 14 | partition | Rows of {{subject_query}} plus profile_rule_truth. |
 | `oracle.metadata_set_difference` | 2 | measure | Single summary row of added/removed counts. |
@@ -225,7 +224,7 @@ Phase 0 of `docs/APPLICATION-DESIGN.md` (§6): each predicate's **output** (`par
 |---|---|---|---|---|---|---|---|
 | E01 | Ordered endpoints / Reversed endpoints | 2 | partition | column | no | column | Column pair; column_name is the start, end_column is entered. |
 | **E02** | Expired / Effective / Not yet effective | 3 | partition | column | no | table | Heuristic says table. Period columns on the same row (ValidityPeriod); attached to a column so type filtering applies. Period tags are entered by hand. |
-| **E03** | Required event present / Required event absent | 2 | partition | table | yes | table | About the subject record; reads the event relation. Subject is {{subject_schema}}.{{subject_table}}. |
+| **E03** | Required event present / Required event absent | 2 | partition | table | yes | table | About the subject record; reads the event relation {{event_schema}}.{{event_table}}. |
 | **E04** | Overlapping intervals / Nonoverlapping intervals | 2 | partition | column | no | table | Heuristic says table. Period columns on the same row (ValidityPeriod); attached to a column so type filtering applies. Period tags are entered by hand. |
 | E05 | Contiguous succession / Noncontiguous succession | 2 | partition | column | no | column | Chain over rows ordered per entity; tested value is one column. |
 | E06 | Expected next step / Unexpected next step | 2 | partition | column | no | column | Chain over rows ordered per entity; tested value is one column. |
@@ -239,19 +238,19 @@ Phase 0 of `docs/APPLICATION-DESIGN.md` (§6): each predicate's **output** (`par
 
 | Axis | Group | Members | Output | Attachment | Cross-source | Heuristic | Note |
 |---|---|---|---|---|---|---|---|
-| K01 | In reference set / Outside reference set | 2 | partition | column | yes | cross-source | Subject is {{source_schema}}.{{source_table}}; the reference/mapping relation is the other source. |
-| K02 | Referenced / Unreferenced | 2 | partition | column | yes | cross-source | Reference-side key column. Subject is {{reference_schema}}.{{reference_table}}; the source population is the other relation. |
-| **K03** | Parent exists / Orphan reference | 2 | partition | column | yes | table | Heuristic says table. Child parent-key column; subject is {{child_schema}}.{{child_table}}, parent is the other relation. |
-| K04 | Zero matches / One match / Multiple matches | 3 | partition | column | yes | cross-source | Subject is {{source_schema}}.{{source_table}}; the reference/mapping relation is the other source. |
+| K01 | In reference set / Outside reference set | 2 | partition | column | yes | cross-source | The reference/mapping relation is the other source. |
+| K02 | Referenced / Unreferenced | 2 | partition | column | yes | cross-source | Reference-side key column: the node is the referenced table; the referencing population ({{source_schema}}.{{source_table}}) is the other source. |
+| **K03** | Parent exists / Orphan reference | 2 | partition | column | yes | table | Heuristic says table. Child parent-key column; the parent relation is the other source. |
+| K04 | Zero matches / One match / Multiple matches | 3 | partition | column | yes | cross-source | The reference/mapping relation is the other source. |
 | K05 | Effective reference / Ineffective reference | 2 | partition | column | yes | cross-source | Matched reference relation; pair grain (see reference_pair_filter). |
 | K06 | Approved reference / Deprecated reference / Other reference status | 3 | partition | column | yes | cross-source | Matched reference relation; pair grain (see reference_pair_filter). |
-| K07 | Mapping available / Mapping unavailable | 2 | partition | column | yes | cross-source | Subject is {{source_schema}}.{{source_table}}; the reference/mapping relation is the other source. |
+| K07 | Mapping available / Mapping unavailable | 2 | partition | column | yes | cross-source | The reference/mapping relation is the other source. |
 
 ### Relationship shape and dependencies
 
 | Axis | Group | Members | Output | Attachment | Cross-source | Heuristic | Note |
 |---|---|---|---|---|---|---|---|
-| **L01** | One-to-one / One-to-many / Many-to-one / Many-to-many | 4 | measure | table | no | cross-source | Heuristic says cross-source (left_/right_ tags), but those are entity column lists. Pair of entity columns, usually on one table via entity_pair_query; mark cross-source by hand if the pair spans tables. |
+| **L01** | One-to-one / One-to-many / Many-to-one / Many-to-many | 4 | measure | table | no | cross-source | Heuristic says cross-source (left_/right_ tags), but those are entity column lists. Pair of entity columns from {{subject_query}}; mark cross-source by hand if the pair spans tables. |
 | L02 | Functionally dependent / Functional-dependency violation | 2 | measure | column | no | column | Dependent column Y; value_columns fills with it, group_columns (determinant X) is entered. |
 | L03 | One related entity / Multiple related entities | 2 | measure | column | no | column | Related-entity column; value_columns fills with it, group_columns (subject) is entered. |
 | **L04** | Required relationship coverage / Incomplete relationship coverage | 2 | measure | table | yes | table | About subject records; reads the relation table. |
@@ -261,7 +260,7 @@ Phase 0 of `docs/APPLICATION-DESIGN.md` (§6): each predicate's **output** (`par
 
 | Axis | Group | Members | Output | Attachment | Cross-source | Heuristic | Note |
 |---|---|---|---|---|---|---|---|
-| **Q01** | Values agree / Values disagree | 2 | partition | column | no | cross-source | Heuristic says cross-source. Two fields on the same row via comparison_query; anchored on the left field. |
+| **Q01** | Values agree / Values disagree | 2 | partition | column | no | cross-source | Heuristic says cross-source. Two fields on the same row of {{subject_query}}; anchored on the left field. |
 | Q02 | Column order respected / Column order violated | 2 | partition | column | no | column | Column pair; column_name is A, comparison_column is B. |
 | **Q03** | Derivation consistent / Derivation inconsistent | 2 | partition | column | no | table | Heuristic says table. About one stored derived column. |
 | Q04 | Aggregate reconciled / Aggregate unreconciled | 2 | measure | column | yes | cross-source | Aggregate of one value column compared with a control/other population. Use H02 for plain row counts. |
@@ -276,7 +275,7 @@ Phase 0 of `docs/APPLICATION-DESIGN.md` (§6): each predicate's **output** (`par
 | **A01** | Classified / Unclassified | 2 | partition | table | yes | table | About the subject record; reads the assignment relation. |
 | A02 | Single-classified / Multi-classified | 2 | measure | column | no | column | Class column; value_columns fills with it, group_columns (subject) is entered. |
 | A03 | Unambiguous classification / Ambiguous classification | 2 | measure | column | no | column | Class column; value_columns fills with it, group_columns (subject) is entered. |
-| **A04** | Classification consistent / Classification inconsistent | 2 | partition | column | yes | table | UNCERTAIN cross-source: the authoritative assignment is usually joined into classification_comparison_query; false if it is a deterministic rule. |
+| **A04** | Classification consistent / Classification inconsistent | 2 | partition | column | yes | table | Cross-source because the authoritative assignment is usually joined into {{subject_query}}; it is not when the authority is a deterministic rule. |
 | **A05** | In selected category / Outside selected category | 2 | partition | table | yes | table | Subject rows are the node's table; category assignments come from {{assignment_schema}}.{{assignment_table}}. |
 
 ### Business rules and lifecycle
@@ -322,7 +321,7 @@ Phase 0 of `docs/APPLICATION-DESIGN.md` (§6): each predicate's **output** (`par
 |---|---|---|---|---|---|---|---|
 | H01 | Empty population / Nonempty population | 2 | measure | table | no | table |  |
 | H02 | Volume within bounds / Volume outside bounds | 2 | measure | table | no | table |  |
-| **H03** | Expected member observed / Expected member absent | 2 | partition | column | yes | table | Subject is the expected-domain relation ({{expected_schema}}.{{expected_table}}), mirroring K02. Attach to the domain table's column so "Expected member absent" partitions domain rows; the observed table is the other source. |
+| **H03** | Expected member observed / Expected member absent | 2 | partition | column | yes | table | Subject is the expected-domain table, mirroring K02. Attach to the domain table's column so "Expected member absent" partitions domain rows; the observed table ({{observed_schema}}.{{observed_table}}) is the other source. |
 | **H04** | Domain fully covered / Domain incompletely covered | 2 | measure | column | yes | table | Same subject convention as H03. |
 | H05 | Underrepresented / Within representation bounds / Overrepresented | 3 | measure | column | yes | cross-source | Observed category column vs declared baseline relation. |
 | H06 | Balanced / Unbalanced | 2 | measure | column | yes | cross-source | Observed category column vs declared baseline relation. |
@@ -341,13 +340,13 @@ Phase 0 of `docs/APPLICATION-DESIGN.md` (§6): each predicate's **output** (`par
 
 | Axis | Group | Members | Output | Attachment | Cross-source | Heuristic | Note |
 |---|---|---|---|---|---|---|---|
-| Y01 | Root / Non-root | 2 | partition | column | yes | cross-source | Node identifier column. Cross-source per §6 (node_query plus edge/parent query); in a self-referencing table the edge relation may be the same table. |
-| Y02 | Leaf / Non-leaf | 2 | partition | column | yes | cross-source | Node identifier column. Cross-source per §6 (node_query plus edge/parent query); in a self-referencing table the edge relation may be the same table. |
-| Y03 | Connected / Isolated | 2 | partition | column | yes | cross-source | Node identifier column. Cross-source per §6 (node_query plus edge/parent query); in a self-referencing table the edge relation may be the same table. |
-| Y04 | On a cycle / Not on a cycle | 2 | measure | column | yes | cross-source | Node identifier column. Cross-source per §6 (node_query plus edge/parent query); in a self-referencing table the edge relation may be the same table. |
-| Y05 | Reachable / Unreachable | 2 | measure | column | yes | cross-source | Node identifier column. Cross-source per §6 (node_query plus edge/parent query); in a self-referencing table the edge relation may be the same table. |
+| **Y01** | Root / Non-root | 2 | partition | column | yes | table | Node identifier column. The node dictionary is {{subject_query}}; the edge/parent query is the other source (it may read the same table in a self-referencing hierarchy). |
+| Y02 | Leaf / Non-leaf | 2 | partition | column | yes | cross-source | Node identifier column. The node dictionary is {{subject_query}}; the edge/parent query is the other source (it may read the same table in a self-referencing hierarchy). |
+| **Y03** | Connected / Isolated | 2 | partition | column | yes | table | Node identifier column. The node dictionary is {{subject_query}}; the edge/parent query is the other source (it may read the same table in a self-referencing hierarchy). |
+| **Y04** | On a cycle / Not on a cycle | 2 | measure | column | yes | table | Node identifier column. The node dictionary is {{subject_query}}; the edge/parent query is the other source (it may read the same table in a self-referencing hierarchy). |
+| **Y05** | Reachable / Unreachable | 2 | measure | column | yes | table | Node identifier column. The node dictionary is {{subject_query}}; the edge/parent query is the other source (it may read the same table in a self-referencing hierarchy). |
 | **Y06** | Self-reference / No self-reference | 2 | partition | column | no | table | Heuristic says table. Reference column compared with the row's own identifier. |
-| Y07 | Depth within bounds / Depth outside bounds | 2 | measure | column | yes | cross-source | Node identifier column. Cross-source per §6 (node_query plus edge/parent query); in a self-referencing table the edge relation may be the same table. |
+| **Y07** | Depth within bounds / Depth outside bounds | 2 | measure | column | yes | table | Node identifier column. The node dictionary is {{subject_query}}; the edge/parent query is the other source (it may read the same table in a self-referencing hierarchy). |
 
 ### Structured payloads
 
@@ -388,52 +387,3 @@ Phase 0 of `docs/APPLICATION-DESIGN.md` (§6): each predicate's **output** (`par
 | **LC02** | At least one component holds / None holds | 2 | partition | table | yes | table | Component results are another relation (component_result_query). |
 | **LC03** | Exactly one component holds / Not exactly one holds | 2 | partition | table | yes | table | Component results are another relation (component_result_query). |
 | LC04 | Conditional rule satisfied / Conditional rule violated | 2 | partition | table | no | table |  |
-
-## Groups whose subject relation is not `{{schema_name}}.{{table_name}}`
-
-These groups use neither `{{schema_name}}.{{table_name}}` nor `{{subject_query}}`, so the automatic source filling in §10.2 does not reach them: the node's source (or parent partition) is not substituted and the investigator types the subject relation. Listed for information; the classification does not change this.
-
-| Axis | Subject-relation tags |
-|---|---|
-| E03 | `event_schema`, `event_table`, `subject_schema`, `subject_table` |
-| K01 | `reference_schema`, `reference_table`, `source_schema`, `source_table` |
-| K02 | `reference_schema`, `reference_table`, `source_schema`, `source_table` |
-| K03 | `child_schema`, `child_table`, `parent_schema`, `parent_table` |
-| K04 | `reference_schema`, `reference_table`, `source_schema`, `source_table` |
-| K07 | `mapping_schema`, `mapping_table`, `source_schema`, `source_table` |
-| L01 | `entity_pair_query` |
-| L04 | `relation_schema`, `relation_table`, `subject_schema`, `subject_table` |
-| L05 | `reference_schema`, `reference_table`, `source_schema`, `source_table` |
-| Q01 | `comparison_query` |
-| Q03 | `derivation_input_query` |
-| Q04 | `left_schema`, `left_table`, `right_schema`, `right_table` |
-| Q05 | `allowed_tuple_relation_query`, `allowed_tuple_subject_query` |
-| Q07 | `compatible_units_relation_query`, `compatible_units_subject_query` |
-| A01 | `assignment_schema`, `assignment_table`, `subject_schema`, `subject_table` |
-| A04 | `classification_comparison_query` |
-| B04 | `authorization_relation_query`, `authorization_subject_query` |
-| G02 | `geographic_reference_schema`, `geographic_reference_table`, `source_schema`, `source_table` |
-| G03 | `spatial_mapping_schema`, `spatial_mapping_table`, `subject_schema`, `subject_table` |
-| G05 | `home_jurisdiction_relation_query`, `home_jurisdiction_subject_query` |
-| G06 | `selected_settlement_relation_query`, `selected_settlement_subject_query` |
-| S06 | `left_schema`, `left_table`, `right_schema`, `right_table` |
-| H03 | `expected_schema`, `expected_table`, `observed_schema`, `observed_table` |
-| H04 | `expected_schema`, `expected_table`, `observed_schema`, `observed_table` |
-| Z01 | `source_extract_query`, `target_extract_query` |
-| Z02 | `source_record_query`, `target_record_query` |
-| Z03 | `left_schema`, `left_table`, `right_schema`, `right_table` |
-| Z04 | `source_extract_query`, `target_extract_query` |
-| Z05 | `source_extract_query`, `target_extract_query` |
-| Y01 | `node_query`, `parent_assignment_query` |
-| Y02 | `node_query`, `parent_assignment_query` |
-| Y03 | `incident_edge_query`, `node_query` |
-| Y04 | `node_query`, `traversal_edge_query` |
-| Y05 | `node_query`, `root_query`, `traversal_edge_query` |
-| Y06 | `node_reference_query` |
-| Y07 | `node_query`, `root_query`, `traversal_edge_query` |
-| W01 | `verification_evidence_query`, `verification_subject_query` |
-| W02 | `approved_source_relation_query`, `approved_source_subject_query` |
-| W03 | `independent_evidence_pair_query` |
-| SC01 | `expected_object_schema`, `expected_object_table`, `inventory_object_schema`, `inventory_object_table` |
-| SC04 | `inventory_constraint_schema`, `inventory_constraint_table`, `required_constraint_schema`, `required_constraint_table` |
-| SC07 | `new_metadata_query`, `old_metadata_query` |

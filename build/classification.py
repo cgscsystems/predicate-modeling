@@ -131,11 +131,6 @@ def render(classification, groups, templates, mapping):
         return "cross-source" if entry["crossSource"] else entry["attachment"]
 
     differs = [g["axis"] for g in groups if heuristic(g) != decision(g["axis"])]
-    unreachable = [
-        g for g in groups
-        if not any({"schema_name", "table_name"} <= set(m["tags"]) or "subject_query" in m["tags"]
-                   for m in g["members"])
-    ]
 
     lines = [
         "# App classification — review table",
@@ -150,7 +145,6 @@ def render(classification, groups, templates, mapping):
         "- A template counts as `partition` when it returns the rows of its subject relation (`t.*` or `p.*` built from `t.*`), with or without extra `profile_*` columns.",
         "- **Attachment** is to the relation whose rows the SQL returns or summarizes (the subject). The group is `column` when it is about one column's values, including a column tested against a companion column on the same row (start/end, value/deadline, x/y). Anchoring such pairs on a column keeps semantic-type and storage filtering (§9) useful. It is `table` when the group is about the record or several fields together.",
         "- **Cross-source** is true only when the SQL reads a second relation of records (reference, mapping, baseline, extract, event, edge or evidence tables and queries). Tags that supply a literal (`reference_value`), a same-row expression (`source_value`), entity column lists (`left_entity_columns`) or a declared value list (`*_set_query`) do not count.",
-        "- Notes marked **UNCERTAIN** need a product-owner decision.",
         "",
         "## Summary",
         "",
@@ -205,19 +199,6 @@ def render(classification, groups, templates, mapping):
         lines.append("| {} | {} | {} | {} | {} | {} | {} | {} |".format(
             axis, cell(group["label"]), len(group["members"]), output, entry["attachment"],
             "yes" if entry["crossSource"] else "no", heuristic(group), cell(entry.get("note"))))
-    lines += [
-        "",
-        "## Groups whose subject relation is not `{{schema_name}}.{{table_name}}`",
-        "",
-        "These groups use neither `{{schema_name}}.{{table_name}}` nor `{{subject_query}}`, so the automatic source filling in §10.2 does not reach them: the node's source (or parent partition) is not substituted and the investigator types the subject relation. Listed for information; the classification does not change this.",
-        "",
-        "| Axis | Subject-relation tags |",
-        "|---|---|",
-    ]
-    for group in unreachable:
-        tags = sorted({t for m in group["members"] for t in m["tags"]
-                       if t.endswith(("_schema", "_table", "_query"))})
-        lines.append("| {} | {} |".format(group["axis"], ", ".join("`{}`".format(t) for t in tags)))
     return "\n".join(lines) + "\n"
 
 

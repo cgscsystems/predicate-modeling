@@ -35,11 +35,11 @@
     },
     "oracle.related_existence": {
       "output": "partition",
-      "note": "Returns rows of the subject relation. The subject is supplied by group-specific tags (e.g. source_schema/source_table, node_query), not {{schema_name}}.{{table_name}}."
+      "note": "Returns rows of the subject relation ({{schema_name}}.{{table_name}}, or ({{subject_query}}) for the Y01–Y03 node dictionary)."
     },
     "oracle.join_match_count": {
       "output": "partition",
-      "note": "Source rows plus profile_match_count; subject is {{source_schema}}.{{source_table}}."
+      "note": "Subject rows plus profile_match_count."
     },
     "oracle.relationship_degree": {
       "output": "measure",
@@ -128,7 +128,7 @@
     },
     "oracle.reference_pair_filter": {
       "output": "partition",
-      "note": "UNCERTAIN: returns t.* joined to matching reference rows, so a source row appears once per matched reference record (pair grain). Drilling in may therefore contain duplicated source rows."
+      "note": "Returns t.* joined to matching reference rows, so a subject row appears once per matched reference record (pair grain); drilling in may repeat subject rows. The template carries a SQL comment saying so."
     },
     "oracle.computed_document_evidence": {
       "output": "partition",
@@ -136,11 +136,11 @@
     },
     "oracle.evaluable_agreement": {
       "output": "partition",
-      "note": "Rows of the investigator-supplied input query plus profile_agreement; a partition of the node only if that query selects from the node source."
+      "note": "Rows of {{subject_query}} plus profile_agreement."
     },
     "oracle.explicit_authorization": {
       "output": "partition",
-      "note": "Rows of authorization_subject_query."
+      "note": "Subject rows that carry an explicit PERMIT/DENY decision."
     },
     "oracle.extract_union_counts": {
       "output": "measure",
@@ -148,15 +148,15 @@
     },
     "oracle.unique_extract_agreement": {
       "output": "measure",
-      "note": "UNCERTAIN: one row per matched key with investigator-chosen comparison_output_columns, not source rows. Could act as a partition only if the output columns are the full source row."
+      "note": "One row per matched key with investigator-chosen comparison_output_columns, not subject rows."
     },
     "oracle.graph_cycle_participation": {
       "output": "measure",
-      "note": "UNCERTAIN: returns a list of node_id values (one row per distinct node), not source rows."
+      "note": "Returns a list of node_id values (one row per distinct node), not subject rows."
     },
     "oracle.graph_rooted_reachability": {
       "output": "measure",
-      "note": "UNCERTAIN: returns a list of node_id values (one row per distinct node), not source rows."
+      "note": "Returns a list of node_id values (one row per distinct node), not subject rows."
     },
     "oracle.graph_shortest_depth": {
       "output": "measure",
@@ -535,7 +535,7 @@
     "E03": {
       "attachment": "table",
       "crossSource": true,
-      "note": "About the subject record; reads the event relation. Subject is {{subject_schema}}.{{subject_table}}."
+      "note": "About the subject record; reads the event relation {{event_schema}}.{{event_table}}."
     },
     "E04": {
       "attachment": "column",
@@ -580,22 +580,22 @@
     "K01": {
       "attachment": "column",
       "crossSource": true,
-      "note": "Subject is {{source_schema}}.{{source_table}}; the reference/mapping relation is the other source."
+      "note": "The reference/mapping relation is the other source."
     },
     "K02": {
       "attachment": "column",
       "crossSource": true,
-      "note": "Reference-side key column. Subject is {{reference_schema}}.{{reference_table}}; the source population is the other relation."
+      "note": "Reference-side key column: the node is the referenced table; the referencing population ({{source_schema}}.{{source_table}}) is the other source."
     },
     "K03": {
       "attachment": "column",
       "crossSource": true,
-      "note": "Heuristic says table. Child parent-key column; subject is {{child_schema}}.{{child_table}}, parent is the other relation."
+      "note": "Heuristic says table. Child parent-key column; the parent relation is the other source."
     },
     "K04": {
       "attachment": "column",
       "crossSource": true,
-      "note": "Subject is {{source_schema}}.{{source_table}}; the reference/mapping relation is the other source."
+      "note": "The reference/mapping relation is the other source."
     },
     "K05": {
       "attachment": "column",
@@ -610,12 +610,12 @@
     "K07": {
       "attachment": "column",
       "crossSource": true,
-      "note": "Subject is {{source_schema}}.{{source_table}}; the reference/mapping relation is the other source."
+      "note": "The reference/mapping relation is the other source."
     },
     "L01": {
       "attachment": "table",
       "crossSource": false,
-      "note": "Heuristic says cross-source (left_/right_ tags), but those are entity column lists. Pair of entity columns, usually on one table via entity_pair_query; mark cross-source by hand if the pair spans tables."
+      "note": "Heuristic says cross-source (left_/right_ tags), but those are entity column lists. Pair of entity columns from {{subject_query}}; mark cross-source by hand if the pair spans tables."
     },
     "L02": {
       "attachment": "column",
@@ -640,7 +640,7 @@
     "Q01": {
       "attachment": "column",
       "crossSource": false,
-      "note": "Heuristic says cross-source. Two fields on the same row via comparison_query; anchored on the left field."
+      "note": "Heuristic says cross-source. Two fields on the same row of {{subject_query}}; anchored on the left field."
     },
     "Q02": {
       "attachment": "column",
@@ -690,7 +690,7 @@
     "A04": {
       "attachment": "column",
       "crossSource": true,
-      "note": "UNCERTAIN cross-source: the authoritative assignment is usually joined into classification_comparison_query; false if it is a deterministic rule."
+      "note": "Cross-source because the authoritative assignment is usually joined into {{subject_query}}; it is not when the authority is a deterministic rule."
     },
     "A05": {
       "attachment": "table",
@@ -811,7 +811,7 @@
     "H03": {
       "attachment": "column",
       "crossSource": true,
-      "note": "Subject is the expected-domain relation ({{expected_schema}}.{{expected_table}}), mirroring K02. Attach to the domain table's column so \"Expected member absent\" partitions domain rows; the observed table is the other source."
+      "note": "Subject is the expected-domain table, mirroring K02. Attach to the domain table's column so \"Expected member absent\" partitions domain rows; the observed table ({{observed_schema}}.{{observed_table}}) is the other source."
     },
     "H04": {
       "attachment": "column",
@@ -856,27 +856,27 @@
     "Y01": {
       "attachment": "column",
       "crossSource": true,
-      "note": "Node identifier column. Cross-source per §6 (node_query plus edge/parent query); in a self-referencing table the edge relation may be the same table."
+      "note": "Node identifier column. The node dictionary is {{subject_query}}; the edge/parent query is the other source (it may read the same table in a self-referencing hierarchy)."
     },
     "Y02": {
       "attachment": "column",
       "crossSource": true,
-      "note": "Node identifier column. Cross-source per §6 (node_query plus edge/parent query); in a self-referencing table the edge relation may be the same table."
+      "note": "Node identifier column. The node dictionary is {{subject_query}}; the edge/parent query is the other source (it may read the same table in a self-referencing hierarchy)."
     },
     "Y03": {
       "attachment": "column",
       "crossSource": true,
-      "note": "Node identifier column. Cross-source per §6 (node_query plus edge/parent query); in a self-referencing table the edge relation may be the same table."
+      "note": "Node identifier column. The node dictionary is {{subject_query}}; the edge/parent query is the other source (it may read the same table in a self-referencing hierarchy)."
     },
     "Y04": {
       "attachment": "column",
       "crossSource": true,
-      "note": "Node identifier column. Cross-source per §6 (node_query plus edge/parent query); in a self-referencing table the edge relation may be the same table."
+      "note": "Node identifier column. The node dictionary is {{subject_query}}; the edge/parent query is the other source (it may read the same table in a self-referencing hierarchy)."
     },
     "Y05": {
       "attachment": "column",
       "crossSource": true,
-      "note": "Node identifier column. Cross-source per §6 (node_query plus edge/parent query); in a self-referencing table the edge relation may be the same table."
+      "note": "Node identifier column. The node dictionary is {{subject_query}}; the edge/parent query is the other source (it may read the same table in a self-referencing hierarchy)."
     },
     "Y06": {
       "attachment": "column",
@@ -886,7 +886,7 @@
     "Y07": {
       "attachment": "column",
       "crossSource": true,
-      "note": "Node identifier column. Cross-source per §6 (node_query plus edge/parent query); in a self-referencing table the edge relation may be the same table."
+      "note": "Node identifier column. The node dictionary is {{subject_query}}; the edge/parent query is the other source (it may read the same table in a self-referencing hierarchy)."
     },
     "J01": {
       "attachment": "column",

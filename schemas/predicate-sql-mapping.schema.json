@@ -16,7 +16,7 @@
       "const": "1.0"
     },
     "mapping_revision": {
-      "const": 6
+      "const": 7
     },
     "catalogue_version": {
       "const": "1.0.0"

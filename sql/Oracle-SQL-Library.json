@@ -1,6 +1,6 @@
 {
   "format_version": "1.0",
-  "library_revision": 6,
+  "library_revision": 7,
   "catalogue_version": "1.0.0",
   "sql_dialect": "oracle",
   "authority": "Canonical SQL bodies; graph and historical batch files are not current SQL authoring sources.",
@@ -272,20 +272,20 @@
     },
     {
       "id": "oracle.join_match_count",
-      "revision": 1,
+      "revision": 2,
       "dialect": "oracle",
       "status": "drafted",
-      "body": "SELECT p.*\nFROM (\n    SELECT t.*,\n           (\n               SELECT COUNT(*)\n               FROM {{reference_schema}}.{{reference_table}} r\n               WHERE ({{source_reference_match_condition}})\n                 AND ({{reference_scope_condition}})\n           ) AS profile_match_count\n    FROM {{source_schema}}.{{source_table}} t\n    WHERE ({{source_eligibility_condition}})\n) p\nWHERE [[test]];",
+      "body": "SELECT p.*\nFROM (\n    SELECT t.*,\n           (\n               SELECT COUNT(*)\n               FROM {{reference_schema}}.{{reference_table}} r\n               WHERE ({{source_reference_match_condition}})\n                 AND ({{reference_scope_condition}})\n           ) AS profile_match_count\n    FROM {{schema_name}}.{{table_name}} t\n    WHERE ({{source_eligibility_condition}})\n) p\nWHERE [[test]];",
       "description": "Count matching reference records per eligible source row, then classify that count.",
       "review_status": "reviewed",
       "oracle_test_status": "not_run"
     },
     {
       "id": "oracle.relationship_degree",
-      "revision": 1,
+      "revision": 2,
       "dialect": "oracle",
       "status": "drafted",
-      "body": "WITH profile_pairs AS (\n    SELECT DISTINCT {{left_entity_columns}}, {{right_entity_columns}}\n    FROM (\n        {{entity_pair_query}}\n    ) e\n    WHERE ({{entity_pair_eligibility_condition}})\n),\nprofile_left_degrees AS (\n    SELECT COUNT(*) AS profile_degree\n    FROM profile_pairs e\n    GROUP BY {{left_entity_columns}}\n),\nprofile_right_degrees AS (\n    SELECT COUNT(*) AS profile_degree\n    FROM profile_pairs e\n    GROUP BY {{right_entity_columns}}\n),\nprofile_summary AS (\n    SELECT (SELECT COUNT(*) FROM profile_pairs) AS profile_pair_count,\n           l.profile_left_entity_count,\n           r.profile_right_entity_count,\n           l.profile_max_rights_per_left,\n           r.profile_max_lefts_per_right\n    FROM (\n        SELECT COUNT(*) AS profile_left_entity_count,\n               MAX(profile_degree) AS profile_max_rights_per_left\n        FROM profile_left_degrees\n    ) l\n    CROSS JOIN (\n        SELECT COUNT(*) AS profile_right_entity_count,\n               MAX(profile_degree) AS profile_max_lefts_per_right\n        FROM profile_right_degrees\n    ) r\n)\nSELECT p.*\nFROM profile_summary p\nWHERE p.profile_pair_count > 0\n  AND [[test]];",
+      "body": "WITH profile_pairs AS (\n    SELECT DISTINCT {{left_entity_columns}}, {{right_entity_columns}}\n    FROM (\n        {{subject_query}}\n    ) e\n    WHERE ({{entity_pair_eligibility_condition}})\n),\nprofile_left_degrees AS (\n    SELECT COUNT(*) AS profile_degree\n    FROM profile_pairs e\n    GROUP BY {{left_entity_columns}}\n),\nprofile_right_degrees AS (\n    SELECT COUNT(*) AS profile_degree\n    FROM profile_pairs e\n    GROUP BY {{right_entity_columns}}\n),\nprofile_summary AS (\n    SELECT (SELECT COUNT(*) FROM profile_pairs) AS profile_pair_count,\n           l.profile_left_entity_count,\n           r.profile_right_entity_count,\n           l.profile_max_rights_per_left,\n           r.profile_max_lefts_per_right\n    FROM (\n        SELECT COUNT(*) AS profile_left_entity_count,\n               MAX(profile_degree) AS profile_max_rights_per_left\n        FROM profile_left_degrees\n    ) l\n    CROSS JOIN (\n        SELECT COUNT(*) AS profile_right_entity_count,\n               MAX(profile_degree) AS profile_max_lefts_per_right\n        FROM profile_right_degrees\n    ) r\n)\nSELECT p.*\nFROM profile_summary p\nWHERE p.profile_pair_count > 0\n  AND [[test]];",
       "description": "Classify a nonempty deduplicated entity-pair population by both degree maxima.",
       "review_status": "reviewed",
       "oracle_test_status": "not_run"
@@ -432,10 +432,10 @@
     },
     {
       "id": "oracle.aligned_numeric_aggregate_comparison",
-      "revision": 1,
+      "revision": 2,
       "dialect": "oracle",
       "status": "drafted",
-      "body": "WITH profile_left_values AS (\n    SELECT CASE WHEN ({{left_value_expression}} IS NOT NULL AND {{left_value_expression}} IS NOT NAN AND {{left_value_expression}} IS NOT INFINITE) AND ABS({{left_value_expression}}) <= 1e60 THEN CAST({{left_value_expression}} AS NUMBER) END AS profile_value\n    FROM {{left_schema}}.{{left_table}} l\n    WHERE ({{left_scope_condition}})\n), profile_right_values AS (\n    SELECT CASE WHEN ({{right_value_expression}} IS NOT NULL AND {{right_value_expression}} IS NOT NAN AND {{right_value_expression}} IS NOT INFINITE) AND ABS({{right_value_expression}}) <= 1e60 THEN CAST({{right_value_expression}} AS NUMBER) END AS profile_value\n    FROM {{right_schema}}.{{right_table}} r\n    WHERE ({{right_scope_condition}})\n), profile_summaries AS (\n    SELECT a.profile_left_selected, a.profile_left_count, a.profile_left_measure,\n           b.profile_right_selected, b.profile_right_count, b.profile_right_measure\n    FROM (SELECT COUNT(*) AS profile_left_selected,\n                 COUNT(profile_value) AS profile_left_count,\n                 [[aggregate]](profile_value) AS profile_left_measure\n          FROM profile_left_values) a\n    CROSS JOIN (SELECT COUNT(*) AS profile_right_selected,\n                       COUNT(profile_value) AS profile_right_count,\n                       [[aggregate]](profile_value) AS profile_right_measure\n                FROM profile_right_values) b\n)\nSELECT p.*, ABS(p.profile_left_measure - p.profile_right_measure) AS profile_difference\nFROM profile_summaries p\nWHERE p.profile_left_selected = p.profile_left_count\n  AND p.profile_right_selected = p.profile_right_count\n  AND p.profile_left_count >= {{minimum_sample_size}}\n  AND p.profile_right_count >= {{minimum_sample_size}}\n  AND {{minimum_sample_size}} >= 1\n  AND {{difference_tolerance}} BETWEEN 0 AND 1e60\n  AND [[test]];",
+      "body": "WITH profile_left_values AS (\n    SELECT CASE WHEN ({{left_value_expression}} IS NOT NULL AND {{left_value_expression}} IS NOT NAN AND {{left_value_expression}} IS NOT INFINITE) AND ABS({{left_value_expression}}) <= 1e60 THEN CAST({{left_value_expression}} AS NUMBER) END AS profile_value\n    FROM {{schema_name}}.{{table_name}} l\n    WHERE ({{left_scope_condition}})\n), profile_right_values AS (\n    SELECT CASE WHEN ({{right_value_expression}} IS NOT NULL AND {{right_value_expression}} IS NOT NAN AND {{right_value_expression}} IS NOT INFINITE) AND ABS({{right_value_expression}}) <= 1e60 THEN CAST({{right_value_expression}} AS NUMBER) END AS profile_value\n    FROM {{right_schema}}.{{right_table}} r\n    WHERE ({{right_scope_condition}})\n), profile_summaries AS (\n    SELECT a.profile_left_selected, a.profile_left_count, a.profile_left_measure,\n           b.profile_right_selected, b.profile_right_count, b.profile_right_measure\n    FROM (SELECT COUNT(*) AS profile_left_selected,\n                 COUNT(profile_value) AS profile_left_count,\n                 [[aggregate]](profile_value) AS profile_left_measure\n          FROM profile_left_values) a\n    CROSS JOIN (SELECT COUNT(*) AS profile_right_selected,\n                       COUNT(profile_value) AS profile_right_count,\n                       [[aggregate]](profile_value) AS profile_right_measure\n                FROM profile_right_values) b\n)\nSELECT p.*, ABS(p.profile_left_measure - p.profile_right_measure) AS profile_difference\nFROM profile_summaries p\nWHERE p.profile_left_selected = p.profile_left_count\n  AND p.profile_right_selected = p.profile_right_count\n  AND p.profile_left_count >= {{minimum_sample_size}}\n  AND p.profile_right_count >= {{minimum_sample_size}}\n  AND {{minimum_sample_size}} >= 1\n  AND {{difference_tolerance}} BETWEEN 0 AND 1e60\n  AND [[test]];",
       "description": "Actual SUM reconciliation or AVG drift across two explicitly aligned populations; all selected values must be finite and nonmissing; empty evidence is undefined.",
       "review_status": "reviewed",
       "oracle_test_status": "not_run"
@@ -512,10 +512,10 @@
     },
     {
       "id": "oracle.reference_pair_filter",
-      "revision": 1,
+      "revision": 2,
       "dialect": "oracle",
       "status": "drafted",
-      "body": "SELECT t.*, r.{{reference_record_id}} AS profile_reference_record_id\nFROM {{schema_name}}.{{table_name}} t\nJOIN {{reference_schema}}.{{reference_table}} r\n  ON ({{reference_match_condition}})\nWHERE ({{subject_scope_condition}})\n  AND ({{reference_scope_condition}})\n  AND ([[eligibility]])\n  AND ([[test]]);",
+      "body": "-- Pair grain: a subject row appears once per matched reference record.\nSELECT t.*, r.{{reference_record_id}} AS profile_reference_record_id\nFROM {{schema_name}}.{{table_name}} t\nJOIN {{reference_schema}}.{{reference_table}} r\n  ON ({{reference_match_condition}})\nWHERE ({{subject_scope_condition}})\n  AND ({{reference_scope_condition}})\n  AND ([[eligibility]])\n  AND ([[test]]);",
       "description": "Matched subject/reference-pair grain. Multiple matched versions retained and identifiable; unmatched rows outside this family.",
       "review_status": "reviewed",
       "oracle_test_status": "not_run"
@@ -542,60 +542,60 @@
     },
     {
       "id": "oracle.explicit_authorization",
-      "revision": 1,
+      "revision": 2,
       "dialect": "oracle",
       "status": "drafted",
-      "body": "SELECT t.*\nFROM ( {{authorization_subject_query}} ) t\nWHERE ({{authorization_evaluable_condition}})\n  AND EXISTS (\n      SELECT 1 FROM ( {{authorization_relation_query}} ) r\n      WHERE ({{authorization_match_condition}})\n        AND ({{authorization_scope_condition}})\n        AND r.decision_code = [[decision]]\n  )\n  AND NOT EXISTS (\n      SELECT 1 FROM ( {{authorization_relation_query}} ) r\n      WHERE ({{authorization_match_condition}})\n        AND ({{authorization_scope_condition}})\n        AND (r.decision_code <> [[decision]] OR r.decision_code IS NULL)\n  );",
+      "body": "SELECT t.*\nFROM {{schema_name}}.{{table_name}} t\nWHERE ({{authorization_evaluable_condition}})\n  AND EXISTS (\n      SELECT 1 FROM ( {{authorization_relation_query}} ) r\n      WHERE ({{authorization_match_condition}})\n        AND ({{authorization_scope_condition}})\n        AND r.decision_code = [[decision]]\n  )\n  AND NOT EXISTS (\n      SELECT 1 FROM ( {{authorization_relation_query}} ) r\n      WHERE ({{authorization_match_condition}})\n        AND ({{authorization_scope_condition}})\n        AND (r.decision_code <> [[decision]] OR r.decision_code IS NULL)\n  );",
       "description": "Require explicit PERMIT/DENY evidence; absent, conflicting and unknown decisions are indeterminate.",
       "review_status": "reviewed",
       "oracle_test_status": "not_run"
     },
     {
       "id": "oracle.extract_union_counts",
-      "revision": 1,
+      "revision": 2,
       "dialect": "oracle",
       "status": "drafted",
-      "body": "WITH profile_occurrences AS (\n    SELECT {{key_columns}}, 1 AS profile_source, 0 AS profile_target\n    FROM ( {{source_extract_query}} ) s\n    WHERE ({{source_key_eligibility_condition}})\n    UNION ALL\n    SELECT {{key_columns}}, 0 AS profile_source, 1 AS profile_target\n    FROM ( {{target_extract_query}} ) s\n    WHERE ({{target_key_eligibility_condition}})\n), profile_counts AS (\n    SELECT {{key_columns}}, SUM(profile_source) AS source_count,\n           SUM(profile_target) AS target_count\n    FROM profile_occurrences\n    GROUP BY {{key_columns}}\n)\nSELECT p.* FROM profile_counts p\nWHERE [[test]];",
+      "body": "WITH profile_occurrences AS (\n    SELECT {{key_columns}}, 1 AS profile_source, 0 AS profile_target\n    FROM ( {{subject_query}} ) s\n    WHERE ({{source_key_eligibility_condition}})\n    UNION ALL\n    SELECT {{key_columns}}, 0 AS profile_source, 1 AS profile_target\n    FROM ( {{target_extract_query}} ) s\n    WHERE ({{target_key_eligibility_condition}})\n), profile_counts AS (\n    SELECT {{key_columns}}, SUM(profile_source) AS source_count,\n           SUM(profile_target) AS target_count\n    FROM profile_occurrences\n    GROUP BY {{key_columns}}\n)\nSELECT p.* FROM profile_counts p\nWHERE [[test]];",
       "description": "Symmetric union population with per-extract occurrence counts; tuple columns remain separate, including null grouping when enabled.",
       "review_status": "reviewed",
       "oracle_test_status": "not_run"
     },
     {
       "id": "oracle.unique_extract_agreement",
-      "revision": 1,
+      "revision": 2,
       "dialect": "oracle",
       "status": "drafted",
-      "body": "WITH profile_source AS (\n    SELECT s.*, COUNT(*) OVER (PARTITION BY {{source_key_columns}}) AS profile_key_count\n    FROM ( {{source_record_query}} ) s\n    WHERE ({{source_record_eligibility_condition}})\n), profile_target AS (\n    SELECT t.*, COUNT(*) OVER (PARTITION BY {{target_key_columns}}) AS profile_key_count\n    FROM ( {{target_record_query}} ) t\n    WHERE ({{target_record_eligibility_condition}})\n), profile_comparison AS (\n    SELECT {{comparison_output_columns}},\n           CASE WHEN ({{record_agreement_condition}}) THEN 1\n                WHEN NOT ({{record_agreement_condition}}) THEN 0 END AS profile_agreement\n    FROM profile_source s JOIN profile_target t ON ({{record_key_match_condition}})\n    WHERE s.profile_key_count = 1 AND t.profile_key_count = 1\n      AND ({{record_comparison_evaluable_condition}})\n)\nSELECT p.* FROM profile_comparison p WHERE p.profile_agreement = [[branch]];",
+      "body": "WITH profile_source AS (\n    SELECT s.*, COUNT(*) OVER (PARTITION BY {{source_key_columns}}) AS profile_key_count\n    FROM ( {{subject_query}} ) s\n    WHERE ({{source_record_eligibility_condition}})\n), profile_target AS (\n    SELECT t.*, COUNT(*) OVER (PARTITION BY {{target_key_columns}}) AS profile_key_count\n    FROM ( {{target_record_query}} ) t\n    WHERE ({{target_record_eligibility_condition}})\n), profile_comparison AS (\n    SELECT {{comparison_output_columns}},\n           CASE WHEN ({{record_agreement_condition}}) THEN 1\n                WHEN NOT ({{record_agreement_condition}}) THEN 0 END AS profile_agreement\n    FROM profile_source s JOIN profile_target t ON ({{record_key_match_condition}})\n    WHERE s.profile_key_count = 1 AND t.profile_key_count = 1\n      AND ({{record_comparison_evaluable_condition}})\n)\nSELECT p.* FROM profile_comparison p WHERE p.profile_agreement = [[branch]];",
       "description": "Compare only keys occurring exactly once on each side; agreement has three-valued semantics.",
       "review_status": "reviewed",
       "oracle_test_status": "not_run"
     },
     {
       "id": "oracle.graph_cycle_participation",
-      "revision": 1,
+      "revision": 2,
       "dialect": "oracle",
       "status": "drafted",
-      "body": "WITH profile_nodes AS (\n    SELECT DISTINCT node_id FROM ( {{node_query}} ) n WHERE node_id IS NOT NULL\n), profile_edges AS (\n    SELECT DISTINCT e.source_id, e.target_id\n    FROM ( {{traversal_edge_query}} ) e\n    JOIN profile_nodes a ON a.node_id = e.source_id\n    JOIN profile_nodes b ON b.node_id = e.target_id\n), profile_walk (origin_id, node_id, previous_id, path_depth) AS (\n    SELECT n.node_id, n.node_id, CAST(NULL AS NUMBER), 0\n    FROM profile_nodes n\n    WHERE [[anchor]]\n    UNION ALL\n    SELECT w.origin_id, e.target_id, w.node_id, w.path_depth + 1\n    FROM profile_walk w JOIN profile_edges e ON e.source_id = w.node_id\n    WHERE ({{walk_step_condition}})\n)\nCYCLE node_id SET profile_cycle TO 'Y' DEFAULT 'N'\nSELECT n.node_id\nFROM profile_nodes n\nWHERE [[existence]] (\n    SELECT 1 FROM profile_walk w\n    WHERE w.origin_id = n.node_id AND w.node_id = n.node_id\n      AND w.path_depth > 0 AND w.profile_cycle = 'Y'\n);",
+      "body": "WITH profile_nodes AS (\n    SELECT DISTINCT node_id FROM ( {{subject_query}} ) n WHERE node_id IS NOT NULL\n), profile_edges AS (\n    SELECT DISTINCT e.source_id, e.target_id\n    FROM ( {{traversal_edge_query}} ) e\n    JOIN profile_nodes a ON a.node_id = e.source_id\n    JOIN profile_nodes b ON b.node_id = e.target_id\n), profile_walk (origin_id, node_id, previous_id, path_depth) AS (\n    SELECT n.node_id, n.node_id, CAST(NULL AS NUMBER), 0\n    FROM profile_nodes n\n    WHERE [[anchor]]\n    UNION ALL\n    SELECT w.origin_id, e.target_id, w.node_id, w.path_depth + 1\n    FROM profile_walk w JOIN profile_edges e ON e.source_id = w.node_id\n    WHERE ({{walk_step_condition}})\n)\nCYCLE node_id SET profile_cycle TO 'Y' DEFAULT 'N'\nSELECT n.node_id\nFROM profile_nodes n\nWHERE [[existence]] (\n    SELECT 1 FROM profile_walk w\n    WHERE w.origin_id = n.node_id AND w.node_id = n.node_id\n      AND w.path_depth > 0 AND w.profile_cycle = 'Y'\n);",
       "description": "All-origin walk tests return to that origin, not mere reachability of some cycle. Directed or simple undirected with no immediate backtracking.",
       "review_status": "reviewed",
       "oracle_test_status": "not_run"
     },
     {
       "id": "oracle.graph_rooted_reachability",
-      "revision": 1,
+      "revision": 2,
       "dialect": "oracle",
       "status": "drafted",
-      "body": "WITH profile_nodes AS (\n    SELECT DISTINCT node_id FROM ( {{node_query}} ) n WHERE node_id IS NOT NULL\n), profile_edges AS (\n    SELECT DISTINCT e.source_id, e.target_id\n    FROM ( {{traversal_edge_query}} ) e\n    JOIN profile_nodes a ON a.node_id = e.source_id\n    JOIN profile_nodes b ON b.node_id = e.target_id\n), profile_walk (origin_id, node_id, previous_id, path_depth) AS (\n    SELECT n.node_id, n.node_id, CAST(NULL AS NUMBER), 0\n    FROM profile_nodes n\n    WHERE [[anchor]]\n    UNION ALL\n    SELECT w.origin_id, e.target_id, w.node_id, w.path_depth + 1\n    FROM profile_walk w JOIN profile_edges e ON e.source_id = w.node_id\n    WHERE ({{walk_step_condition}})\n)\nCYCLE node_id SET profile_cycle TO 'Y' DEFAULT 'N'\nSELECT n.node_id\nFROM profile_nodes n\nWHERE [[existence]] (SELECT 1 FROM profile_walk w WHERE w.node_id = n.node_id);",
+      "body": "WITH profile_nodes AS (\n    SELECT DISTINCT node_id FROM ( {{subject_query}} ) n WHERE node_id IS NOT NULL\n), profile_edges AS (\n    SELECT DISTINCT e.source_id, e.target_id\n    FROM ( {{traversal_edge_query}} ) e\n    JOIN profile_nodes a ON a.node_id = e.source_id\n    JOIN profile_nodes b ON b.node_id = e.target_id\n), profile_walk (origin_id, node_id, previous_id, path_depth) AS (\n    SELECT n.node_id, n.node_id, CAST(NULL AS NUMBER), 0\n    FROM profile_nodes n\n    WHERE [[anchor]]\n    UNION ALL\n    SELECT w.origin_id, e.target_id, w.node_id, w.path_depth + 1\n    FROM profile_walk w JOIN profile_edges e ON e.source_id = w.node_id\n    WHERE ({{walk_step_condition}})\n)\nCYCLE node_id SET profile_cycle TO 'Y' DEFAULT 'N'\nSELECT n.node_id\nFROM profile_nodes n\nWHERE [[existence]] (SELECT 1 FROM profile_walk w WHERE w.node_id = n.node_id);",
       "description": "Root set reachability includes zero-length root paths; cycle detection makes walks finite.",
       "review_status": "reviewed",
       "oracle_test_status": "not_run"
     },
     {
       "id": "oracle.graph_shortest_depth",
-      "revision": 1,
+      "revision": 2,
       "dialect": "oracle",
       "status": "drafted",
-      "body": "WITH profile_nodes AS (\n    SELECT DISTINCT node_id FROM ( {{node_query}} ) n WHERE node_id IS NOT NULL\n), profile_edges AS (\n    SELECT DISTINCT e.source_id, e.target_id\n    FROM ( {{traversal_edge_query}} ) e\n    JOIN profile_nodes a ON a.node_id = e.source_id\n    JOIN profile_nodes b ON b.node_id = e.target_id\n), profile_walk (origin_id, node_id, previous_id, path_depth) AS (\n    SELECT n.node_id, n.node_id, CAST(NULL AS NUMBER), 0\n    FROM profile_nodes n\n    WHERE [[anchor]]\n    UNION ALL\n    SELECT w.origin_id, e.target_id, w.node_id, w.path_depth + 1\n    FROM profile_walk w JOIN profile_edges e ON e.source_id = w.node_id\n    WHERE ({{walk_step_condition}})\n)\nCYCLE node_id SET profile_cycle TO 'Y' DEFAULT 'N'\n, profile_depth AS (\n    SELECT node_id, MIN(path_depth) AS profile_depth\n    FROM profile_walk WHERE profile_cycle = 'N'\n    GROUP BY node_id\n)\nSELECT p.* FROM profile_depth p\nWHERE {{minimum_depth}} >= 0\n  AND {{maximum_depth}} >= {{minimum_depth}}\n  AND [[test]];",
+      "body": "WITH profile_nodes AS (\n    SELECT DISTINCT node_id FROM ( {{subject_query}} ) n WHERE node_id IS NOT NULL\n), profile_edges AS (\n    SELECT DISTINCT e.source_id, e.target_id\n    FROM ( {{traversal_edge_query}} ) e\n    JOIN profile_nodes a ON a.node_id = e.source_id\n    JOIN profile_nodes b ON b.node_id = e.target_id\n), profile_walk (origin_id, node_id, previous_id, path_depth) AS (\n    SELECT n.node_id, n.node_id, CAST(NULL AS NUMBER), 0\n    FROM profile_nodes n\n    WHERE [[anchor]]\n    UNION ALL\n    SELECT w.origin_id, e.target_id, w.node_id, w.path_depth + 1\n    FROM profile_walk w JOIN profile_edges e ON e.source_id = w.node_id\n    WHERE ({{walk_step_condition}})\n)\nCYCLE node_id SET profile_cycle TO 'Y' DEFAULT 'N'\n, profile_depth AS (\n    SELECT node_id, MIN(path_depth) AS profile_depth\n    FROM profile_walk WHERE profile_cycle = 'N'\n    GROUP BY node_id\n)\nSELECT p.* FROM profile_depth p\nWHERE {{minimum_depth}} >= 0\n  AND {{maximum_depth}} >= {{minimum_depth}}\n  AND [[test]];",
       "description": "Shortest unweighted path from the root set. Unreachable nodes have undefined depth and are in neither branch.",
       "review_status": "reviewed",
       "oracle_test_status": "not_run"
@@ -612,10 +612,10 @@
     },
     {
       "id": "oracle.metadata_set_difference",
-      "revision": 1,
+      "revision": 2,
       "dialect": "oracle",
       "status": "drafted",
-      "body": "WITH profile_old AS (\n    {{old_metadata_query}}\n), profile_new AS (\n    {{new_metadata_query}}\n), profile_old_only AS (\n    SELECT {{metadata_columns}} FROM profile_old\n    MINUS\n    SELECT {{metadata_columns}} FROM profile_new\n), profile_new_only AS (\n    SELECT {{metadata_columns}} FROM profile_new\n    MINUS\n    SELECT {{metadata_columns}} FROM profile_old\n), profile_counts AS (\n    SELECT (SELECT COUNT(*) FROM profile_old_only) AS profile_old_only_count,\n           (SELECT COUNT(*) FROM profile_new_only) AS profile_new_only_count\n    FROM DUAL\n)\nSELECT p.* FROM profile_counts p\nWHERE ({{snapshot_scope_known_condition}})\n  AND [[test]];",
+      "body": "WITH profile_old AS (\n    {{old_metadata_query}}\n), profile_new AS (\n    {{subject_query}}\n), profile_old_only AS (\n    SELECT {{metadata_columns}} FROM profile_old\n    MINUS\n    SELECT {{metadata_columns}} FROM profile_new\n), profile_new_only AS (\n    SELECT {{metadata_columns}} FROM profile_new\n    MINUS\n    SELECT {{metadata_columns}} FROM profile_old\n), profile_counts AS (\n    SELECT (SELECT COUNT(*) FROM profile_old_only) AS profile_old_only_count,\n           (SELECT COUNT(*) FROM profile_new_only) AS profile_new_only_count\n    FROM DUAL\n)\nSELECT p.* FROM profile_counts p\nWHERE ({{snapshot_scope_known_condition}})\n  AND [[test]];",
       "description": "Symmetric set difference of aligned selected metadata tuples, including additions and removals.",
       "review_status": "reviewed",
       "oracle_test_status": "not_run"
