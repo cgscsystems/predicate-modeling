@@ -91,6 +91,10 @@
                 "type": "string",
                 "pattern": "^[a-f0-9]{64}$"
               },
+              "source_normalized_sql_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
               "parameters": {
                 "type": "array",
                 "items": {

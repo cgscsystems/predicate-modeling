@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Predicate Investigation Workbench</title>
+<style>
+body{font-family:Arial,sans-serif;margin:20px;background:#f5f5f5}
+button,select,input,textarea{margin:4px}
+.details{margin-left:20px;border-left:2px solid #ccc;padding-left:10px}
+.card{background:white;padding:10px;margin:8px 0;border-radius:6px}
+textarea{width:95%;height:80px}
+.summary{font-weight:bold}
+</style>
+</head>
+<body>
+<h1>Predicate Investigation Workbench</h1>
+<button onclick="addTable()">Add Table</button>
+<div id="tables"></div>
+<script>
+const semanticTypes={
+'Identifier':['NonNull','Unique','Duplicate','Valid Format','Referenced','Orphaned'],
+'Code':['NonNull','Valid Code','Invalid Code','Known','Unknown'],
+'Quantity':['NonNull','Positive','Negative','Zero','Within Range','Outlier'],
+'Date':['NonNull','Valid Date','Invalid Date','Past','Future'],
+'Postal Code':['NonNull','Unique','Duplicate','Well Formed','Malformed','In Reference Table','Not In Reference Table'],
+'Free Text':['NonNull','Empty','Non-Empty','Well Formed']
+};
+function predTemplate(name){
+return `<details class='card details'><summary>${name}</summary>
+Status: <select><option>Not Tested</option><option>Confirmed</option><option>Rejected</option><option>N/A</option><option>Exception Found</option></select><br>
+SQL:<br><textarea></textarea><br>
+Results:<br><textarea></textarea><br>
+Notes:<br><textarea></textarea></details>`;
+}
+function addTable(){
+const name=prompt('Table name'); if(!name)return;
+const d=document.createElement('details');
+d.className='card';
+d.innerHTML=`<summary>${name}</summary><button onclick='addColumn(this)'>Add Column</button><div></div>`;
+d.querySelector('button').onclick=function(){addColumn(this)};
+d.querySelector('div').className='details';
+document.getElementById('tables').appendChild(d);
+}
+function addColumn(btn){
+const name=prompt('Column name'); if(!name)return;
+const parent=btn.parentElement.querySelector('.details');
+const wrap=document.createElement('details');
+let opts=Object.keys(semanticTypes).map(x=>`<option>${x}</option>`).join('');
+wrap.className='card';
+wrap.innerHTML=`<summary>${name}</summary>
+Semantic Type:<select onchange='applyType(this)'>${opts}</select>
+<div class='preds details'></div>`;
+parent.appendChild(wrap);
+applyType(wrap.querySelector('select'));
+}
+function applyType(sel){
+const preds=sel.parentElement.querySelector('.preds');
+preds.innerHTML='';
+semanticTypes[sel.value].forEach(p=>preds.insertAdjacentHTML('beforeend',predTemplate(p)));
+}
+</script>
+</body>
+</html>

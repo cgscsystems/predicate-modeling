@@ -1,57 +1,51 @@
-# Predicate Catalog application handoff 1.0.0
+# Predicate modeling
 
-This directory is the minimum self-contained handoff for the Application Pipeline.
+Reference data for a predicate investigation workbench: an offline, outline-style tool for profiling a database table by table and column by column, recording the SQL used, the results and the conclusions for each predicate.
 
-## Completion state
+This repository currently holds the frozen predicate catalogue and its Oracle SQL scaffolds. The application is not built yet.
 
-- Frozen catalogue: 364 predicate definitions, version 1.0.0.
-- SQL mapping: 364/364 predicates mapped to an exact reviewed Oracle template revision.
-- Canonical SQL: 46 templates, library revision 6.
-- Graph: revision 2 with 364 SQL references and exact operational tag inventories.
-- Portable validation: passed before packaging and rechecked by this package validator.
-- Native Oracle execution: **not run**. Production acceptance still requires Oracle-side execution against representative target schemas and data.
+## Contents
 
-## Package contents
+| Path | What it is |
+|---|---|
+| `graph/Predicate-Catalogue-Enumeration-v1.0.md` | The frozen catalogue (release 1.0.0) in readable form: 364 predicates in 173 groups across 26 families, and 34 semantic types. |
+| `graph/Predicate-Catalogue-Graph-v1.0.0-sql-enriched.json` | The same catalogue as a graph: predicates, groups, families, semantic types, storage classes, applicability rules and the edges between them. Each predicate references its SQL template. |
+| `sql/Oracle-SQL-Library.json` | 46 reusable Oracle SQL template bodies. |
+| `sql/Predicate-SQL-Mapping.json` | For each of the 364 predicates: its template, the values of its internal slots and the tags left to fill in. |
+| `schemas/` | JSON schemas for the three files above. |
+| `docs/SQL-Implementation-Contracts.md` | Notes on how individual templates treat nulls, scope and parameters. |
+| `docs/APPLICATION-DESIGN.md` | Build specification for the workbench application. |
+| `docs/reference/prototype-workbench.html` | The original throwaway prototype, kept for reference only. |
+| `examples/metadata.example.csv` | Synthetic metadata sheet in the import layout. |
+| `tools/validate_catalogue.py` | Consistency check across the graph, library and mapping. |
 
-- `graph/Predicate-Catalogue-Graph-v1.0.0-sql-enriched.json` — application graph with per-predicate SQL references.
-- `schemas/predicate-catalogue-graph.schema.json` — schema for the enriched graph.
-- `sql/Oracle-SQL-Library.json` — canonical template bodies.
-- `schemas/oracle-sql-library.schema.json` — library schema.
-- `sql/Predicate-SQL-Mapping.json` — exact internal slot bindings and required operational tags for all predicates.
-- `schemas/predicate-sql-mapping.schema.json` — mapping schema.
-- `sql/SQL-Tag-Contract.json` — two-stage tag and security contract.
-- `schemas/runtime-bindings.schema.json` — application binding document schema.
-- `runtime/render_predicate.py` — reference renderer; it does not execute SQL.
-- `runtime/validate_package.py` — standard-library package validator.
-- `docs/SQL-Implementation-Contracts.md` — algorithm, input, null, scope and limitation contracts.
-- `MANIFEST.json` and `VALIDATION.json` — package integrity and validation evidence.
+## Terminology
 
-## Rendering contract
+| Term | Meaning |
+|---|---|
+| Predicate | A condition that selects a subset of rows. A primary predicate is derived directly from one column. |
+| Group | A set of predicates that together split a population: a complementary pair (Null / Non-null) or a multiway group. Catalogue IDs such as `U01`. |
+| Family | One of the catalogue's 26 organizing folders for groups. Organization only. |
+| Sentence | A compound predicate, whether nested (a predicate applied inside another predicate's rows) or lateral (several predicates combined at the same level). |
+| Semantic partition | The general class covering predicates and sentences. |
+| Semantic type | A human-assigned role for a column (Code, Identifier, ...). With the data type, it limits which groups apply. |
 
-1. Select a `predicate_id` in `Predicate-SQL-Mapping.json`.
-2. Resolve `[[internal_slots]]` only from that reviewed mapping. The reference renderer performs this and verifies the saved SHA256.
-3. Supply exactly the listed `{{operational_tags}}` through a binding document.
-4. Treat every operational replacement as trusted application configuration. Use driver bind placeholders such as `:threshold` for data values, then pass the values separately through the Oracle driver.
-5. Reject missing, extra, nested or residual tags. Never insert raw end-user text into identifiers, conditions, expressions, column lists or subqueries.
+A predicate either returns rows, making it a partition that can be split further, or returns a measure (a count or statistic), making it a fact recorded about the partition it is evaluated in.
 
-Inspect stage-one SQL and required tags:
+## SQL templates
 
-```powershell
-python -X utf8 -B runtime/render_predicate.py P01.1
+The templates save typing. They are not required to run as written; the investigator copies them into a SQL environment and adapts them.
+
+- `[[slot]]`: internal differences between predicates that share a template (for example `= 1` versus `> 1`). These are already resolved by the mapping.
+- `{{tag}}`: values the investigator or the application supplies, such as `{{column_name}}` or `{{population_condition}}`. Anything not filled in stays visible for the investigator to complete.
+- The source relation always appears as `{{schema_name}}.{{table_name}}`. It can be replaced by a parenthesized query to evaluate the predicate inside another predicate's rows.
+
+The templates have not been run against Oracle.
+
+## Validation
+
+```sh
+python tools/validate_catalogue.py
 ```
 
-Render the included non-production example:
-
-```powershell
-python -X utf8 -B runtime/render_predicate.py P01.1 examples/P01.1-bindings.example.json
-```
-
-Validate the complete handoff:
-
-```powershell
-python -X utf8 -B runtime/validate_package.py
-```
-
-## Inputs the application must still supply
-
-The package contains no fabricated runtime database model. The Application Pipeline must supply authorized Oracle connections, table/view and column bindings, investigation scope, business/reference rules, parameter values and evidence snapshots. It must validate identifiers and trusted SQL fragments, bind data values, preserve complementary-predicate scope, and record executed SQL plus Oracle results. These are deployment inputs, not missing catalogue mappings.
+Checks that the frozen enumeration matches the graph's recorded hash, that every predicate in the graph has a mapping to an existing template, that resolving each mapping reproduces its recorded SQL fingerprint and tag list, and that the graph's SQL references agree with the mapping. Standard library only.
