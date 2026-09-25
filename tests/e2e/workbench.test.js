@@ -3,8 +3,8 @@ import test, { after, before } from "node:test";
 import assert from "node:assert/strict";
 
 import {
-  addGroup, chooseFile, detailButton, download, expand, generatedSql, importMetadata, loadPlaywright, menuGroupIds,
-  openPage, row, select, tempFile,
+  addGroup, chooseFile, detailButton, download, expand, finish, generatedSql, importMetadata, loadPlaywright, menuGroupIds,
+  newSession, row, select, tempFile, withOrdersStatus,
 } from "./browser.js";
 
 let browser;
@@ -17,36 +17,16 @@ after(async () => {
   await browser.close();
 });
 
-// A fresh context per test: its own localStorage, no network.
-async function freshPage(options) {
-  const context = await browser.newContext({ acceptDownloads: true });
-  await context.setOffline(true);
-  if (options && options.blockStorage) {
-    await context.addInitScript(() => {
-      Object.defineProperty(window, "localStorage", { get() { throw new DOMException("Storage is disabled", "SecurityError"); } });
-    });
-  }
-  const page = await openPage(context);
-  return { context, page };
-}
-
-async function finish({ context, page }) {
-  assert.deepEqual(page.errors, [], "no script errors");
-  assert.deepEqual(page.requests, [], "no network requests");
-  await context.close();
-}
-
-async function withOrdersStatus(page) {
-  await importMetadata(page);
-  await expand(page, "SALES.ORDERS");
-  await select(page, "ORDER_STATUS_CDE");
-}
+const freshPage = (options) => newSession(browser, options);
 
 test("1: import builds one table per SCHEMA.TABLE with columns in COLUMN_ID order and notes", async () => {
   const session = await freshPage();
   const { page } = session;
   const report = await importMetadata(page);
-  assert.match(report, /2 tables added, 12 columns added, 0 columns updated/);
+  assert.equal(report.summary, "Imported metadata.example.csv.");
+  assert.deepEqual(report.counts, {
+    "Tables added": 2, "Columns added": 12, "Columns updated": 0, "Columns unchanged": 0, "Warnings": 0, "Rows skipped": 0,
+  });
   assert.deepEqual(await page.locator("#outline .row.kind-table .name").allTextContents(), ["SALES.CUSTOMERS", "SALES.ORDERS"]);
   await expand(page, "SALES.ORDERS");
   const names = await page.locator("#outline .row.kind-column .name").allTextContents();
@@ -62,10 +42,13 @@ test("2: re-importing the same file changes nothing; one extra column adds only 
   const session = await freshPage();
   const { page } = session;
   await importMetadata(page);
-  assert.match(await importMetadata(page), /0 tables added, 0 columns added, 0 columns updated, 12 unchanged/);
+  const again = await importMetadata(page);
+  assert.match(again.summary, /^Nothing changed/);
+  assert.equal(again.counts["Columns unchanged"], 12);
   const csv = (await import("node:fs")).readFileSync((await import("./browser.js")).EXAMPLE_CSV, "utf8")
     + "SALES,ORDERS,8,CHANNEL_CDE,VARCHAR2(3),Y,,Sales channel,,,,,Code\n";
-  assert.match(await importMetadata(page, tempFile("extra.csv", csv)), /0 tables added, 1 columns added, 0 columns updated, 12 unchanged/);
+  const extra = await importMetadata(page, tempFile("extra.csv", csv));
+  assert.deepEqual([extra.counts["Tables added"], extra.counts["Columns added"], extra.counts["Columns updated"], extra.counts["Columns unchanged"]], [0, 1, 0, 12]);
   await expand(page, "SALES.ORDERS");
   assert.equal(await page.locator("#outline .row.kind-column").last().locator(".name").textContent(), "CHANNEL_CDE");
   await finish(session);

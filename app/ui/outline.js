@@ -4,6 +4,7 @@ import { el, replaceContent } from "./dom.js";
 import { STATUS_SYMBOLS, kindIcon, nodeTitle, statusLabel } from "./labels.js";
 import { isPartition, subtreeStats } from "../lib/workspace.js";
 import { findOrphans } from "../lib/persist.js";
+import { filterOutline, outlineMatcher } from "../lib/filter.js";
 
 const TAG_PREVIEW_LENGTH = 40;
 
@@ -51,17 +52,21 @@ function rowMeta(app, node, orphans) {
   return parts;
 }
 
-function outlineRow(app, node, depth, orphans) {
+function outlineRow(app, node, depth, view) {
+  const { orphans, filter } = view;
   const selected = app.selectedId === node.id;
   const icon = kindIcon(app, node);
-  const expandable = node.children.length > 0;
+  // While filtering, collapse state is ignored, so there is nothing to toggle.
+  const expandable = node.children.length > 0 && !filter;
   const classes = ["row", "kind-" + node.kind];
+  if (filter) classes.push(filter.matched.has(node.id) ? "match" : "context");
   if (icon.title === "Measure") classes.push("measure");
   if (selected) classes.push("selected");
   if (app.combine.includes(node.id)) classes.push("combining");
   const row = el("div", {
     class: classes.join(" "),
     role: "treeitem",
+    id: "row-" + node.id,
     "aria-level": String(depth + 1),
     "aria-selected": selected ? "true" : "false",
     "aria-expanded": expandable ? String(!node.collapsed) : null,
@@ -70,6 +75,7 @@ function outlineRow(app, node, depth, orphans) {
     onclick: (event) => {
       if ((event.ctrlKey || event.metaKey) && (node.kind === "predicate" || node.kind === "sentence")) app.toggleCombine(node.id);
       else app.select(node.id);
+      if (!event.target.closest("button")) document.getElementById("outline").focus({ preventScroll: true });
     },
     ondblclick: () => app.zoom(node.id),
   },
@@ -95,11 +101,24 @@ function outlineRow(app, node, depth, orphans) {
   return row;
 }
 
-function appendSubtree(app, rows, nodeId, depth, orphans) {
+// A non-selectable hint under a nested table that has no columns yet.
+function placeholderRow(app, table, depth) {
+  return el("div", { class: "row placeholder", role: "none", style: "--depth: " + depth },
+    el("span", { class: "twisty-spacer" }), el("span", { class: "icon" }),
+    el("span", { class: "row-body" }, el("span", { class: "muted", text: "No columns yet." }),
+      el("button", { type: "button", class: "link", text: "+ Add column", onclick: () => app.actions.addColumn(table.id) })));
+}
+
+function appendSubtree(app, rows, nodeId, depth, view) {
   const node = app.ws.nodes[nodeId];
-  rows.push(outlineRow(app, node, depth, orphans));
-  if (node.collapsed) return;
-  for (const childId of node.children) appendSubtree(app, rows, childId, depth + 1, orphans);
+  if (view.filter && !view.filter.visible.has(nodeId)) return;
+  rows.push(outlineRow(app, node, depth, view));
+  view.ids.push(nodeId);
+  if (!view.filter && node.kind === "table" && node.parentId && !node.children.some((id) => app.ws.nodes[id].kind === "column")) {
+    rows.push(placeholderRow(app, node, depth + 1));
+  }
+  if (node.collapsed && !view.filter) return;
+  for (const childId of node.children) appendSubtree(app, rows, childId, depth + 1, view);
 }
 
 function renderBreadcrumb(app) {
@@ -129,11 +148,24 @@ function renderSelectionBar(app) {
 
 export function renderOutline(app) {
   const container = document.getElementById("outline");
-  const orphans = new Set(findOrphans(app.ws, app.catalogue));
-  const rows = [];
   const top = app.zoomId ? [app.zoomId] : app.ws.roots;
-  for (const id of top) appendSubtree(app, rows, id, 0, orphans);
-  if (!rows.length) {
+  const matcher = outlineMatcher(app.filter, (node) => nodeTitle(app, node));
+  const view = {
+    orphans: new Set(findOrphans(app.ws, app.catalogue)),
+    filter: matcher ? filterOutline(app.ws, top, matcher) : null,
+    ids: [],
+  };
+  const rows = [];
+  for (const id of top) appendSubtree(app, rows, id, 0, view);
+  app.visibleRowIds = view.ids;
+  app.matchedRowIds = view.filter ? view.ids.filter((id) => view.filter.matched.has(id)) : view.ids;
+  const count = document.getElementById("filter-count");
+  if (count) count.textContent = view.filter ? view.filter.matched.size + " match" + (view.filter.matched.size === 1 ? "" : "es") : "";
+  if (view.filter && !view.filter.matched.size) {
+    rows.push(el("div", { class: "empty-state" },
+      el("p", { text: "Nothing " + (app.zoomId ? "in this view " : "") + "matches the filter." }),
+      el("button", { type: "button", text: "Clear filter", onclick: () => app.clearFilter() })));
+  } else if (!rows.length) {
     rows.push(el("div", { class: "empty-state" },
       el("p", { text: "No tables yet." }),
       el("p", { text: "Import a metadata sheet (CSV or XLSX, one row per column) to build the outline." }),
@@ -143,5 +175,7 @@ export function renderOutline(app) {
   renderBreadcrumb(app);
   renderSelectionBar(app);
   const selected = container.querySelector(".row.selected");
+  if (selected) container.setAttribute("aria-activedescendant", selected.id);
+  else container.removeAttribute("aria-activedescendant");
   if (selected && selected.scrollIntoView) selected.scrollIntoView({ block: "nearest" });
 }

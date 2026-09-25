@@ -72,10 +72,22 @@ export function parseMetadataRows(rows, semanticTypeIds) {
   return { ok: true, records: [...byKey.values()], hasColumnId, warnings, skipped };
 }
 
+function describeColumnChanges(before, after) {
+  const list = (values) => (values.length ? values.join(", ") : "none");
+  const changes = [];
+  if (before.dataType !== after.dataType) changes.push("data type " + (before.dataType || "blank") + " → " + (after.dataType || "blank"));
+  if (canonicalJson(before.semanticTypes) !== canonicalJson(after.semanticTypes)) {
+    changes.push("semantic types " + list(before.semanticTypes) + " → " + list(after.semanticTypes));
+  }
+  if (canonicalJson(before.notes) !== canonicalJson(after.notes)) changes.push("notes changed");
+  if (before.order !== after.order) changes.push("position " + before.order + " → " + after.order);
+  return changes;
+}
+
 // Merges parsed records into the workspace. Nothing is deleted and records are never touched.
 export function mergeMetadata(ws, catalogue, parsed) {
   const report = {
-    tablesAdded: [], columnsAdded: [], columnsUpdated: [], unchanged: 0,
+    tablesAdded: [], columnsAdded: [], columnsUpdated: [], updates: [], recommendationChanges: [], unchanged: 0,
     warnings: parsed.warnings.slice(), skipped: parsed.skipped.slice(),
   };
   const nextOrder = new Map();
@@ -125,7 +137,8 @@ export function mergeMetadata(ws, catalogue, parsed) {
     if (existing.order !== entry.order) reorder.add(record.key);
     ws.columns[record.key] = entry;
     report.columnsUpdated.push(record.key);
-    if (typesChanged) refreshRecommendations(ws, catalogue, record.key);
+    report.updates.push({ key: record.key, changes: describeColumnChanges(existing, entry) });
+    if (typesChanged) report.recommendationChanges.push(...refreshRecommendations(ws, catalogue, record.key));
   }
   for (const key of reorder) {
     for (const node of Object.values(ws.nodes)) {

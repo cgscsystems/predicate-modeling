@@ -106,6 +106,8 @@ test("refreshing types keeps groups and marks those that no longer match", () =>
   const rows = exampleRows().map((row) => (row[3] === "ORDER_STATUS_CDE" ? [...row.slice(0, 4), "NUMBER(2)", ...row.slice(5)] : row));
   const report = mergeMetadata(ws, catalogue, parseMetadataRows(rows, semanticIds()));
   assert.deepEqual(report.columnsUpdated, ["SALES.ORDERS.ORDER_STATUS_CDE"]);
+  assert.deepEqual(report.updates, [{ key: "SALES.ORDERS.ORDER_STATUS_CDE", changes: ["data type VARCHAR2(2) → NUMBER(2)"] }]);
+  assert.deepEqual(report.recommendationChanges.map((c) => [c.groupId, c.offRecommendation]), [["X01", true]]);
   assert.ok(ws.nodes[x01.id], "group kept");
   assert.equal(ws.nodes[x01.id].offRecommendation, true);
   assert.equal(ws.nodes[m01.id].offRecommendation, false);

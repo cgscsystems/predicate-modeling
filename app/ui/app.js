@@ -8,6 +8,7 @@ import { renderDetail } from "./detail.js";
 import { openAddGroupDialog } from "./addgroup.js";
 import { openAddColumnDialog, openCustomGroupsDialog, openCustomPredicateDialog } from "./forms.js";
 import { clearAutosave, flushAutosave, readAutosave, scheduleAutosave, storageAvailable } from "./autosave.js";
+import { installFilterBar, installKeyboard, showShortcuts } from "./keyboard.js";
 import { createCatalogue } from "../lib/catalogue.js";
 import { parseCsv } from "../lib/csv.js";
 import { mergeExtensions, parseExtensionFile, serializeExtensions } from "../lib/extensions.js";
@@ -18,10 +19,41 @@ import {
 } from "../lib/workspace.js";
 import { rowsFromWorkbook } from "../lib/xlsx.js";
 
-function reportList(title, items) {
+// A collapsible list; important lists start open.
+function reportList(title, items, open) {
   if (!items.length) return null;
-  return el("details", { class: "report-list" }, el("summary", { text: title + " (" + items.length + ")" }),
+  return el("details", { class: "report-list", open: Boolean(open) }, el("summary", { text: title + " (" + items.length + ")" }),
     el("ul", {}, items.map((item) => el("li", { text: item }))));
+}
+
+function reportCounts(pairs) {
+  return el("dl", { class: "report-counts" }, pairs.map(([label, value, warn]) => [
+    el("dt", { text: label }), el("dd", { class: warn && value ? "warn" : "", text: String(value) })]));
+}
+
+function metadataReport(fileName, parsed, report) {
+  const changed = report.tablesAdded.length + report.columnsAdded.length + report.columnsUpdated.length;
+  const recommendation = report.recommendationChanges.map((change) => change.columnKey + ": " + change.groupId
+    + (change.offRecommendation ? " is now off-recommendation" : " is recommended again"));
+  return el("div", { class: "report" },
+    el("p", { class: "report-summary", text: changed ? "Imported " + fileName + "." : "Nothing changed: " + fileName + " matches the workspace." }),
+    reportCounts([
+      ["Tables added", report.tablesAdded.length],
+      ["Columns added", report.columnsAdded.length],
+      ["Columns updated", report.columnsUpdated.length],
+      ["Columns unchanged", report.unchanged],
+      ["Warnings", report.warnings.length, true],
+      ["Rows skipped", report.skipped.length, true],
+    ]),
+    reportList("Warnings", report.warnings.map((w) => "Row " + w.row + ": " + w.message), true),
+    reportList("Skipped rows", report.skipped.map((s) => "Row " + s.row + ": " + s.reason), true),
+    reportList("Groups whose recommendation changed", recommendation, true),
+    reportList("Tables added", report.tablesAdded),
+    reportList("Columns added", report.columnsAdded),
+    reportList("Columns updated", report.updates.map((u) => u.key + ": " + u.changes.join("; "))),
+    report.updates.length || report.columnsAdded.length
+      ? el("p", { class: "small muted", text: "Nothing is deleted by an import, and recorded results are never changed." })
+      : null);
 }
 
 function hasContent(ws) {
@@ -44,7 +76,8 @@ function renderToolbar(app) {
       el("button", { type: "button", text: "Open workspace…", onclick: () => app.actions.openWorkspace() }),
       el("button", { type: "button", class: "primary", text: "Export workspace", onclick: () => app.actions.exportWorkspace() }),
       el("button", { type: "button", text: "Import catalogue extension…", onclick: () => app.actions.importExtension() }),
-      el("button", { type: "button", text: "Custom groups…", onclick: () => openCustomGroupsDialog(app) })),
+      el("button", { type: "button", text: "Custom groups…", onclick: () => openCustomGroupsDialog(app) }),
+      el("button", { type: "button", class: "icon-text", text: "?", title: "Keyboard shortcuts (?)", "aria-label": "Keyboard shortcuts", onclick: () => showShortcuts() })),
     el("div", { class: "toolbar-status", role: "status" },
       el("span", { class: "status-item" + (app.autosave.available && !app.autosave.failed ? "" : " warn"), id: "autosave-status", text: autosave }),
       el("span", { class: "status-item" + (app.changedSinceExport ? " warn" : ""), id: "export-status", text: exported })));
@@ -62,11 +95,16 @@ export function startApp(bundle, XLSX) {
     selectedId: null,
     zoomId: null,
     combine: [],
+    filter: { text: "", status: "" },
+    visibleRowIds: [],
+    matchedRowIds: [],
     lastExportAt: null,
     changedSinceExport: false,
     autosave: { available: storageAvailable(), savedAt: null, failed: false, offerPending: false, timer: null },
   };
   app.catalogue = createCatalogue(bundle, app.ws.extensions);
+
+  app.refreshOutline = () => renderOutline(app);
 
   app.render = () => {
     renderToolbar(app);
@@ -205,9 +243,15 @@ export function startApp(bundle, XLSX) {
       if (!file) return;
       let rows;
       try {
-        rows = /\.csv$/i.test(file.name) ? parseCsv(await readFileAs(file, "text")) : rowsFromWorkbook(XLSX, await readFileAs(file, "buffer"));
+        if (/\.csv$/i.test(file.name)) rows = parseCsv(await readFileAs(file, "text"));
+        else if (!XLSX) throw new Error("the XLSX reader is not available in this build; save the sheet as CSV instead.");
+        else rows = rowsFromWorkbook(XLSX, await readFileAs(file, "buffer"));
       } catch (problem) {
         messageDialog("Import failed", "The file could not be read: " + problem.message);
+        return;
+      }
+      if (rows.length < 2) {
+        messageDialog("Import failed", file.name + " has no data rows. The first row must be the header, followed by one row per column.");
         return;
       }
       const parsed = parseMetadataRows(rows, bundle.semanticTypes.map((type) => type.id));
@@ -223,17 +267,9 @@ export function startApp(bundle, XLSX) {
       }
       app.commit();
       openDialog({
-        title: "Import report: " + file.name,
+        title: "Import report",
         label: "Import report",
-        body: el("div", { class: "report" },
-          el("p", { text: report.tablesAdded.length + " tables added, " + report.columnsAdded.length + " columns added, "
-            + report.columnsUpdated.length + " columns updated, " + report.unchanged + " unchanged." }),
-          el("p", { text: parsed.warnings.length + " warnings, " + parsed.skipped.length + " rows skipped." }),
-          reportList("Tables added", report.tablesAdded),
-          reportList("Columns added", report.columnsAdded),
-          reportList("Columns updated", report.columnsUpdated),
-          reportList("Warnings", report.warnings.map((w) => "Row " + w.row + ": " + w.message)),
-          reportList("Skipped rows", report.skipped.map((s) => "Row " + s.row + ": " + s.reason))),
+        body: metadataReport(file.name, parsed, report),
         actions: [{ label: "OK", kind: "primary" }],
       });
     },
@@ -258,10 +294,13 @@ export function startApp(bundle, XLSX) {
         return;
       }
       app.replaceWorkspace(result.workspace, { lastExportAt: result.workspace.savedAt, changedSinceExport: false });
-      const orphans = findOrphans(app.ws, app.catalogue).length;
-      const notes = [...result.warnings];
-      if (orphans) notes.push(orphans + " group or predicate nodes are not in this catalogue and are marked as orphaned.");
-      if (notes.length) messageDialog("Workspace opened with warnings", el("div", {}, notes.map((note) => el("p", { text: note }))));
+      const orphans = findOrphans(app.ws, app.catalogue);
+      if (result.warnings.length || orphans.length) {
+        messageDialog("Workspace opened with warnings", el("div", { class: "report" },
+          result.warnings.map((note) => el("p", { text: note })),
+          orphans.length ? el("p", { text: orphans.length + " group or predicate nodes are not in this catalogue. They are kept with their records and marked as orphaned; their SQL cannot be generated." }) : null,
+          reportList("Orphaned nodes", orphans.map((id) => nodeTitle(app, app.ws.nodes[id])), true)));
+      }
     },
 
     importExtension: async () => {
@@ -305,6 +344,26 @@ export function startApp(bundle, XLSX) {
   };
 
   window.addEventListener("pagehide", () => flushAutosave(app));
+  // Without working autosave, unexported changes would be lost on leaving the page.
+  window.addEventListener("beforeunload", (event) => {
+    if (app.changedSinceExport && (!app.autosave.available || app.autosave.failed)) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+  });
+  const showError = (message) => {
+    const banner = document.getElementById("error-banner");
+    replaceContent(banner,
+      el("span", { text: "Something went wrong: " + message + " Export your workspace now to keep a copy of your work so far." }),
+      el("button", { type: "button", text: "Export workspace", onclick: () => app.actions.exportWorkspace() }),
+      el("button", { type: "button", text: "Dismiss", onclick: () => { banner.hidden = true; } }));
+    banner.hidden = false;
+  };
+  window.addEventListener("error", (event) => showError(event.message || "an unexpected error."));
+  window.addEventListener("unhandledrejection", (event) => showError((event.reason && event.reason.message) || "an unexpected error."));
+
+  installFilterBar(app);
+  installKeyboard(app);
 
   const saved = app.autosave.available ? readAutosave() : null;
   if (saved && hasContent(saved.workspace)) {

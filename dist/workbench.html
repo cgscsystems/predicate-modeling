@@ -261,13 +261,37 @@ pre.sql { margin: 0; padding: 10px; overflow: auto; max-height: 360px; white-spa
 .member-editor { background: var(--surface-2); }
 .report-list { margin: 4px 0; }
 .report-list ul { max-height: 220px; overflow: auto; margin: 4px 0; }
+
+/* Phase 3: filter, keyboard, reports, errors */
+.filter-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.filter-bar input[type="search"] { flex: 1 1 200px; width: auto; }
+.filter-bar select { width: auto; flex: 0 1 200px; }
+.outline:focus { outline: none; }
+.outline:focus .row.selected { box-shadow: inset 0 0 0 2px var(--accent); }
+.row.context { opacity: 0.6; }
+.row.match .name { font-weight: 600; }
+.row.placeholder { cursor: default; font-size: 12.5px; }
+.row.placeholder:hover { background: none; }
+.error-banner { background: color-mix(in srgb, var(--danger) 14%, var(--surface)); color: var(--text); }
+button.icon-text { min-width: 32px; font-weight: 600; }
+.shortcuts { border-collapse: collapse; width: 100%; }
+.shortcuts th, .shortcuts td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--border); }
+kbd { font-family: var(--mono); font-size: 12px; padding: 1px 6px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; background: var(--surface-2); white-space: nowrap; }
+.report-summary { font-weight: 600; }
+.report-counts { display: grid; grid-template-columns: max-content max-content; gap: 2px 16px; margin: 8px 0 12px; }
+.report-counts dt { color: var(--muted); }
+.report-counts dd { margin: 0; font-variant-numeric: tabular-nums; }
+.report-counts dd.warn { color: var(--warn); font-weight: 600; }
+#detail h2:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
 </style>
 </head>
 <body>
 <header class="toolbar" id="toolbar"></header>
 <div class="banner" id="banner" hidden></div>
+<div class="banner error-banner" id="error-banner" role="alert" hidden></div>
 <main class="layout">
   <section class="outline-pane" aria-label="Outline">
+    <div class="filter-bar" id="filter-bar" role="search"></div>
     <nav class="breadcrumb" id="breadcrumb" aria-label="Zoom path"></nav>
     <div class="selection-bar" id="selection-bar" hidden></div>
     <div class="outline" id="outline" role="tree" aria-label="Tables, columns and predicates"></div>
@@ -826,14 +850,22 @@ function columnNodesFor(ws, columnKey) {
 }
 
 // Re-evaluates off-recommendation markers of groups on a column after its types change.
+// Returns the group nodes whose marker changed.
 function refreshRecommendations(ws, catalogue, columnKey) {
+  const changed = [];
   for (const columnNode of columnNodesFor(ws, columnKey)) {
     for (const childId of columnNode.children) {
       const child = ws.nodes[childId];
       const group = child.kind === "group" ? catalogue.group(child.groupId) : null;
-      if (group) child.offRecommendation = !isRecommendedAt(ws, group, columnNode);
+      if (!group) continue;
+      const off = !isRecommendedAt(ws, group, columnNode);
+      if (off !== child.offRecommendation) {
+        child.offRecommendation = off;
+        changed.push({ nodeId: child.id, groupId: child.groupId, columnKey, offRecommendation: off });
+      }
     }
   }
+  return changed;
 }
 
 // Predicates and sentences in a subtree, and how many have a status other than "Not tested".
@@ -985,6 +1017,42 @@ function findOrphans(ws, catalogue) {
   return orphans;
 }
 
+// ---- lib/filter.js ----
+// Outline search and status filter (design §13): matches plus their ancestors stay visible.
+
+// "tested" matches any status other than Not tested.
+function outlineMatcher(criteria, titleOf) {
+  const text = String(criteria.text || "").trim().toLowerCase();
+  const status = criteria.status || "";
+  if (!text && !status) return null;
+  return (node) => {
+    if (status) {
+      if (!node.record) return false;
+      if (status === "tested" ? node.record.status === "not_tested" : node.record.status !== status) return false;
+    }
+    return !text || titleOf(node).toLowerCase().includes(text);
+  };
+}
+
+// Visible and matched node IDs under the given view roots.
+function filterOutline(ws, rootIds, matches) {
+  const visible = new Set();
+  const matched = new Set();
+  const visit = (id, ancestors) => {
+    const node = ws.nodes[id];
+    if (matches(node)) {
+      matched.add(id);
+      visible.add(id);
+      for (const ancestor of ancestors) visible.add(ancestor);
+    }
+    ancestors.push(id);
+    for (const childId of node.children) visit(childId, ancestors);
+    ancestors.pop();
+  };
+  for (const id of rootIds) visit(id, []);
+  return { visible, matched };
+}
+
 // ---- ui/outline.js ----
 // The outline (design §13): one indented tree, collapsible, with any node openable as the view root.
 
@@ -1035,17 +1103,21 @@ function rowMeta(app, node, orphans) {
   return parts;
 }
 
-function outlineRow(app, node, depth, orphans) {
+function outlineRow(app, node, depth, view) {
+  const { orphans, filter } = view;
   const selected = app.selectedId === node.id;
   const icon = kindIcon(app, node);
-  const expandable = node.children.length > 0;
+  // While filtering, collapse state is ignored, so there is nothing to toggle.
+  const expandable = node.children.length > 0 && !filter;
   const classes = ["row", "kind-" + node.kind];
+  if (filter) classes.push(filter.matched.has(node.id) ? "match" : "context");
   if (icon.title === "Measure") classes.push("measure");
   if (selected) classes.push("selected");
   if (app.combine.includes(node.id)) classes.push("combining");
   const row = el("div", {
     class: classes.join(" "),
     role: "treeitem",
+    id: "row-" + node.id,
     "aria-level": String(depth + 1),
     "aria-selected": selected ? "true" : "false",
     "aria-expanded": expandable ? String(!node.collapsed) : null,
@@ -1054,6 +1126,7 @@ function outlineRow(app, node, depth, orphans) {
     onclick: (event) => {
       if ((event.ctrlKey || event.metaKey) && (node.kind === "predicate" || node.kind === "sentence")) app.toggleCombine(node.id);
       else app.select(node.id);
+      if (!event.target.closest("button")) document.getElementById("outline").focus({ preventScroll: true });
     },
     ondblclick: () => app.zoom(node.id),
   },
@@ -1079,11 +1152,24 @@ function outlineRow(app, node, depth, orphans) {
   return row;
 }
 
-function appendSubtree(app, rows, nodeId, depth, orphans) {
+// A non-selectable hint under a nested table that has no columns yet.
+function placeholderRow(app, table, depth) {
+  return el("div", { class: "row placeholder", role: "none", style: "--depth: " + depth },
+    el("span", { class: "twisty-spacer" }), el("span", { class: "icon" }),
+    el("span", { class: "row-body" }, el("span", { class: "muted", text: "No columns yet." }),
+      el("button", { type: "button", class: "link", text: "+ Add column", onclick: () => app.actions.addColumn(table.id) })));
+}
+
+function appendSubtree(app, rows, nodeId, depth, view) {
   const node = app.ws.nodes[nodeId];
-  rows.push(outlineRow(app, node, depth, orphans));
-  if (node.collapsed) return;
-  for (const childId of node.children) appendSubtree(app, rows, childId, depth + 1, orphans);
+  if (view.filter && !view.filter.visible.has(nodeId)) return;
+  rows.push(outlineRow(app, node, depth, view));
+  view.ids.push(nodeId);
+  if (!view.filter && node.kind === "table" && node.parentId && !node.children.some((id) => app.ws.nodes[id].kind === "column")) {
+    rows.push(placeholderRow(app, node, depth + 1));
+  }
+  if (node.collapsed && !view.filter) return;
+  for (const childId of node.children) appendSubtree(app, rows, childId, depth + 1, view);
 }
 
 function renderBreadcrumb(app) {
@@ -1113,11 +1199,24 @@ function renderSelectionBar(app) {
 
 function renderOutline(app) {
   const container = document.getElementById("outline");
-  const orphans = new Set(findOrphans(app.ws, app.catalogue));
-  const rows = [];
   const top = app.zoomId ? [app.zoomId] : app.ws.roots;
-  for (const id of top) appendSubtree(app, rows, id, 0, orphans);
-  if (!rows.length) {
+  const matcher = outlineMatcher(app.filter, (node) => nodeTitle(app, node));
+  const view = {
+    orphans: new Set(findOrphans(app.ws, app.catalogue)),
+    filter: matcher ? filterOutline(app.ws, top, matcher) : null,
+    ids: [],
+  };
+  const rows = [];
+  for (const id of top) appendSubtree(app, rows, id, 0, view);
+  app.visibleRowIds = view.ids;
+  app.matchedRowIds = view.filter ? view.ids.filter((id) => view.filter.matched.has(id)) : view.ids;
+  const count = document.getElementById("filter-count");
+  if (count) count.textContent = view.filter ? view.filter.matched.size + " match" + (view.filter.matched.size === 1 ? "" : "es") : "";
+  if (view.filter && !view.filter.matched.size) {
+    rows.push(el("div", { class: "empty-state" },
+      el("p", { text: "Nothing " + (app.zoomId ? "in this view " : "") + "matches the filter." }),
+      el("button", { type: "button", text: "Clear filter", onclick: () => app.clearFilter() })));
+  } else if (!rows.length) {
     rows.push(el("div", { class: "empty-state" },
       el("p", { text: "No tables yet." }),
       el("p", { text: "Import a metadata sheet (CSV or XLSX, one row per column) to build the outline." }),
@@ -1127,6 +1226,8 @@ function renderOutline(app) {
   renderBreadcrumb(app);
   renderSelectionBar(app);
   const selected = container.querySelector(".row.selected");
+  if (selected) container.setAttribute("aria-activedescendant", selected.id);
+  else container.removeAttribute("aria-activedescendant");
   if (selected && selected.scrollIntoView) selected.scrollIntoView({ block: "nearest" });
 }
 
@@ -1456,17 +1557,24 @@ function tagEditor(app, node) {
       el("tbody", {}, body)));
 }
 
+function hint(text) {
+  return el("p", { class: "hint", text });
+}
+
 function tableDetail(app, node) {
   const { ws, catalogue } = app;
   const stats = subtreeStats(ws, node.id);
   const parts = [el("dl", { class: "facts" },
     fieldRow("Table", node.schema + "." + node.table),
     fieldRow("Predicates tested", stats.tested + " of " + stats.total))];
+  if (!node.parentId && !node.children.length) {
+    parts.push(hint("This table has no column nodes. Re-add columns with “+ Add column”, or add a table-level group."));
+  }
   if (node.parentId) {
     parts.push(el("p", {}, "Rows of the partition ",
       el("button", { type: "button", class: "link", text: nodeTitle(app, ws.nodes[node.parentId]), onclick: () => app.select(node.parentId) }), "."));
     if (!node.children.some((id) => ws.nodes[id].kind === "column")) {
-      parts.push(el("p", { class: "hint", text: "Add the columns you want to split these rows on." }));
+      parts.push(hint("No columns yet. Add the columns you want to split these rows on."));
     }
     parts.push(sqlBlock(tableSource(ws, catalogue, node.id), "Source of this nested table"));
   }
@@ -1477,6 +1585,7 @@ function columnDetail(app, node) {
   const column = app.ws.columns[node.columnKey];
   const notes = Object.entries(column.notes);
   return [
+    node.children.length ? null : hint("No groups yet. Add a group to split this column's rows (press a)."),
     section(null, el("dl", { class: "facts" },
       fieldRow("Column", node.columnKey),
       fieldRow("Data type", column.dataType),
@@ -1503,6 +1612,7 @@ function groupDetail(app, node) {
         fieldRow("Semantic applicability", group.applicability.semanticText),
         fieldRow("Storage applicability", group.applicability.storageText),
         group.note ? fieldRow("Workbench note", group.note) : null)),
+    node.children.length ? null : hint("All of this group's predicates were deleted. Use “Add again” to bring one back."),
     section("Members", el("ul", { class: "member-list" }, group.members.map((predicateId) => {
       const predicate = app.catalogue.predicate(predicateId);
       return el("li", {},
@@ -1559,7 +1669,8 @@ function renderDetail(app) {
   if (!node) {
     replaceContent(panel, el("div", { class: "detail-empty" },
       el("h2", { text: "Nothing selected" }),
-      el("p", { text: "Select a table, column, group or predicate in the outline to see its details and record results." })));
+      el("p", { text: "Select a table, column, group or predicate in the outline to see its details and record results." }),
+      el("p", { class: "small", text: "Keyboard: ↑ ↓ to move, ← → to collapse and expand, Enter for details, ] and [ to zoom, / to search, ? for all shortcuts." })));
     return;
   }
   const orphaned = findOrphans(app.ws, app.catalogue).includes(node.id);
@@ -2098,6 +2209,169 @@ function flushAutosave(app) {
   writeAutosave(app);
 }
 
+// ---- ui/keyboard.js ----
+// Keyboard control and the outline filter bar (design §13).
+
+
+const SHORTCUTS = [
+  ["↑ / ↓", "Previous / next row"],
+  ["← / →", "Collapse, or go to the parent / expand, or go to the first child"],
+  ["Home / End", "First / last row"],
+  ["Enter", "Move to the detail panel"],
+  ["Esc", "Back to the outline; clears the combine selection"],
+  ["]", "Zoom into the selected row"],
+  ["[", "Zoom out one level"],
+  ["/", "Search the outline"],
+  ["Space", "Select or deselect a partition to combine"],
+  ["a", "Add a group to the selected column or table"],
+  ["Delete", "Delete the selected row (asks first)"],
+  ["?", "Show these shortcuts"],
+];
+
+function showShortcuts() {
+  openDialog({
+    title: "Keyboard shortcuts",
+    body: el("table", { class: "shortcuts" }, el("tbody", {}, SHORTCUTS.map(([keys, action]) =>
+      el("tr", {}, el("th", { scope: "row" }, el("kbd", { text: keys })), el("td", { text: action }))))),
+    actions: [{ label: "Close", kind: "primary" }],
+  });
+}
+
+function typingIn(target) {
+  return target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
+}
+
+function focusDetail() {
+  const heading = document.querySelector("#detail h2");
+  if (!heading) return;
+  heading.tabIndex = -1;
+  heading.focus();
+  heading.scrollIntoView({ block: "nearest" });
+}
+
+function moveTo(app, id) {
+  if (id) app.select(id);
+}
+
+function outlineKey(app, event) {
+  if (event.altKey || event.ctrlKey || event.metaKey) return false;
+  const { ws } = app;
+  const ids = app.visibleRowIds || [];
+  const index = ids.indexOf(app.selectedId);
+  const node = app.selectedId ? ws.nodes[app.selectedId] : null;
+  const filtering = Boolean(app.filter.text.trim() || app.filter.status);
+  switch (event.key) {
+    case "ArrowDown":
+      moveTo(app, ids[index < 0 ? 0 : Math.min(index + 1, ids.length - 1)]);
+      return true;
+    case "ArrowUp":
+      moveTo(app, ids[index < 0 ? 0 : Math.max(index - 1, 0)]);
+      return true;
+    case "Home":
+      moveTo(app, ids[0]);
+      return true;
+    case "End":
+      moveTo(app, ids[ids.length - 1]);
+      return true;
+    case "ArrowRight":
+      if (!node || !node.children.length) return true;
+      if (node.collapsed && !filtering) app.toggleCollapsed(node.id);
+      else moveTo(app, node.children.find((id) => ids.includes(id)));
+      return true;
+    case "ArrowLeft":
+      if (!node) return true;
+      if (node.children.length && !node.collapsed && !filtering) app.toggleCollapsed(node.id);
+      else if (node.parentId && ids.includes(node.parentId)) moveTo(app, node.parentId);
+      return true;
+    case "Enter":
+      if (node) focusDetail();
+      return true;
+    case "]":
+      if (node) app.zoom(node.id);
+      return true;
+    case "[":
+      if (app.zoomId) app.zoom(ws.nodes[app.zoomId].parentId || null);
+      return true;
+    case " ":
+      if (node && (node.kind === "predicate" || node.kind === "sentence") && isPartition(ws, app.catalogue, node.id)) app.toggleCombine(node.id);
+      return true;
+    case "a":
+      if (node && (node.kind === "column" || node.kind === "table")) app.actions.addGroup(node.id);
+      return true;
+    case "Delete":
+      if (node) app.actions.deleteNode(node.id);
+      return true;
+    case "Escape":
+      if (app.combine.length) app.clearCombine();
+      return true;
+    default:
+      return false;
+  }
+}
+
+function installKeyboard(app) {
+  const outline = document.getElementById("outline");
+  outline.tabIndex = 0;
+  outline.addEventListener("keydown", (event) => {
+    if (event.target !== outline) return;
+    if (outlineKey(app, event)) event.preventDefault();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (document.querySelector("dialog[open]") || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.key === "Escape" && event.target instanceof Node && document.getElementById("detail").contains(event.target)) {
+      event.preventDefault();
+      outline.focus();
+      return;
+    }
+    if (typingIn(event.target)) return;
+    if (event.key === "/") {
+      event.preventDefault();
+      document.getElementById("filter-text").focus();
+    } else if (event.key === "?") {
+      event.preventDefault();
+      showShortcuts();
+    }
+  });
+}
+
+// Built once so typing in it never loses focus to a re-render.
+function installFilterBar(app) {
+  const text = el("input", {
+    type: "search", id: "filter-text", placeholder: "Search names (press / )", "aria-label": "Search the outline by name",
+    oninput: () => { app.filter.text = text.value; app.refreshOutline(); },
+    onkeydown: (event) => {
+      if (event.key === "Escape" && text.value) {
+        event.preventDefault();
+        event.stopPropagation();
+        app.clearFilter();
+      } else if (event.key === "Enter" || event.key === "ArrowDown") {
+        event.preventDefault();
+        if (app.matchedRowIds.length) {
+          app.select(app.matchedRowIds[0]);
+          document.getElementById("outline").focus();
+        }
+      }
+    },
+  });
+  const status = el("select", {
+    id: "filter-status", "aria-label": "Filter by status",
+    onchange: () => { app.filter.status = status.value; app.refreshOutline(); },
+  },
+  el("option", { value: "", text: "Any status" }),
+  el("option", { value: "tested", text: "Tested (any result)" }),
+  STATUSES.map((entry) => el("option", { value: entry.id, text: STATUS_SYMBOLS[entry.id] + " " + entry.label })));
+  const bar = document.getElementById("filter-bar");
+  bar.append(text, status,
+    el("span", { id: "filter-count", class: "muted small", role: "status" }),
+    el("button", { type: "button", class: "link", text: "Clear", onclick: () => app.clearFilter() }));
+  app.clearFilter = () => {
+    text.value = "";
+    status.value = "";
+    app.filter = { text: "", status: "" };
+    app.refreshOutline();
+  };
+}
+
 // ---- lib/csv.js ----
 // RFC 4180 CSV reader: comma separator, double-quoted fields with "" escapes, CRLF or LF.
 
@@ -2249,10 +2523,22 @@ function parseMetadataRows(rows, semanticTypeIds) {
   return { ok: true, records: [...byKey.values()], hasColumnId, warnings, skipped };
 }
 
+function describeColumnChanges(before, after) {
+  const list = (values) => (values.length ? values.join(", ") : "none");
+  const changes = [];
+  if (before.dataType !== after.dataType) changes.push("data type " + (before.dataType || "blank") + " → " + (after.dataType || "blank"));
+  if (canonicalJson(before.semanticTypes) !== canonicalJson(after.semanticTypes)) {
+    changes.push("semantic types " + list(before.semanticTypes) + " → " + list(after.semanticTypes));
+  }
+  if (canonicalJson(before.notes) !== canonicalJson(after.notes)) changes.push("notes changed");
+  if (before.order !== after.order) changes.push("position " + before.order + " → " + after.order);
+  return changes;
+}
+
 // Merges parsed records into the workspace. Nothing is deleted and records are never touched.
 function mergeMetadata(ws, catalogue, parsed) {
   const report = {
-    tablesAdded: [], columnsAdded: [], columnsUpdated: [], unchanged: 0,
+    tablesAdded: [], columnsAdded: [], columnsUpdated: [], updates: [], recommendationChanges: [], unchanged: 0,
     warnings: parsed.warnings.slice(), skipped: parsed.skipped.slice(),
   };
   const nextOrder = new Map();
@@ -2302,7 +2588,8 @@ function mergeMetadata(ws, catalogue, parsed) {
     if (existing.order !== entry.order) reorder.add(record.key);
     ws.columns[record.key] = entry;
     report.columnsUpdated.push(record.key);
-    if (typesChanged) refreshRecommendations(ws, catalogue, record.key);
+    report.updates.push({ key: record.key, changes: describeColumnChanges(existing, entry) });
+    if (typesChanged) report.recommendationChanges.push(...refreshRecommendations(ws, catalogue, record.key));
   }
   for (const key of reorder) {
     for (const node of Object.values(ws.nodes)) {
@@ -2327,10 +2614,41 @@ function rowsFromWorkbook(XLSX, data) {
 // Application state, actions and rendering. The logic lives in app/lib; this wires it to the page.
 
 
-function reportList(title, items) {
+// A collapsible list; important lists start open.
+function reportList(title, items, open) {
   if (!items.length) return null;
-  return el("details", { class: "report-list" }, el("summary", { text: title + " (" + items.length + ")" }),
+  return el("details", { class: "report-list", open: Boolean(open) }, el("summary", { text: title + " (" + items.length + ")" }),
     el("ul", {}, items.map((item) => el("li", { text: item }))));
+}
+
+function reportCounts(pairs) {
+  return el("dl", { class: "report-counts" }, pairs.map(([label, value, warn]) => [
+    el("dt", { text: label }), el("dd", { class: warn && value ? "warn" : "", text: String(value) })]));
+}
+
+function metadataReport(fileName, parsed, report) {
+  const changed = report.tablesAdded.length + report.columnsAdded.length + report.columnsUpdated.length;
+  const recommendation = report.recommendationChanges.map((change) => change.columnKey + ": " + change.groupId
+    + (change.offRecommendation ? " is now off-recommendation" : " is recommended again"));
+  return el("div", { class: "report" },
+    el("p", { class: "report-summary", text: changed ? "Imported " + fileName + "." : "Nothing changed: " + fileName + " matches the workspace." }),
+    reportCounts([
+      ["Tables added", report.tablesAdded.length],
+      ["Columns added", report.columnsAdded.length],
+      ["Columns updated", report.columnsUpdated.length],
+      ["Columns unchanged", report.unchanged],
+      ["Warnings", report.warnings.length, true],
+      ["Rows skipped", report.skipped.length, true],
+    ]),
+    reportList("Warnings", report.warnings.map((w) => "Row " + w.row + ": " + w.message), true),
+    reportList("Skipped rows", report.skipped.map((s) => "Row " + s.row + ": " + s.reason), true),
+    reportList("Groups whose recommendation changed", recommendation, true),
+    reportList("Tables added", report.tablesAdded),
+    reportList("Columns added", report.columnsAdded),
+    reportList("Columns updated", report.updates.map((u) => u.key + ": " + u.changes.join("; "))),
+    report.updates.length || report.columnsAdded.length
+      ? el("p", { class: "small muted", text: "Nothing is deleted by an import, and recorded results are never changed." })
+      : null);
 }
 
 function hasContent(ws) {
@@ -2353,7 +2671,8 @@ function renderToolbar(app) {
       el("button", { type: "button", text: "Open workspace…", onclick: () => app.actions.openWorkspace() }),
       el("button", { type: "button", class: "primary", text: "Export workspace", onclick: () => app.actions.exportWorkspace() }),
       el("button", { type: "button", text: "Import catalogue extension…", onclick: () => app.actions.importExtension() }),
-      el("button", { type: "button", text: "Custom groups…", onclick: () => openCustomGroupsDialog(app) })),
+      el("button", { type: "button", text: "Custom groups…", onclick: () => openCustomGroupsDialog(app) }),
+      el("button", { type: "button", class: "icon-text", text: "?", title: "Keyboard shortcuts (?)", "aria-label": "Keyboard shortcuts", onclick: () => showShortcuts() })),
     el("div", { class: "toolbar-status", role: "status" },
       el("span", { class: "status-item" + (app.autosave.available && !app.autosave.failed ? "" : " warn"), id: "autosave-status", text: autosave }),
       el("span", { class: "status-item" + (app.changedSinceExport ? " warn" : ""), id: "export-status", text: exported })));
@@ -2371,11 +2690,16 @@ function startApp(bundle, XLSX) {
     selectedId: null,
     zoomId: null,
     combine: [],
+    filter: { text: "", status: "" },
+    visibleRowIds: [],
+    matchedRowIds: [],
     lastExportAt: null,
     changedSinceExport: false,
     autosave: { available: storageAvailable(), savedAt: null, failed: false, offerPending: false, timer: null },
   };
   app.catalogue = createCatalogue(bundle, app.ws.extensions);
+
+  app.refreshOutline = () => renderOutline(app);
 
   app.render = () => {
     renderToolbar(app);
@@ -2514,9 +2838,15 @@ function startApp(bundle, XLSX) {
       if (!file) return;
       let rows;
       try {
-        rows = /\.csv$/i.test(file.name) ? parseCsv(await readFileAs(file, "text")) : rowsFromWorkbook(XLSX, await readFileAs(file, "buffer"));
+        if (/\.csv$/i.test(file.name)) rows = parseCsv(await readFileAs(file, "text"));
+        else if (!XLSX) throw new Error("the XLSX reader is not available in this build; save the sheet as CSV instead.");
+        else rows = rowsFromWorkbook(XLSX, await readFileAs(file, "buffer"));
       } catch (problem) {
         messageDialog("Import failed", "The file could not be read: " + problem.message);
+        return;
+      }
+      if (rows.length < 2) {
+        messageDialog("Import failed", file.name + " has no data rows. The first row must be the header, followed by one row per column.");
         return;
       }
       const parsed = parseMetadataRows(rows, bundle.semanticTypes.map((type) => type.id));
@@ -2532,17 +2862,9 @@ function startApp(bundle, XLSX) {
       }
       app.commit();
       openDialog({
-        title: "Import report: " + file.name,
+        title: "Import report",
         label: "Import report",
-        body: el("div", { class: "report" },
-          el("p", { text: report.tablesAdded.length + " tables added, " + report.columnsAdded.length + " columns added, "
-            + report.columnsUpdated.length + " columns updated, " + report.unchanged + " unchanged." }),
-          el("p", { text: parsed.warnings.length + " warnings, " + parsed.skipped.length + " rows skipped." }),
-          reportList("Tables added", report.tablesAdded),
-          reportList("Columns added", report.columnsAdded),
-          reportList("Columns updated", report.columnsUpdated),
-          reportList("Warnings", report.warnings.map((w) => "Row " + w.row + ": " + w.message)),
-          reportList("Skipped rows", report.skipped.map((s) => "Row " + s.row + ": " + s.reason))),
+        body: metadataReport(file.name, parsed, report),
         actions: [{ label: "OK", kind: "primary" }],
       });
     },
@@ -2567,10 +2889,13 @@ function startApp(bundle, XLSX) {
         return;
       }
       app.replaceWorkspace(result.workspace, { lastExportAt: result.workspace.savedAt, changedSinceExport: false });
-      const orphans = findOrphans(app.ws, app.catalogue).length;
-      const notes = [...result.warnings];
-      if (orphans) notes.push(orphans + " group or predicate nodes are not in this catalogue and are marked as orphaned.");
-      if (notes.length) messageDialog("Workspace opened with warnings", el("div", {}, notes.map((note) => el("p", { text: note }))));
+      const orphans = findOrphans(app.ws, app.catalogue);
+      if (result.warnings.length || orphans.length) {
+        messageDialog("Workspace opened with warnings", el("div", { class: "report" },
+          result.warnings.map((note) => el("p", { text: note })),
+          orphans.length ? el("p", { text: orphans.length + " group or predicate nodes are not in this catalogue. They are kept with their records and marked as orphaned; their SQL cannot be generated." }) : null,
+          reportList("Orphaned nodes", orphans.map((id) => nodeTitle(app, app.ws.nodes[id])), true)));
+      }
     },
 
     importExtension: async () => {
@@ -2614,6 +2939,26 @@ function startApp(bundle, XLSX) {
   };
 
   window.addEventListener("pagehide", () => flushAutosave(app));
+  // Without working autosave, unexported changes would be lost on leaving the page.
+  window.addEventListener("beforeunload", (event) => {
+    if (app.changedSinceExport && (!app.autosave.available || app.autosave.failed)) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+  });
+  const showError = (message) => {
+    const banner = document.getElementById("error-banner");
+    replaceContent(banner,
+      el("span", { text: "Something went wrong: " + message + " Export your workspace now to keep a copy of your work so far." }),
+      el("button", { type: "button", text: "Export workspace", onclick: () => app.actions.exportWorkspace() }),
+      el("button", { type: "button", text: "Dismiss", onclick: () => { banner.hidden = true; } }));
+    banner.hidden = false;
+  };
+  window.addEventListener("error", (event) => showError(event.message || "an unexpected error."));
+  window.addEventListener("unhandledrejection", (event) => showError((event.reason && event.reason.message) || "an unexpected error."));
+
+  installFilterBar(app);
+  installKeyboard(app);
 
   const saved = app.autosave.available ? readAutosave() : null;
   if (saved && hasContent(saved.workspace)) {

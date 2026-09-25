@@ -1,6 +1,7 @@
 // Playwright helpers for the end-to-end checks against dist/workbench.html (run: npm run test:e2e).
 import { execSync } from "node:child_process";
 import { createRequire } from "node:module";
+import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -48,9 +49,15 @@ export async function chooseFile(page, trigger, file) {
 export async function importMetadata(page, file) {
   await chooseFile(page, () => page.locator("#toolbar").getByRole("button", { name: "Import metadata…" }).click(), file || EXAMPLE_CSV);
   const report = page.getByRole("dialog", { name: "Import report" });
+  const counts = await report.locator(".report-counts").evaluate((list) => {
+    const values = {};
+    list.querySelectorAll("dt").forEach((dt) => { values[dt.textContent] = Number(dt.nextElementSibling.textContent); });
+    return values;
+  });
+  const summary = await report.locator(".report-summary").textContent();
   const text = await report.locator(".report").textContent();
   await report.getByRole("button", { name: "OK" }).click();
-  return text;
+  return { counts, summary, text };
 }
 
 export function row(page, name) {
@@ -100,4 +107,29 @@ export function generatedSql(page) {
 export async function download(page, trigger) {
   const [file] = await Promise.all([page.waitForEvent("download"), trigger()]);
   return { name: file.suggestedFilename(), text: readFileSync(await file.path(), "utf8") };
+}
+
+// A fresh context: its own localStorage, no network. blockStorage makes localStorage throw.
+export async function newSession(browser, options) {
+  const context = await browser.newContext({ acceptDownloads: true, ...((options && options.contextOptions) || {}) });
+  await context.setOffline(true);
+  if (options && options.blockStorage) {
+    await context.addInitScript(() => {
+      Object.defineProperty(window, "localStorage", { get() { throw new DOMException("Storage is disabled", "SecurityError"); } });
+    });
+  }
+  const page = await openPage(context);
+  return { context, page };
+}
+
+export async function finish({ context, page }) {
+  assert.deepEqual(page.errors, [], "no script errors");
+  assert.deepEqual(page.requests, [], "no network requests");
+  await context.close();
+}
+
+export async function withOrdersStatus(page) {
+  await importMetadata(page);
+  await expand(page, "SALES.ORDERS");
+  await select(page, "ORDER_STATUS_CDE");
 }

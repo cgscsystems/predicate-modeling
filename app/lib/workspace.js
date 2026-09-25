@@ -281,14 +281,22 @@ export function columnNodesFor(ws, columnKey) {
 }
 
 // Re-evaluates off-recommendation markers of groups on a column after its types change.
+// Returns the group nodes whose marker changed.
 export function refreshRecommendations(ws, catalogue, columnKey) {
+  const changed = [];
   for (const columnNode of columnNodesFor(ws, columnKey)) {
     for (const childId of columnNode.children) {
       const child = ws.nodes[childId];
       const group = child.kind === "group" ? catalogue.group(child.groupId) : null;
-      if (group) child.offRecommendation = !isRecommendedAt(ws, group, columnNode);
+      if (!group) continue;
+      const off = !isRecommendedAt(ws, group, columnNode);
+      if (off !== child.offRecommendation) {
+        child.offRecommendation = off;
+        changed.push({ nodeId: child.id, groupId: child.groupId, columnKey, offRecommendation: off });
+      }
     }
   }
+  return changed;
 }
 
 // Predicates and sentences in a subtree, and how many have a status other than "Not tested".

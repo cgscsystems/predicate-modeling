@@ -100,17 +100,24 @@ function tagEditor(app, node) {
       el("tbody", {}, body)));
 }
 
+function hint(text) {
+  return el("p", { class: "hint", text });
+}
+
 function tableDetail(app, node) {
   const { ws, catalogue } = app;
   const stats = subtreeStats(ws, node.id);
   const parts = [el("dl", { class: "facts" },
     fieldRow("Table", node.schema + "." + node.table),
     fieldRow("Predicates tested", stats.tested + " of " + stats.total))];
+  if (!node.parentId && !node.children.length) {
+    parts.push(hint("This table has no column nodes. Re-add columns with “+ Add column”, or add a table-level group."));
+  }
   if (node.parentId) {
     parts.push(el("p", {}, "Rows of the partition ",
       el("button", { type: "button", class: "link", text: nodeTitle(app, ws.nodes[node.parentId]), onclick: () => app.select(node.parentId) }), "."));
     if (!node.children.some((id) => ws.nodes[id].kind === "column")) {
-      parts.push(el("p", { class: "hint", text: "Add the columns you want to split these rows on." }));
+      parts.push(hint("No columns yet. Add the columns you want to split these rows on."));
     }
     parts.push(sqlBlock(tableSource(ws, catalogue, node.id), "Source of this nested table"));
   }
@@ -121,6 +128,7 @@ function columnDetail(app, node) {
   const column = app.ws.columns[node.columnKey];
   const notes = Object.entries(column.notes);
   return [
+    node.children.length ? null : hint("No groups yet. Add a group to split this column's rows (press a)."),
     section(null, el("dl", { class: "facts" },
       fieldRow("Column", node.columnKey),
       fieldRow("Data type", column.dataType),
@@ -147,6 +155,7 @@ function groupDetail(app, node) {
         fieldRow("Semantic applicability", group.applicability.semanticText),
         fieldRow("Storage applicability", group.applicability.storageText),
         group.note ? fieldRow("Workbench note", group.note) : null)),
+    node.children.length ? null : hint("All of this group's predicates were deleted. Use “Add again” to bring one back."),
     section("Members", el("ul", { class: "member-list" }, group.members.map((predicateId) => {
       const predicate = app.catalogue.predicate(predicateId);
       return el("li", {},
@@ -203,7 +212,8 @@ export function renderDetail(app) {
   if (!node) {
     replaceContent(panel, el("div", { class: "detail-empty" },
       el("h2", { text: "Nothing selected" }),
-      el("p", { text: "Select a table, column, group or predicate in the outline to see its details and record results." })));
+      el("p", { text: "Select a table, column, group or predicate in the outline to see its details and record results." }),
+      el("p", { class: "small", text: "Keyboard: ↑ ↓ to move, ← → to collapse and expand, Enter for details, ] and [ to zoom, / to search, ? for all shortcuts." })));
     return;
   }
   const orphaned = findOrphans(app.ws, app.catalogue).includes(node.id);
