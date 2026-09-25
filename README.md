@@ -14,6 +14,9 @@ This repository currently holds the frozen predicate catalogue and its Oracle SQ
 | `sql/Predicate-SQL-Mapping.json` | For each of the 364 predicates: its template, the values of its internal slots and the tags left to fill in. |
 | `schemas/` | JSON schemas for the three files above. |
 | `docs/SQL-Implementation-Contracts.md` | Notes on how individual templates treat nulls, scope and parameters. |
+| `docs/APPLICATION-DESIGN.md` | Build specification for the workbench application. |
+| `docs/reference/prototype-workbench.html` | The original throwaway prototype, kept for reference only. |
+| `examples/metadata.example.csv` | Synthetic metadata sheet in the import layout. |
 | `tools/validate_catalogue.py` | Consistency check across the graph, library and mapping. |
 
 ## Terminology
