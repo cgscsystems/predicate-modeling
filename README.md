@@ -2,7 +2,7 @@
 
 Reference data for a predicate investigation workbench: an offline, outline-style tool for profiling a database table by table and column by column, recording the SQL used, the results and the conclusions for each predicate.
 
-This repository holds the frozen predicate catalogue, its Oracle SQL scaffolds and the workbench application, which is being built in phases (see `docs/APPLICATION-DESIGN.md` §15). The core logic is in place; the user interface is not built yet.
+This repository holds the frozen predicate catalogue, its Oracle SQL scaffolds and the workbench application, which is being built in phases (see `docs/APPLICATION-DESIGN.md` §15). Open `dist/workbench.html` (double-click; it needs no network or server) to use it.
 
 ## Contents
 
@@ -19,11 +19,12 @@ This repository holds the frozen predicate catalogue, its Oracle SQL scaffolds a
 | `examples/metadata.example.csv` | Synthetic metadata sheet in the import layout. |
 | `tools/validate_catalogue.py` | Consistency check across the graph, library and mapping. |
 | `catalogue/app-classification.json` | App-specific classification: predicate output (partition or measure) and group attachment. Review table in `app-classification.md`. |
-| `app/lib/` | Workbench logic as ES modules with no DOM dependency: metadata import, applicability, SQL generation, workspace model, persistence, extensions. |
 | `app/vendor/` | Vendored SheetJS reader for XLSX imports (see its README). |
-| `build/build.py` | Validates the catalogue and builds the catalogue bundle (and, from phase 2, `dist/workbench.html`). |
+| `dist/workbench.html` | The built workbench: one self-contained file. |
+| `app/` | Workbench source: `lib/` logic (no DOM), `ui/` interface, `index.html` and `styles.css`. |
+| `build/build.py` | Validates the catalogue, builds the catalogue bundle and inlines everything into `dist/workbench.html`. |
 | `build/classification.py` | Checks the classification and regenerates its review table. |
-| `tests/` | Node tests (`npm test`). |
+| `tests/` | Node tests (`npm test`) and Playwright end-to-end checks (`tests/e2e`, `npm run test:e2e`). |
 
 ## Terminology
 
@@ -59,6 +60,7 @@ Checks that the frozen enumeration matches the graph's recorded hash, that every
 ## Building and testing the workbench
 
 ```sh
-python build/build.py      # validate the catalogue and classification, build the bundle
-npm test                   # node --test; needs Node 20+ and Python 3 on PATH (set PYTHON to override)
+python build/build.py      # validate the catalogue and classification, write dist/workbench.html
+npm test                   # logic tests; needs Node 20+ and Python 3 on PATH (set PYTHON to override)
+npm run test:e2e           # builds, then drives dist/workbench.html in Chromium via Playwright
 ```

@@ -162,3 +162,11 @@ test("blank predicates fill tags in hand-written SQL; orphans and deleted compon
   delete ws.nodes[equals.id];
   assert.match(generateSql(ws, catalogue, sentence.id), new RegExp("-- Component " + equals.id + " was deleted"));
 });
+
+test("the group form asks only for tags automatic filling leaves open", async () => {
+  const { unfilledGroupTags } = await import("../app/lib/sql.js");
+  const { ws, catalogue, status } = setup();
+  assert.deepEqual(unfilledGroupTags(ws, catalogue, status.id, "U01"), []);
+  assert.deepEqual(unfilledGroupTags(ws, catalogue, status.id, "M01"), ["selected_value"]);
+  assert.deepEqual(unfilledGroupTags(ws, catalogue, rootTable(ws, "SALES.ORDERS").id, "U02"), ["key_columns"]);
+});

@@ -51,6 +51,23 @@ function predicateTemplate(catalogue, node) {
   return predicate ? { sql: predicate.sql, tags: predicate.tags } : null;
 }
 
+const ALWAYS_AUTOMATIC = ["schema_name", "table_name", "subject_query", ...SCOPE_TAGS];
+const COLUMN_AUTOMATIC = [...COLUMN_NAME_TAGS, ...COLUMN_LIST_TAGS, "value_expression", ...NONNULL_TAGS];
+
+// Tags of a group's members that automatic filling would leave for the investigator, in first-use order.
+export function unfilledGroupTags(ws, catalogue, parentId, groupId) {
+  const group = catalogue.group(groupId);
+  const automatic = new Set(ALWAYS_AUTOMATIC);
+  if (getNode(ws, parentId).kind === "column" && group.attachment === "column") COLUMN_AUTOMATIC.forEach((tag) => automatic.add(tag));
+  const tags = [];
+  for (const predicateId of group.members) {
+    for (const tag of (catalogue.predicate(predicateId) || { tags: [] }).tags) {
+      if (!automatic.has(tag) && !tags.includes(tag)) tags.push(tag);
+    }
+  }
+  return tags;
+}
+
 // Automatic tag values for a predicate node (design §10.2), excluding the source pair.
 function automaticValues(ws, catalogue, node, source) {
   const values = { subject_query: "SELECT * FROM " + source };

@@ -1,8 +1,11 @@
-"""Build the workbench catalogue bundle and, once the UI exists, dist/workbench.html.
+"""Build dist/workbench.html: one self-contained file that opens from file:// without a network.
 
 Usage:
-    python build/build.py                 # validate and build everything available
+    python build/build.py                 # validate, then write dist/workbench.html
     python build/build.py --bundle PATH   # validate, then write only the catalogue bundle ("-" for stdout)
+
+The app's ES modules are joined into one classic script, following imports from app/main.js,
+so modules must use plain relative named imports and unique top-level names.
 
 Standard library only. Fails if tools/validate_catalogue.py fails, if the classification
 check fails, or if any predicate's stage-one SQL does not match its recorded fingerprint.
@@ -25,8 +28,13 @@ GRAPH = ROOT / "graph" / "Predicate-Catalogue-Graph-v1.0.0-sql-enriched.json"
 LIBRARY = ROOT / "sql" / "Oracle-SQL-Library.json"
 MAPPING = ROOT / "sql" / "Predicate-SQL-Mapping.json"
 CLASSIFICATION = ROOT / "catalogue" / "app-classification.json"
-APP_HTML = ROOT / "app" / "index.html"
+APP_DIR = ROOT / "app"
+APP_HTML = APP_DIR / "index.html"
+APP_ENTRY = APP_DIR / "main.js"
+DIST_HTML = ROOT / "dist" / "workbench.html"
 SLOT = re.compile(r"\[\[(\w+)\]\]")
+IMPORT = re.compile(r'^import \{[\w,\s]+\} from "(\.{1,2}/[\w/.-]+\.js)";\n?', re.M)
+EXPORT = re.compile(r"^export (?=(?:async )?function |const |let |class )", re.M)
 
 
 class BuildError(Exception):
@@ -137,6 +145,61 @@ def build_bundle():
     }
 
 
+def module_order(entry):
+    """Modules reachable from entry, dependencies first. Import cycles are an error."""
+    order, state = [], {}
+
+    def visit(path, chain):
+        if state.get(path) == "done":
+            return
+        if state.get(path) == "active":
+            raise BuildError("Import cycle: " + " -> ".join(str(p.relative_to(APP_DIR)) for p in chain + [path]))
+        state[path] = "active"
+        for relative in IMPORT.findall(path.read_text(encoding="utf-8")):
+            visit((path.parent / relative).resolve(), chain + [path])
+        state[path] = "done"
+        order.append(path)
+
+    visit(entry.resolve(), [])
+    return order
+
+
+def application_script():
+    """All app modules as one classic script: imports removed, exports unwrapped."""
+    parts = []
+    for path in module_order(APP_ENTRY):
+        source = path.read_text(encoding="utf-8")
+        leftover = re.search(r"^\s*(import|export)\b.*$", EXPORT.sub("", IMPORT.sub("", source)), re.M)
+        if leftover:
+            raise BuildError("Unsupported module syntax in {}: {}".format(path.relative_to(ROOT), leftover.group(0).strip()))
+        parts.append("// ---- {} ----\n{}".format(path.relative_to(APP_DIR).as_posix(), EXPORT.sub("", IMPORT.sub("", source))))
+    return '(function () {\n"use strict";\n' + "\n".join(parts) + "\n})();\n"
+
+
+def inline_script(code):
+    return code.replace("</script", "<\\/script")
+
+
+def build_html(bundle):
+    html = APP_HTML.read_text(encoding="utf-8")
+    replacements = {
+        '<link rel="stylesheet" href="styles.css">':
+            "<style>\n" + (APP_DIR / "styles.css").read_text(encoding="utf-8") + "</style>",
+        '<script src="vendor/xlsx.full.min.js"></script>':
+            "<script>\n" + inline_script((APP_DIR / "vendor" / "xlsx.full.min.js").read_text(encoding="utf-8")) + "\n</script>",
+        '<script type="application/json" id="catalogue-bundle"></script>':
+            '<script type="application/json" id="catalogue-bundle">'
+            + json.dumps(bundle, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/") + "</script>",
+        '<script type="module" src="main.js"></script>':
+            "<script>\n" + inline_script(application_script()) + "</script>",
+    }
+    for marker, content in replacements.items():
+        if html.count(marker) != 1:
+            raise BuildError("app/index.html must contain exactly one " + marker)
+        html = html.replace(marker, content)
+    return html
+
+
 def main(argv):
     try:
         validate()
@@ -152,11 +215,15 @@ def main(argv):
         else:
             Path(target).write_text(text, encoding="utf-8", newline="\n")
         return 0
-    if not APP_HTML.exists():
-        print("Catalogue bundle OK ({} groups, {} predicates); app/index.html not present yet, so no HTML was built."
-              .format(len(bundle["groups"]), len(bundle["predicates"])))
-        return 0
-    raise NotImplementedError("HTML inlining arrives with the UI (phase 2)")
+    try:
+        html = build_html(bundle)
+    except BuildError as error:
+        print(error, file=sys.stderr)
+        return 1
+    DIST_HTML.parent.mkdir(exist_ok=True)
+    DIST_HTML.write_text(html, encoding="utf-8", newline="\n")
+    print("Wrote {} ({} KB)".format(DIST_HTML.relative_to(ROOT).as_posix(), len(html.encode("utf-8")) // 1024))
+    return 0
 
 
 if __name__ == "__main__":
