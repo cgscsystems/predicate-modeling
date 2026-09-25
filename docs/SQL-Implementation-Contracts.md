@@ -4,6 +4,15 @@ Catalogue 1.0.0 remains frozen. These are customizable Oracle 19c query template
 
 The full SQL export carries batch-specific instructions for batches 01–14. The sections below explain the new variants and dependencies introduced in the final six groups.
 
+## Subject relation (library and mapping revision 7)
+
+Every predicate reads its subject (the relation whose rows it returns or summarizes) in one of two ways:
+
+- `{{schema_name}}.{{table_name}}` with alias `t`, when the subject is the table's rows as stored.
+- `{{subject_query}}`, when the template needs the subject reshaped: a node dictionary exposing `node_id` (Y01–Y05, Y07), an extract or record projection (Z01, Z02, Z04, Z05), an entity-pair projection (L01), a metadata snapshot (SC07), a subject exposing `subject_id` (LC01–LC03), or the input row set of an agreement or declared-rule check (Q01, Q03, A04, W03, Y06, B01–B03, B06, SC02, SC03, LC04).
+
+Tags such as `reference_*`, `source_*` (in K02, the referencing population), `observed_*`, `right_*`, `target_*`, `old_metadata_query` and `*_relation_query` name the *other* relation. Revision 7 renamed the subject-side tags that had drifted from this convention (for example `source_schema`/`source_table` in K01, `child_*` in K03, `expected_*` in H03/H04, `left_*` in Q04/S06/Z03, `node_query`, `*_subject_query`, `source_extract_query`, `new_metadata_query`). Condition tags keep their names.
+
 ---
 
 # Batch 09 — presence and text
@@ -307,7 +316,7 @@ Y06 excludes absent references; root/no-parent is a separate predicate. Equality
 
 Q05/Q07/G05/G06/W02 reuse `oracle.related_existence`: subject alias `t`, policy relation alias `r`, full tuple match and fixed scope. The negative branch means no allowed member *within a known applicable closed policy relation*. Example Q05:
 
-- `allowed_tuple_subject_query`: `SELECT id,country_code,province_code FROM addresses`.
+- Subject: `{{schema_name}}.{{table_name}}`, e.g. the `addresses` table with `country_code` and `province_code`.
 - `allowed_tuple_relation_query`: authoritative `(country_code, province_code, scheme_id)` tuples.
 - `allowed_tuple_match_condition`: `r.country_code=t.country_code AND r.province_code=t.province_code`.
 - `allowed_tuple_scope_condition`: `r.scheme_id=:scheme_id`.
@@ -340,12 +349,12 @@ Do not use just `s.v=t.v OR (both null)` when expecting null/non-null to be fals
 
 ## Graph input and conventions
 
-Graph queries consume an explicit node dictionary and edge facts, never supplied cycle/reachability/depth flags. `node_query` exposes unique nonnull numeric `node_id`. A composite source identifier is mapped losslessly by a dictionary, e.g. `SELECT DENSE_RANK() OVER (ORDER BY key_a,key_b) AS node_id,key_a,key_b FROM (SELECT DISTINCT key_a,key_b FROM raw_nodes WHERE key_a IS NOT NULL AND key_b IS NOT NULL)`. Join each raw edge endpoint to that same dictionary by all key components. Dictionary IDs need only be stable within the fixed snapshot/query; do not independently rank endpoints, concatenate fields, or use collision-prone hashes. Numeric IDs support the optional undirected previous-node state and the portable test translation. Other numeric integral IDs work directly.
+Graph queries consume an explicit node dictionary and edge facts, never supplied cycle/reachability/depth flags. The node dictionary, supplied as `subject_query`, exposes unique nonnull numeric `node_id`. A composite source identifier is mapped losslessly by a dictionary, e.g. `SELECT DENSE_RANK() OVER (ORDER BY key_a,key_b) AS node_id,key_a,key_b FROM (SELECT DISTINCT key_a,key_b FROM raw_nodes WHERE key_a IS NOT NULL AND key_b IS NOT NULL)`. Join each raw edge endpoint to that same dictionary by all key components. Dictionary IDs need only be stable within the fixed snapshot/query; do not independently rank endpoints, concatenate fields, or use collision-prone hashes. Numeric IDs support the optional undirected previous-node state and the portable test translation. Other numeric integral IDs work directly.
 
 Local predicates use raw declared assignments:
 
 - Y01 `parent_assignment_query` projects `parent_id,child_id`. A nonnull parent assignment makes the observed child non-root even if that parent is missing from nodes. A null parent is no assignment. This separates missing parent referential integrity (K03) from root status.
-- Y02 checks whether there is an **observed** child, using `node_query` membership. Unobserved child endpoints do not establish non-leaf status.
+- Y02 checks whether there is an **observed** child, using node-dictionary (`subject_query`) membership. Unobserved child endpoints do not establish non-leaf status.
 - Y03 `incident_edge_query` projects `source_id,target_id`. Incident means either endpoint equals the node. Set `incident_edge_scope_condition` to `1=1` to count self-loops or `r.source_id<>r.target_id` to exclude them. Define explicitly whether dangling endpoint edges belong to this graph; the incident query selects that graph.
 
 Traversal normalizes duplicate edges and keeps only edges whose two endpoints occur in the observed vertex dictionary. Edges point from parent/source to child/target. `root_query` provides zero or more known `node_id` values; repeated roots do not duplicate anchors. Missing root IDs are ignored because they are not graph vertices; failure to obtain the required root set is unknown evidence, not a legitimately empty root set.
@@ -399,7 +408,7 @@ SC02/SC03 use an unambiguously aligned actual/expected metadata input query. Sup
 
 SC05/SC06 reuse scalar equality: schema_name/table_name point to prepared known-constraint metadata; column_name is the normalized enablement/validation column. SC05 accepts only ENABLED/DISABLED; SC06 only VALIDATED/NOT VALIDATED. Other and null values select neither member. Status alone does not prove historic data correctness, constraint type, or enforcement at other times.
 
-SC07 compares the sets of selected metadata tuples using MINUS in both directions. old_metadata_query/new_metadata_query expose the same uniquely named columns; metadata_columns is a nonempty unqualified column list including object identity and every selected property. No lossy concatenation. Use comparable Oracle scalar fields, excluding raw LONG/LOB fields unless safely represented by an appropriate full comparison strategy. Set semantics intentionally ignore duplicate identical inventory rows. Null properties compare as equal in set operations, but unavailability of an entire required property makes snapshot_scope_known_condition false. Align owner filters, relevant extraction times and completeness; include identity so additions/removals are counted. Both known empty sets are unchanged. Output old-only and new-only tuple counts, not changed-object counts.
+SC07 compares the sets of selected metadata tuples using MINUS in both directions. old_metadata_query and subject_query (the new snapshot) expose the same uniquely named columns; metadata_columns is a nonempty unqualified column list including object identity and every selected property. No lossy concatenation. Use comparable Oracle scalar fields, excluding raw LONG/LOB fields unless safely represented by an appropriate full comparison strategy. Set semantics intentionally ignore duplicate identical inventory rows. Null properties compare as equal in set operations, but unavailability of an entire required property makes snapshot_scope_known_condition false. Align owner filters, relevant extraction times and completeness; include identity so additions/removals are counted. Both known empty sets are unchanged. Output old-only and new-only tuple counts, not changed-object counts.
 
 ## Logical components
 

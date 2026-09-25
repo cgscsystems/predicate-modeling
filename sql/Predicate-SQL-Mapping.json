@@ -1,6 +1,6 @@
 {
   "format_version": "1.0",
-  "mapping_revision": 6,
+  "mapping_revision": 7,
   "catalogue_version": "1.0.0",
   "catalogue_sha256": "a4021e1b175f95c685a1bfe58fab5f3b6cf8ec8a1e69ec30c544c15b0fb5b778",
   "catalogue_inventory": [
@@ -3874,13 +3874,13 @@
       "planned_pattern_id": "calendar_lookup",
       "implementation": {
         "template_id": "oracle.reference_pair_filter",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "EXISTS (SELECT 1 FROM ({{selected_calendar_class_query}}) s WHERE s.member_value = r.{{calendar_class_column}})",
           "eligibility": "t.{{calendar_value_column}} IS NOT NULL AND r.{{calendar_class_column}} IS NOT NULL"
         },
         "source_batch": "11",
-        "rendered_sql_sha256": "3415c6b438bad4fc328908884aec7963293c30fe1e2d23a377c27b16365555b8",
+        "rendered_sql_sha256": "3341a1392679fe3078670c28ca43f03d95abd797945f01a4d3d21f84e196c590",
         "parameters": [
           "calendar_class_column",
           "calendar_value_column",
@@ -3902,13 +3902,13 @@
       "planned_pattern_id": "calendar_lookup",
       "implementation": {
         "template_id": "oracle.reference_pair_filter",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "NOT EXISTS (SELECT 1 FROM ({{selected_calendar_class_query}}) s WHERE s.member_value = r.{{calendar_class_column}})",
           "eligibility": "t.{{calendar_value_column}} IS NOT NULL AND r.{{calendar_class_column}} IS NOT NULL"
         },
         "source_batch": "11",
-        "rendered_sql_sha256": "6d433c10bbadc09aed33ead6b3a5fab9502519e9039bf441dd94e27911a21c36",
+        "rendered_sql_sha256": "0f890f5dde72af8b05283c405ad7398f88ef55333a60e3b1c0bd1dec0b78da97",
         "parameters": [
           "calendar_class_column",
           "calendar_value_column",
@@ -4179,7 +4179,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{subject_schema}}.{{subject_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{event_schema}}.{{event_table}}",
           "eligibility": "{{subject_eligibility_condition}}",
           "match": "{{event_match_condition}}",
@@ -4187,15 +4187,15 @@
           "existence": "EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "0cf6e2d367d891e85a75ce89bdb37446c9b3dd2389a6ce57dde9c1a7e94af997",
+        "rendered_sql_sha256": "e2a9260968d0a440cb0fdfc1150bc4ab0b07b06f61cb015ae3db47e4bbc16bcc",
         "parameters": [
           "event_match_condition",
           "event_schema",
           "event_scope_condition",
           "event_table",
+          "schema_name",
           "subject_eligibility_condition",
-          "subject_schema",
-          "subject_table"
+          "table_name"
         ]
       }
     },
@@ -4207,7 +4207,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{subject_schema}}.{{subject_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{event_schema}}.{{event_table}}",
           "eligibility": "{{subject_eligibility_condition}}",
           "match": "{{event_match_condition}}",
@@ -4215,15 +4215,15 @@
           "existence": "NOT EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "5856643ee91dc2955b0d0ee4837874fde12d8b612f35de4e815a4c07a915cde3",
+        "rendered_sql_sha256": "66227e2b39de2642c7e4de701ade81c410dff17ef74245fa7c3d4d2891f10d0e",
         "parameters": [
           "event_match_condition",
           "event_schema",
           "event_scope_condition",
           "event_table",
+          "schema_name",
           "subject_eligibility_condition",
-          "subject_schema",
-          "subject_table"
+          "table_name"
         ]
       }
     },
@@ -4679,7 +4679,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{source_schema}}.{{source_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{reference_schema}}.{{reference_table}}",
           "eligibility": "{{source_key_nonnull_condition}}",
           "match": "{{source_reference_match_condition}}",
@@ -4687,15 +4687,15 @@
           "existence": "EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "d14c238487d9e1c5dee635e36ea8a9391ec8200ccbafbf20f684fd644705b951",
+        "rendered_sql_sha256": "1edf995dc4e8c112c70f7880578dd794fdca10dc652ce8bd6413dfed6cfb190f",
         "parameters": [
           "reference_schema",
           "reference_scope_condition",
           "reference_table",
+          "schema_name",
           "source_key_nonnull_condition",
           "source_reference_match_condition",
-          "source_schema",
-          "source_table"
+          "table_name"
         ]
       }
     },
@@ -4707,7 +4707,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{source_schema}}.{{source_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{reference_schema}}.{{reference_table}}",
           "eligibility": "{{source_key_nonnull_condition}}",
           "match": "{{source_reference_match_condition}}",
@@ -4715,15 +4715,15 @@
           "existence": "NOT EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "4eaa9456ac50b03f83278a23fab76cd60f359f2c3d6180cb7f1e2e661620dac2",
+        "rendered_sql_sha256": "dfc487f5e75b0a9fc376a01a26beba5400aa0af2739d4a6d78766cf044d04f83",
         "parameters": [
           "reference_schema",
           "reference_scope_condition",
           "reference_table",
+          "schema_name",
           "source_key_nonnull_condition",
           "source_reference_match_condition",
-          "source_schema",
-          "source_table"
+          "table_name"
         ]
       }
     },
@@ -4735,7 +4735,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{reference_schema}}.{{reference_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{source_schema}}.{{source_table}}",
           "eligibility": "{{reference_key_nonnull_condition}}",
           "match": "{{reference_source_match_condition}}",
@@ -4743,15 +4743,15 @@
           "existence": "EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "6b0581afbf81078e95b86b7faf75c36f726b2b720b71e56373af013ca9cc1fbb",
+        "rendered_sql_sha256": "6561f05bee2b0df831c57da9744569acb857018a7fa7c5ee8c32068742d8dd52",
         "parameters": [
           "reference_key_nonnull_condition",
-          "reference_schema",
           "reference_source_match_condition",
-          "reference_table",
+          "schema_name",
           "source_schema",
           "source_scope_condition",
-          "source_table"
+          "source_table",
+          "table_name"
         ]
       }
     },
@@ -4763,7 +4763,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{reference_schema}}.{{reference_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{source_schema}}.{{source_table}}",
           "eligibility": "{{reference_key_nonnull_condition}}",
           "match": "{{reference_source_match_condition}}",
@@ -4771,15 +4771,15 @@
           "existence": "NOT EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "d0bb48aab6c0a37bfc0c8bbb06d72902f87be8a6c880a9ba5d2797348ee42797",
+        "rendered_sql_sha256": "e8110cce1c30f8298e70f3a0d2856826a8b936098bf757547b913029a4eb97ce",
         "parameters": [
           "reference_key_nonnull_condition",
-          "reference_schema",
           "reference_source_match_condition",
-          "reference_table",
+          "schema_name",
           "source_schema",
           "source_scope_condition",
-          "source_table"
+          "source_table",
+          "table_name"
         ]
       }
     },
@@ -4791,7 +4791,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{child_schema}}.{{child_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{parent_schema}}.{{parent_table}}",
           "eligibility": "{{child_parent_key_nonnull_condition}}",
           "match": "{{child_parent_match_condition}}",
@@ -4799,15 +4799,15 @@
           "existence": "EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "63897a3355b2bdf5e44a3756e6273e23156089e55a9340f1b783b19035e8e0f3",
+        "rendered_sql_sha256": "647cde34f79070e5ba7eb667e925928490c8557396e5590dca3c43bc5476a8c7",
         "parameters": [
           "child_parent_key_nonnull_condition",
           "child_parent_match_condition",
-          "child_schema",
-          "child_table",
           "parent_schema",
           "parent_scope_condition",
-          "parent_table"
+          "parent_table",
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -4819,7 +4819,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{child_schema}}.{{child_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{parent_schema}}.{{parent_table}}",
           "eligibility": "{{child_parent_key_nonnull_condition}}",
           "match": "{{child_parent_match_condition}}",
@@ -4827,15 +4827,15 @@
           "existence": "NOT EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "6602ff3d11d160c6715b3afd4c8d70416c0d0027e4d96c9dfdbfacfc96a24702",
+        "rendered_sql_sha256": "7f517d58c495344e7f737d2292e7e47277ae634e9bf4eb34be2fd3e512f67585",
         "parameters": [
           "child_parent_key_nonnull_condition",
           "child_parent_match_condition",
-          "child_schema",
-          "child_table",
           "parent_schema",
           "parent_scope_condition",
-          "parent_table"
+          "parent_table",
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -4845,20 +4845,20 @@
       "planned_pattern_id": "join_match_count",
       "implementation": {
         "template_id": "oracle.join_match_count",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "p.profile_match_count = 0"
         },
         "source_batch": "06",
-        "rendered_sql_sha256": "5da97c3eb6d1377d3c6b8718b1c99c4acb9b20f391e59413541eb166c4054d64",
+        "rendered_sql_sha256": "f35cc482d8919d98b92797c65478c9a9a9fb8970fb365a8137871136cd620e06",
         "parameters": [
           "reference_schema",
           "reference_scope_condition",
           "reference_table",
+          "schema_name",
           "source_eligibility_condition",
           "source_reference_match_condition",
-          "source_schema",
-          "source_table"
+          "table_name"
         ]
       }
     },
@@ -4868,20 +4868,20 @@
       "planned_pattern_id": "join_match_count",
       "implementation": {
         "template_id": "oracle.join_match_count",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "p.profile_match_count = 1"
         },
         "source_batch": "06",
-        "rendered_sql_sha256": "d7ea216ab86132f074679be1c9e8cff6c17b0bc7c36ad8839b7bf90d3ab59066",
+        "rendered_sql_sha256": "6f9df9a8c547c5d52903c5fa82d5324950099bfba919ad98c51ddf5d018cf1fa",
         "parameters": [
           "reference_schema",
           "reference_scope_condition",
           "reference_table",
+          "schema_name",
           "source_eligibility_condition",
           "source_reference_match_condition",
-          "source_schema",
-          "source_table"
+          "table_name"
         ]
       }
     },
@@ -4891,20 +4891,20 @@
       "planned_pattern_id": "join_match_count",
       "implementation": {
         "template_id": "oracle.join_match_count",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "p.profile_match_count > 1"
         },
         "source_batch": "06",
-        "rendered_sql_sha256": "27341e052f4b392282e586c7bf23b83a7ee224116928dd38b7db7f8778b3d435",
+        "rendered_sql_sha256": "d078e126ffaf83ae7dd0cd14039d27e18b3d86356451a83a9e192c45e3efd820",
         "parameters": [
           "reference_schema",
           "reference_scope_condition",
           "reference_table",
+          "schema_name",
           "source_eligibility_condition",
           "source_reference_match_condition",
-          "source_schema",
-          "source_table"
+          "table_name"
         ]
       }
     },
@@ -4914,13 +4914,13 @@
       "planned_pattern_id": "effective_reference",
       "implementation": {
         "template_id": "oracle.reference_pair_filter",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "t.{{relevant_date_column}} >= r.{{valid_from_column}} AND t.{{relevant_date_column}} < r.{{valid_to_column}}",
           "eligibility": "t.{{relevant_date_column}} IS NOT NULL AND r.{{valid_from_column}} IS NOT NULL AND r.{{valid_to_column}} IS NOT NULL AND r.{{valid_from_column}} < r.{{valid_to_column}}"
         },
         "source_batch": "11",
-        "rendered_sql_sha256": "48b667485cd573635526a7d8b246dad3caf8e4e54c8f434b6d0b1fc8a19f6b76",
+        "rendered_sql_sha256": "0dab89c9b097137059a622769b20a19dd404c568bc1124f82e7df26adc9d6eda",
         "parameters": [
           "reference_match_condition",
           "reference_record_id",
@@ -4942,13 +4942,13 @@
       "planned_pattern_id": "effective_reference",
       "implementation": {
         "template_id": "oracle.reference_pair_filter",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "t.{{relevant_date_column}} < r.{{valid_from_column}} OR t.{{relevant_date_column}} >= r.{{valid_to_column}}",
           "eligibility": "t.{{relevant_date_column}} IS NOT NULL AND r.{{valid_from_column}} IS NOT NULL AND r.{{valid_to_column}} IS NOT NULL AND r.{{valid_from_column}} < r.{{valid_to_column}}"
         },
         "source_batch": "11",
-        "rendered_sql_sha256": "cb14ffcc50b30d2bc97dadf82a7f3cfb9009593c5d72c325a56623e55413d9d3",
+        "rendered_sql_sha256": "db8e7601f9cd8e33411bb684da51a2e68d20e357bb4794fa76b2e5004e20a361",
         "parameters": [
           "reference_match_condition",
           "reference_record_id",
@@ -4970,13 +4970,13 @@
       "planned_pattern_id": "reference_status",
       "implementation": {
         "template_id": "oracle.reference_pair_filter",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "EXISTS (SELECT 1 FROM ({{approved_status_query}}) s WHERE s.member_value = r.{{status_column}})",
           "eligibility": "r.{{status_column}} IS NOT NULL"
         },
         "source_batch": "11",
-        "rendered_sql_sha256": "8abffd29f9b5e01a1f979d4ce56ede2e8c695b4088a73de01e884c150feadfc3",
+        "rendered_sql_sha256": "dd6da45ee404e1f02225b1aa18e33a7e4e5b1baae2dae50959ec0b9fc5f799f0",
         "parameters": [
           "approved_status_query",
           "reference_match_condition",
@@ -4997,13 +4997,13 @@
       "planned_pattern_id": "reference_status",
       "implementation": {
         "template_id": "oracle.reference_pair_filter",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "EXISTS (SELECT 1 FROM ({{deprecated_status_query}}) s WHERE s.member_value = r.{{status_column}})",
           "eligibility": "r.{{status_column}} IS NOT NULL"
         },
         "source_batch": "11",
-        "rendered_sql_sha256": "9200955135becfd01d40f5fce415ebb2f8b9fe6c0229c409430f1d2f81018fc9",
+        "rendered_sql_sha256": "4aa11b0ff410931b783ab8622bf327f0f9154623ca16c0b44c95521f1aaf682d",
         "parameters": [
           "deprecated_status_query",
           "reference_match_condition",
@@ -5024,13 +5024,13 @@
       "planned_pattern_id": "reference_status",
       "implementation": {
         "template_id": "oracle.reference_pair_filter",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "NOT EXISTS (SELECT 1 FROM ({{approved_status_query}}) s WHERE s.member_value = r.{{status_column}}) AND NOT EXISTS (SELECT 1 FROM ({{deprecated_status_query}}) s WHERE s.member_value = r.{{status_column}})",
           "eligibility": "r.{{status_column}} IS NOT NULL"
         },
         "source_batch": "11",
-        "rendered_sql_sha256": "8d31babda65e180c670f62051ec0eaa885ec7e265d22795607a71dc28d123815",
+        "rendered_sql_sha256": "acf5737fbdca96a8c83393ab8cf18cca56e349a4cae883bc4592a44ffbc94f2a",
         "parameters": [
           "approved_status_query",
           "deprecated_status_query",
@@ -5054,7 +5054,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{source_schema}}.{{source_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{mapping_schema}}.{{mapping_table}}",
           "eligibility": "{{source_key_nonnull_condition}}",
           "match": "{{source_mapping_match_condition}}",
@@ -5062,15 +5062,15 @@
           "existence": "EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "5e75c8a7381c865d2d945d911b42e80f55ae621e8b182788861e5f0e759ee4ad",
+        "rendered_sql_sha256": "aed00af6e6d5ed0f215c9e6d4cf9e017fa22010fcadec2de11e9c5185e0e8068",
         "parameters": [
           "mapping_schema",
           "mapping_scope_condition",
           "mapping_table",
+          "schema_name",
           "source_key_nonnull_condition",
           "source_mapping_match_condition",
-          "source_schema",
-          "source_table"
+          "table_name"
         ]
       }
     },
@@ -5082,7 +5082,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{source_schema}}.{{source_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{mapping_schema}}.{{mapping_table}}",
           "eligibility": "{{source_key_nonnull_condition}}",
           "match": "{{source_mapping_match_condition}}",
@@ -5090,15 +5090,15 @@
           "existence": "NOT EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "8464e094e103795bd66e026795c0370e7bee0d43e4da5ed65861a9df5444fa00",
+        "rendered_sql_sha256": "869960c73cc21dcec7acc8ee4ca139c9503db7b53a1bf43297d243a2abdfc70a",
         "parameters": [
           "mapping_schema",
           "mapping_scope_condition",
           "mapping_table",
+          "schema_name",
           "source_key_nonnull_condition",
           "source_mapping_match_condition",
-          "source_schema",
-          "source_table"
+          "table_name"
         ]
       }
     },
@@ -5108,17 +5108,17 @@
       "planned_pattern_id": "relationship_degree",
       "implementation": {
         "template_id": "oracle.relationship_degree",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "p.profile_max_rights_per_left = 1\n  AND p.profile_max_lefts_per_right = 1"
         },
         "source_batch": "07",
-        "rendered_sql_sha256": "3df1e82349370bdb79e1005416a71bf8ba925816042839b0bad1111006aeb8e4",
+        "rendered_sql_sha256": "59decd4426cf6f1ef83191935e1e629f1af49d2a3e30559870dcc5875ccc92d5",
         "parameters": [
           "entity_pair_eligibility_condition",
-          "entity_pair_query",
           "left_entity_columns",
-          "right_entity_columns"
+          "right_entity_columns",
+          "subject_query"
         ]
       }
     },
@@ -5128,17 +5128,17 @@
       "planned_pattern_id": "relationship_degree",
       "implementation": {
         "template_id": "oracle.relationship_degree",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "p.profile_max_rights_per_left > 1\n  AND p.profile_max_lefts_per_right = 1"
         },
         "source_batch": "07",
-        "rendered_sql_sha256": "59759d48398625a22738e0b3139e76bc760d76b91b83af2ce4c412b0a2a0ed97",
+        "rendered_sql_sha256": "b7ba392df50894a02fdac82d57a9752867c0b1bd1349a2e55324490990e131b5",
         "parameters": [
           "entity_pair_eligibility_condition",
-          "entity_pair_query",
           "left_entity_columns",
-          "right_entity_columns"
+          "right_entity_columns",
+          "subject_query"
         ]
       }
     },
@@ -5148,17 +5148,17 @@
       "planned_pattern_id": "relationship_degree",
       "implementation": {
         "template_id": "oracle.relationship_degree",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "p.profile_max_rights_per_left = 1\n  AND p.profile_max_lefts_per_right > 1"
         },
         "source_batch": "07",
-        "rendered_sql_sha256": "721f9a923e174d450657d195900bc7559ea92a61d28b12e382f3a9fb4af9c1ba",
+        "rendered_sql_sha256": "676005c2055b0c7061e99484b6b6c1c8fd26a37dd31e11062da7e55d5a39da4d",
         "parameters": [
           "entity_pair_eligibility_condition",
-          "entity_pair_query",
           "left_entity_columns",
-          "right_entity_columns"
+          "right_entity_columns",
+          "subject_query"
         ]
       }
     },
@@ -5168,17 +5168,17 @@
       "planned_pattern_id": "relationship_degree",
       "implementation": {
         "template_id": "oracle.relationship_degree",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "p.profile_max_rights_per_left > 1\n  AND p.profile_max_lefts_per_right > 1"
         },
         "source_batch": "07",
-        "rendered_sql_sha256": "fd5d86b375a65e5faec48c839a71c7dafc8df9e72146386dc92d8404b0878687",
+        "rendered_sql_sha256": "8d6a4c6b28c1d4d0c85aa22e378d71d869da5dc617b5c0fb758438220e48f7b1",
         "parameters": [
           "entity_pair_eligibility_condition",
-          "entity_pair_query",
           "left_entity_columns",
-          "right_entity_columns"
+          "right_entity_columns",
+          "subject_query"
         ]
       }
     },
@@ -5290,7 +5290,7 @@
         "template_id": "oracle.population_coverage",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{subject_schema}}.{{subject_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{relation_schema}}.{{relation_table}}",
           "eligibility": "{{subject_eligibility_condition}}",
           "match": "{{subject_relation_match_condition}}",
@@ -5298,15 +5298,15 @@
           "test": "p.profile_covered_row_count = p.profile_subject_row_count"
         },
         "source_batch": "08",
-        "rendered_sql_sha256": "1caecafeab17ea0f43024543b1b8f0432cc90a718515730d7486b55f824e4d2f",
+        "rendered_sql_sha256": "670418c4d92d6419ed280d78a3f7f9077e756b06b6fc49bc499f78335300a7df",
         "parameters": [
           "relation_schema",
           "relation_table",
           "required_relation_scope_condition",
+          "schema_name",
           "subject_eligibility_condition",
           "subject_relation_match_condition",
-          "subject_schema",
-          "subject_table"
+          "table_name"
         ]
       }
     },
@@ -5318,7 +5318,7 @@
         "template_id": "oracle.population_coverage",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{subject_schema}}.{{subject_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{relation_schema}}.{{relation_table}}",
           "eligibility": "{{subject_eligibility_condition}}",
           "match": "{{subject_relation_match_condition}}",
@@ -5326,15 +5326,15 @@
           "test": "p.profile_covered_row_count < p.profile_subject_row_count"
         },
         "source_batch": "08",
-        "rendered_sql_sha256": "1d13fb8fd8d310868788da6b92a7fe87da6d64aa79a52ce60e7cc9bffa1c4847",
+        "rendered_sql_sha256": "ac5911cd5fd7bcae38e37b7c76d645a35e626128b42ba9dfbd3e23e943569d15",
         "parameters": [
           "relation_schema",
           "relation_table",
           "required_relation_scope_condition",
+          "schema_name",
           "subject_eligibility_condition",
           "subject_relation_match_condition",
-          "subject_schema",
-          "subject_table"
+          "table_name"
         ]
       }
     },
@@ -5344,21 +5344,21 @@
       "planned_pattern_id": "join_match_count",
       "implementation": {
         "template_id": "oracle.join_match_count",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "({{match_allowance}}) >= 0\n  AND ({{match_allowance}}) = TRUNC({{match_allowance}})\n  AND p.profile_match_count <= ({{match_allowance}})"
         },
         "source_batch": "06",
-        "rendered_sql_sha256": "3950d841ba7bce7b00effeee8f1a56344472bde3a42db6f4f97097c7df51d8e7",
+        "rendered_sql_sha256": "b2687db085e3cbc5a3545a76d893c8431487037bd354c8577758e06f483084a2",
         "parameters": [
           "match_allowance",
           "reference_schema",
           "reference_scope_condition",
           "reference_table",
+          "schema_name",
           "source_eligibility_condition",
           "source_reference_match_condition",
-          "source_schema",
-          "source_table"
+          "table_name"
         ]
       }
     },
@@ -5368,21 +5368,21 @@
       "planned_pattern_id": "join_match_count",
       "implementation": {
         "template_id": "oracle.join_match_count",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "({{match_allowance}}) >= 0\n  AND ({{match_allowance}}) = TRUNC({{match_allowance}})\n  AND p.profile_match_count > ({{match_allowance}})"
         },
         "source_batch": "06",
-        "rendered_sql_sha256": "357e926fb99bf8d22c42622458ae00d55c1992608a0def75c2d7ae3efaf1129a",
+        "rendered_sql_sha256": "08ee54aa3d8c26b8badadae6f2bc85efafd156d98410b86d91a9de11fb2144c5",
         "parameters": [
           "match_allowance",
           "reference_schema",
           "reference_scope_condition",
           "reference_table",
+          "schema_name",
           "source_eligibility_condition",
           "source_reference_match_condition",
-          "source_schema",
-          "source_table"
+          "table_name"
         ]
       }
     },
@@ -5394,18 +5394,18 @@
         "template_id": "oracle.evaluable_agreement",
         "template_revision": 1,
         "slots": {
-          "input_query": "{{comparison_query}}",
+          "input_query": "{{subject_query}}",
           "eligibility": "{{comparison_evaluable_condition}}",
           "agreement": "{{left_value_expression}} = {{right_value_expression}}",
           "branch": "1"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "3f947f8033c1f9da5a25e9ff819ea854b833a5099d61f035ea292a51f22893a2",
+        "rendered_sql_sha256": "9c30e7fe88396651d4de531de776bda450c207d6d0213f823565b3e25a8a12ef",
         "parameters": [
           "comparison_evaluable_condition",
-          "comparison_query",
           "left_value_expression",
-          "right_value_expression"
+          "right_value_expression",
+          "subject_query"
         ]
       }
     },
@@ -5417,18 +5417,18 @@
         "template_id": "oracle.evaluable_agreement",
         "template_revision": 1,
         "slots": {
-          "input_query": "{{comparison_query}}",
+          "input_query": "{{subject_query}}",
           "eligibility": "{{comparison_evaluable_condition}}",
           "agreement": "{{left_value_expression}} = {{right_value_expression}}",
           "branch": "0"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "fad5aa5be323d812200ba96fea638fb67b4b2c4f55c0d1008a8fd79817663d81",
+        "rendered_sql_sha256": "25394ad3abe0ecca8bd6c444c89164343eae8fc5bb69da394b61956adbaa2c5a",
         "parameters": [
           "comparison_evaluable_condition",
-          "comparison_query",
           "left_value_expression",
-          "right_value_expression"
+          "right_value_expression",
+          "subject_query"
         ]
       }
     },
@@ -5482,19 +5482,19 @@
         "template_id": "oracle.evaluable_agreement",
         "template_revision": 1,
         "slots": {
-          "input_query": "{{derivation_input_query}}",
+          "input_query": "{{subject_query}}",
           "eligibility": "({{derivation_evaluable_condition}}) AND {{absolute_tolerance}} >= 0",
           "agreement": "ABS({{stored_result_expression}} - ({{calculated_result_expression}})) <= {{absolute_tolerance}}",
           "branch": "1"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "7134a9555ee0aa03acca590a81b0da6b5ef210bb030129a154c17899f0ca80b6",
+        "rendered_sql_sha256": "87efefbaa8d38b71f021ebcafc41681ece6fe908f5c54b969aa94e76a6bf2e86",
         "parameters": [
           "absolute_tolerance",
           "calculated_result_expression",
           "derivation_evaluable_condition",
-          "derivation_input_query",
-          "stored_result_expression"
+          "stored_result_expression",
+          "subject_query"
         ]
       }
     },
@@ -5506,19 +5506,19 @@
         "template_id": "oracle.evaluable_agreement",
         "template_revision": 1,
         "slots": {
-          "input_query": "{{derivation_input_query}}",
+          "input_query": "{{subject_query}}",
           "eligibility": "({{derivation_evaluable_condition}}) AND {{absolute_tolerance}} >= 0",
           "agreement": "ABS({{stored_result_expression}} - ({{calculated_result_expression}})) <= {{absolute_tolerance}}",
           "branch": "0"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "f67bde2ea18480c92541ba9f880e750ce43b5459c9e545c9249e43b12164c583",
+        "rendered_sql_sha256": "e3bcbedfbf5c6bfbab60f15d600e08d1e02164d378e12997547f2b3d5d6b5cad",
         "parameters": [
           "absolute_tolerance",
           "calculated_result_expression",
           "derivation_evaluable_condition",
-          "derivation_input_query",
-          "stored_result_expression"
+          "stored_result_expression",
+          "subject_query"
         ]
       }
     },
@@ -5528,24 +5528,24 @@
       "planned_pattern_id": "aggregate_reconcile",
       "implementation": {
         "template_id": "oracle.aligned_numeric_aggregate_comparison",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "ABS(p.profile_left_measure - p.profile_right_measure) <= {{difference_tolerance}}",
           "aggregate": "SUM"
         },
         "source_batch": "10",
-        "rendered_sql_sha256": "46fc4cfb90e04ff55bf98340a142b3c0bd7594c350720539be24330dd63cc89b",
+        "rendered_sql_sha256": "894fba669adc19efa0b6bf41b0d6a461718b1b886fd65c47cc64db24fd462ee3",
         "parameters": [
           "difference_tolerance",
-          "left_schema",
           "left_scope_condition",
-          "left_table",
           "left_value_expression",
           "minimum_sample_size",
           "right_schema",
           "right_scope_condition",
           "right_table",
-          "right_value_expression"
+          "right_value_expression",
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -5555,24 +5555,24 @@
       "planned_pattern_id": "aggregate_reconcile",
       "implementation": {
         "template_id": "oracle.aligned_numeric_aggregate_comparison",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "NOT (ABS(p.profile_left_measure - p.profile_right_measure) <= {{difference_tolerance}})",
           "aggregate": "SUM"
         },
         "source_batch": "10",
-        "rendered_sql_sha256": "01e3e751fbbb25c292a9b4e5de0111658a30f5e17b54effb0bfd7f4c32ced19f",
+        "rendered_sql_sha256": "d905e0be139f4a694bcabcf5e0110e4cefed64937742ed885a1a6f0b620d859c",
         "parameters": [
           "difference_tolerance",
-          "left_schema",
           "left_scope_condition",
-          "left_table",
           "left_value_expression",
           "minimum_sample_size",
           "right_schema",
           "right_scope_condition",
           "right_table",
-          "right_value_expression"
+          "right_value_expression",
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -5584,7 +5584,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{allowed_tuple_subject_query}})",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "eligibility": "{{allowed_tuple_evaluable_condition}}",
           "existence": "EXISTS",
           "related_table": "({{allowed_tuple_relation_query}})",
@@ -5592,13 +5592,14 @@
           "scope": "{{allowed_tuple_scope_condition}}"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "744c11d7fc4132bd38bd46c3b17c84f0d399d28946e74b0e6b22690f58783aee",
+        "rendered_sql_sha256": "004ec6bce968fad9fe3950016f7113915dfab805e53c355158d2c35d4db0e9af",
         "parameters": [
           "allowed_tuple_evaluable_condition",
           "allowed_tuple_match_condition",
           "allowed_tuple_relation_query",
           "allowed_tuple_scope_condition",
-          "allowed_tuple_subject_query"
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -5610,7 +5611,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{allowed_tuple_subject_query}})",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "eligibility": "{{allowed_tuple_evaluable_condition}}",
           "existence": "NOT EXISTS",
           "related_table": "({{allowed_tuple_relation_query}})",
@@ -5618,13 +5619,14 @@
           "scope": "{{allowed_tuple_scope_condition}}"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "79945ea32df35445dfba5132e84e90cfb64fd165756ca2fa19e76c0d75bf1cb1",
+        "rendered_sql_sha256": "26e1c8311467f23c69d06b1319f0a419705955117f159ae784ba0724dd1d17db",
         "parameters": [
           "allowed_tuple_evaluable_condition",
           "allowed_tuple_match_condition",
           "allowed_tuple_relation_query",
           "allowed_tuple_scope_condition",
-          "allowed_tuple_subject_query"
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -5686,7 +5688,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{compatible_units_subject_query}})",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "eligibility": "{{compatible_units_evaluable_condition}}",
           "existence": "EXISTS",
           "related_table": "({{compatible_units_relation_query}})",
@@ -5694,13 +5696,14 @@
           "scope": "{{compatible_units_scope_condition}}"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "c8deceb996cd49d351f394116367e6bc4c3dfdee45e52384070097b2fa98d16b",
+        "rendered_sql_sha256": "a0173203305da9922e3d97ddf2049726643b180d8c11fd76f5d4478ac71e0759",
         "parameters": [
           "compatible_units_evaluable_condition",
           "compatible_units_match_condition",
           "compatible_units_relation_query",
           "compatible_units_scope_condition",
-          "compatible_units_subject_query"
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -5712,7 +5715,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{compatible_units_subject_query}})",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "eligibility": "{{compatible_units_evaluable_condition}}",
           "existence": "NOT EXISTS",
           "related_table": "({{compatible_units_relation_query}})",
@@ -5720,13 +5723,14 @@
           "scope": "{{compatible_units_scope_condition}}"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "d1ddc5d1f3960dd5318a2f58a99f0ee098fbdab6c7f0015b057cf39dfceaad37",
+        "rendered_sql_sha256": "fd205abbb8cd1c94df0cc4a8f2c83dff69c0aca39ce75021d316323b0d184694",
         "parameters": [
           "compatible_units_evaluable_condition",
           "compatible_units_match_condition",
           "compatible_units_relation_query",
           "compatible_units_scope_condition",
-          "compatible_units_subject_query"
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -5738,7 +5742,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{subject_schema}}.{{subject_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{assignment_schema}}.{{assignment_table}}",
           "eligibility": "{{subject_eligibility_condition}}",
           "match": "{{subject_assignment_match_condition}}",
@@ -5746,15 +5750,15 @@
           "existence": "EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "41488cf633fa529ec4f0f81b5a98d157261c0e4ad2c736d0a2511fe3e7902bba",
+        "rendered_sql_sha256": "b778837982eac4d729208435668b716674c34c02774a351feac8ae527304a6e8",
         "parameters": [
           "accepted_assignment_condition",
           "assignment_schema",
           "assignment_table",
+          "schema_name",
           "subject_assignment_match_condition",
           "subject_eligibility_condition",
-          "subject_schema",
-          "subject_table"
+          "table_name"
         ]
       }
     },
@@ -5766,7 +5770,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{subject_schema}}.{{subject_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{assignment_schema}}.{{assignment_table}}",
           "eligibility": "{{subject_eligibility_condition}}",
           "match": "{{subject_assignment_match_condition}}",
@@ -5774,15 +5778,15 @@
           "existence": "NOT EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "7a38e42f34184b6d56efb8e14aea3fb6c7237cd48a9499325e49c4e5ecb535d3",
+        "rendered_sql_sha256": "6a5e6802e89b1da3e672e311d66d47bb627fa4c65cbb8b842ab5502cae6cdccf",
         "parameters": [
           "accepted_assignment_condition",
           "assignment_schema",
           "assignment_table",
+          "schema_name",
           "subject_assignment_match_condition",
           "subject_eligibility_condition",
-          "subject_schema",
-          "subject_table"
+          "table_name"
         ]
       }
     },
@@ -5898,18 +5902,18 @@
         "template_id": "oracle.evaluable_agreement",
         "template_revision": 1,
         "slots": {
-          "input_query": "{{classification_comparison_query}}",
+          "input_query": "{{subject_query}}",
           "eligibility": "{{classification_evaluable_condition}}",
           "agreement": "{{recorded_class_expression}} = {{authoritative_class_expression}}",
           "branch": "1"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "c4610e39bcc8d809975d57de68e6d592c498f1693ae3fa4c5f90b90c491e191b",
+        "rendered_sql_sha256": "be69b540cbbd6b029e1c6ab4d69ca66d6f9b20db9041fa6a3db36c8621a8cda6",
         "parameters": [
           "authoritative_class_expression",
-          "classification_comparison_query",
           "classification_evaluable_condition",
-          "recorded_class_expression"
+          "recorded_class_expression",
+          "subject_query"
         ]
       }
     },
@@ -5921,18 +5925,18 @@
         "template_id": "oracle.evaluable_agreement",
         "template_revision": 1,
         "slots": {
-          "input_query": "{{classification_comparison_query}}",
+          "input_query": "{{subject_query}}",
           "eligibility": "{{classification_evaluable_condition}}",
           "agreement": "{{recorded_class_expression}} = {{authoritative_class_expression}}",
           "branch": "0"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "bedfec5dcef1767b5f8fd2cd6fce30256ef7673bc4f96da25893bed907265cd4",
+        "rendered_sql_sha256": "3a0313416ef063175bef47b8cb24ac9337a7d2c116568232a9ed38e8cf65b7c5",
         "parameters": [
           "authoritative_class_expression",
-          "classification_comparison_query",
           "classification_evaluable_condition",
-          "recorded_class_expression"
+          "recorded_class_expression",
+          "subject_query"
         ]
       }
     },
@@ -6120,18 +6124,19 @@
       "planned_pattern_id": "tuple_policy",
       "implementation": {
         "template_id": "oracle.explicit_authorization",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "decision": "'PERMIT'"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "dd50169839f8ec5f93a38204d066790faf6a335b10e3c262b87a0290c6ac5ceb",
+        "rendered_sql_sha256": "9e6405a2a34eecec21ddb33a0b288d7532b1f3996ed5fdf09a36442ea69ea62d",
         "parameters": [
           "authorization_evaluable_condition",
           "authorization_match_condition",
           "authorization_relation_query",
           "authorization_scope_condition",
-          "authorization_subject_query"
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -6141,18 +6146,19 @@
       "planned_pattern_id": "tuple_policy",
       "implementation": {
         "template_id": "oracle.explicit_authorization",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "decision": "'DENY'"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "b13b1752eec7812eecaf5240e2b925b4369a7e478ea0f0a56cc34606cfd25d3a",
+        "rendered_sql_sha256": "88c921f66a1083d025283fd22a3bc376da498499d5b844a593d8471c60f5566c",
         "parameters": [
           "authorization_evaluable_condition",
           "authorization_match_condition",
           "authorization_relation_query",
           "authorization_scope_condition",
-          "authorization_subject_query"
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -6308,7 +6314,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{source_schema}}.{{source_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{geographic_reference_schema}}.{{geographic_reference_table}}",
           "eligibility": "{{source_geography_nonnull_condition}}",
           "match": "{{geography_match_condition}}",
@@ -6316,15 +6322,15 @@
           "existence": "EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "718fedf80cd21b92606d2cac28a32cb5ee249cd1817250e275abbbaef32c1651",
+        "rendered_sql_sha256": "ef2dcda439003bbc0f5768bb4d236c4999c65dcb0b534248d28809b608f82c57",
         "parameters": [
           "geographic_reference_schema",
           "geographic_reference_table",
           "geographic_release_condition",
           "geography_match_condition",
+          "schema_name",
           "source_geography_nonnull_condition",
-          "source_schema",
-          "source_table"
+          "table_name"
         ]
       }
     },
@@ -6336,7 +6342,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{source_schema}}.{{source_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{geographic_reference_schema}}.{{geographic_reference_table}}",
           "eligibility": "{{source_geography_nonnull_condition}}",
           "match": "{{geography_match_condition}}",
@@ -6344,15 +6350,15 @@
           "existence": "NOT EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "1f6bc3e6cedd7e552b2912d2b60a311033a3fab63c1e0325cad8d41d949f9b8d",
+        "rendered_sql_sha256": "8f526924a659c0f429829d299b602647b5b5826937dd70dffbaa4c9b0a670d93",
         "parameters": [
           "geographic_reference_schema",
           "geographic_reference_table",
           "geographic_release_condition",
           "geography_match_condition",
+          "schema_name",
           "source_geography_nonnull_condition",
-          "source_schema",
-          "source_table"
+          "table_name"
         ]
       }
     },
@@ -6364,7 +6370,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{subject_schema}}.{{subject_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{spatial_mapping_schema}}.{{spatial_mapping_table}}",
           "eligibility": "{{subject_eligibility_condition}}",
           "match": "{{subject_spatial_match_condition}}",
@@ -6372,14 +6378,14 @@
           "existence": "EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "30cfa1dab105162adcf1dea0ecd8415a2de9cde9d5209f8e2493b3b752a7a37c",
+        "rendered_sql_sha256": "cb22f96cd03e6fda8a068c47507652d2f973ee2449262f85a2bd43dfa7eacd54",
         "parameters": [
+          "schema_name",
           "spatial_mapping_schema",
           "spatial_mapping_table",
           "subject_eligibility_condition",
-          "subject_schema",
           "subject_spatial_match_condition",
-          "subject_table",
+          "table_name",
           "usable_spatial_mapping_condition"
         ]
       }
@@ -6392,7 +6398,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{subject_schema}}.{{subject_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{spatial_mapping_schema}}.{{spatial_mapping_table}}",
           "eligibility": "{{subject_eligibility_condition}}",
           "match": "{{subject_spatial_match_condition}}",
@@ -6400,14 +6406,14 @@
           "existence": "NOT EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "14f8ba4cdbbaf87264490599cb1f21c737663e145af3ef832ae4480c861ae326",
+        "rendered_sql_sha256": "6e9e8ece0062ac059e4d53d735142b8e5967e8376a6fe868389757867269653d",
         "parameters": [
+          "schema_name",
           "spatial_mapping_schema",
           "spatial_mapping_table",
           "subject_eligibility_condition",
-          "subject_schema",
           "subject_spatial_match_condition",
-          "subject_table",
+          "table_name",
           "usable_spatial_mapping_condition"
         ]
       }
@@ -6466,7 +6472,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{home_jurisdiction_subject_query}})",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "eligibility": "{{home_jurisdiction_evaluable_condition}}",
           "existence": "EXISTS",
           "related_table": "({{home_jurisdiction_relation_query}})",
@@ -6474,13 +6480,14 @@
           "scope": "{{home_jurisdiction_scope_condition}}"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "ea818b87855eb2e5f4d18dbded4b2c604790245603ecfc81a34274c8e333a904",
+        "rendered_sql_sha256": "b6749ecdd54a04e3710b7f574fb406e592cd0c007d3ebb4668d862247b92a752",
         "parameters": [
           "home_jurisdiction_evaluable_condition",
           "home_jurisdiction_match_condition",
           "home_jurisdiction_relation_query",
           "home_jurisdiction_scope_condition",
-          "home_jurisdiction_subject_query"
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -6492,7 +6499,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{home_jurisdiction_subject_query}})",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "eligibility": "{{home_jurisdiction_evaluable_condition}}",
           "existence": "NOT EXISTS",
           "related_table": "({{home_jurisdiction_relation_query}})",
@@ -6500,13 +6507,14 @@
           "scope": "{{home_jurisdiction_scope_condition}}"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "d04f9bb529a8e991f6d2f4f6f59a098fde47fc000bd17e3fdf782743f246135a",
+        "rendered_sql_sha256": "4390fd69916e0b82b6973e37326be00d9833b6d92772e34b6d332db11f6dbe74",
         "parameters": [
           "home_jurisdiction_evaluable_condition",
           "home_jurisdiction_match_condition",
           "home_jurisdiction_relation_query",
           "home_jurisdiction_scope_condition",
-          "home_jurisdiction_subject_query"
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -6518,7 +6526,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{selected_settlement_subject_query}})",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "eligibility": "{{selected_settlement_evaluable_condition}}",
           "existence": "EXISTS",
           "related_table": "({{selected_settlement_relation_query}})",
@@ -6526,13 +6534,14 @@
           "scope": "{{selected_settlement_scope_condition}}"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "0e3601f3a88eb3fadd126d6b3f1976a1de9b4d5998c3798401259468182a5e0f",
+        "rendered_sql_sha256": "127a37e6c717e35f4d0b85ea24ef0bb4b7c66e96039b7f92eaaca872c76f18e7",
         "parameters": [
+          "schema_name",
           "selected_settlement_evaluable_condition",
           "selected_settlement_match_condition",
           "selected_settlement_relation_query",
           "selected_settlement_scope_condition",
-          "selected_settlement_subject_query"
+          "table_name"
         ]
       }
     },
@@ -6544,7 +6553,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{selected_settlement_subject_query}})",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "eligibility": "{{selected_settlement_evaluable_condition}}",
           "existence": "NOT EXISTS",
           "related_table": "({{selected_settlement_relation_query}})",
@@ -6552,13 +6561,14 @@
           "scope": "{{selected_settlement_scope_condition}}"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "d6ad07616f955d5bfcaeea72774aba10a738d8a1157481a2e27fbdf6249afb85",
+        "rendered_sql_sha256": "dffcbf2763ee787ca4dfbd7a09d6cd9725826dd1ec530a9afe9a753049ac4e5b",
         "parameters": [
+          "schema_name",
           "selected_settlement_evaluable_condition",
           "selected_settlement_match_condition",
           "selected_settlement_relation_query",
           "selected_settlement_scope_condition",
-          "selected_settlement_subject_query"
+          "table_name"
         ]
       }
     },
@@ -6612,13 +6622,13 @@
       "planned_pattern_id": "effective_reference",
       "implementation": {
         "template_id": "oracle.reference_pair_filter",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "(t.{{relevant_date_column}} >= r.{{valid_from_column}} AND t.{{relevant_date_column}} < r.{{valid_to_column}}) AND ({{reference_use_condition}})",
           "eligibility": "t.{{relevant_date_column}} IS NOT NULL AND r.{{valid_from_column}} IS NOT NULL AND r.{{valid_to_column}} IS NOT NULL AND r.{{valid_from_column}} < r.{{valid_to_column}} AND (({{reference_use_condition}}) OR NOT ({{reference_use_condition}}))"
         },
         "source_batch": "11",
-        "rendered_sql_sha256": "9570a5f32d99a2ff636225a3ddfbe19b34859da907233abe6b5a62b58632c93b",
+        "rendered_sql_sha256": "df81b678bc17ce779eb59ea363c5d6fb5aabeabeac21b85f5c34984d7036c81d",
         "parameters": [
           "reference_match_condition",
           "reference_record_id",
@@ -6641,13 +6651,13 @@
       "planned_pattern_id": "effective_reference",
       "implementation": {
         "template_id": "oracle.reference_pair_filter",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "(t.{{relevant_date_column}} < r.{{valid_from_column}} OR t.{{relevant_date_column}} >= r.{{valid_to_column}}) OR NOT ({{reference_use_condition}})",
           "eligibility": "t.{{relevant_date_column}} IS NOT NULL AND r.{{valid_from_column}} IS NOT NULL AND r.{{valid_to_column}} IS NOT NULL AND r.{{valid_from_column}} < r.{{valid_to_column}} AND (({{reference_use_condition}}) OR NOT ({{reference_use_condition}}))"
         },
         "source_batch": "11",
-        "rendered_sql_sha256": "82ab22f70b0d2e42a8e81da5a53bf8c1dfcce7713920eba55709c3e820ec2f02",
+        "rendered_sql_sha256": "224c2a59f389ff1828c9af08a89532baad6a2ed91cdca0c28fdc3ca838a71e30",
         "parameters": [
           "reference_match_condition",
           "reference_record_id",
@@ -6906,24 +6916,24 @@
       "planned_pattern_id": "statistic_bounds",
       "implementation": {
         "template_id": "oracle.aligned_numeric_aggregate_comparison",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "ABS(p.profile_left_measure - p.profile_right_measure) <= {{difference_tolerance}}",
           "aggregate": "AVG"
         },
         "source_batch": "10",
-        "rendered_sql_sha256": "764303fe0dab4cc1197b8bf436ca660b98373871225cafcca13823b9551a09f8",
+        "rendered_sql_sha256": "7dddbfa81bf53071c1f580bfe944b2638ace57caccf28f5598ea3508425cca74",
         "parameters": [
           "difference_tolerance",
-          "left_schema",
           "left_scope_condition",
-          "left_table",
           "left_value_expression",
           "minimum_sample_size",
           "right_schema",
           "right_scope_condition",
           "right_table",
-          "right_value_expression"
+          "right_value_expression",
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -6933,24 +6943,24 @@
       "planned_pattern_id": "statistic_bounds",
       "implementation": {
         "template_id": "oracle.aligned_numeric_aggregate_comparison",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "NOT (ABS(p.profile_left_measure - p.profile_right_measure) <= {{difference_tolerance}})",
           "aggregate": "AVG"
         },
         "source_batch": "10",
-        "rendered_sql_sha256": "71c95538adfc5ba85aa320c9b0f14f3474ddde8fe3c133bacf7753318ff91e4f",
+        "rendered_sql_sha256": "b5fcce6ab7511acf376632895518a6917d166483680c869eeccdcb86c503d06c",
         "parameters": [
           "difference_tolerance",
-          "left_schema",
           "left_scope_condition",
-          "left_table",
           "left_value_expression",
           "minimum_sample_size",
           "right_schema",
           "right_scope_condition",
           "right_table",
-          "right_value_expression"
+          "right_value_expression",
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -7138,7 +7148,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{expected_schema}}.{{expected_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{observed_schema}}.{{observed_table}}",
           "eligibility": "{{expected_member_eligibility_condition}}",
           "match": "{{expected_observed_match_condition}}",
@@ -7146,15 +7156,15 @@
           "existence": "EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "d2e4ae15c7cb9064b73b9860985df18808aa8b45b594461c34004d404e04470c",
+        "rendered_sql_sha256": "e0dccb5ce51d2494f7daec7185309e779b52a5a55a9f1a4046ce74ebff6dfa4f",
         "parameters": [
           "expected_member_eligibility_condition",
           "expected_observed_match_condition",
-          "expected_schema",
-          "expected_table",
           "observed_schema",
           "observed_scope_condition",
-          "observed_table"
+          "observed_table",
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -7166,7 +7176,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{expected_schema}}.{{expected_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{observed_schema}}.{{observed_table}}",
           "eligibility": "{{expected_member_eligibility_condition}}",
           "match": "{{expected_observed_match_condition}}",
@@ -7174,15 +7184,15 @@
           "existence": "NOT EXISTS"
         },
         "source_batch": "05",
-        "rendered_sql_sha256": "2c841662836496911f8e65b34547207c7fe9db55ade16995ec9647834c662358",
+        "rendered_sql_sha256": "b7767c41d7035896910fa7dc7bc5c2284b94f7cf461ee33132dbf549bdfca255",
         "parameters": [
           "expected_member_eligibility_condition",
           "expected_observed_match_condition",
-          "expected_schema",
-          "expected_table",
           "observed_schema",
           "observed_scope_condition",
-          "observed_table"
+          "observed_table",
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -7194,7 +7204,7 @@
         "template_id": "oracle.population_coverage",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{expected_schema}}.{{expected_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{observed_schema}}.{{observed_table}}",
           "eligibility": "{{expected_member_eligibility_condition}}",
           "match": "{{expected_observed_match_condition}}",
@@ -7202,15 +7212,15 @@
           "test": "p.profile_covered_row_count = p.profile_subject_row_count"
         },
         "source_batch": "08",
-        "rendered_sql_sha256": "335b2ac0ab532ab4d2eaea936af23192547ce161adb1d35451f187f44a72bfb8",
+        "rendered_sql_sha256": "9e9257844d4dda5c6ce44549c97607fe1bbfed6b2c135e218d2574905229d50d",
         "parameters": [
           "expected_member_eligibility_condition",
           "expected_observed_match_condition",
-          "expected_schema",
-          "expected_table",
           "observed_schema",
           "observed_scope_condition",
-          "observed_table"
+          "observed_table",
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -7222,7 +7232,7 @@
         "template_id": "oracle.population_coverage",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{expected_schema}}.{{expected_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{observed_schema}}.{{observed_table}}",
           "eligibility": "{{expected_member_eligibility_condition}}",
           "match": "{{expected_observed_match_condition}}",
@@ -7230,15 +7240,15 @@
           "test": "p.profile_covered_row_count < p.profile_subject_row_count"
         },
         "source_batch": "08",
-        "rendered_sql_sha256": "e94f54fafcf9e02d77367dc5a8396c855941e31e9706dcb0614150757c198d3f",
+        "rendered_sql_sha256": "63433fb7503978764e62fdce24f089bce9e1e003ee40ac401be8f4d91efeae21",
         "parameters": [
           "expected_member_eligibility_condition",
           "expected_observed_match_condition",
-          "expected_schema",
-          "expected_table",
           "observed_schema",
           "observed_scope_condition",
-          "observed_table"
+          "observed_table",
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -7393,16 +7403,16 @@
       "planned_pattern_id": "extract_key_membership",
       "implementation": {
         "template_id": "oracle.extract_union_counts",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "p.source_count > 0 AND p.target_count > 0"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "e8d51e07de006d1d17841dc933a21b40b0c3f9e116860c20479e7d62b6101b63",
+        "rendered_sql_sha256": "6d2e0226f9486c2315ba48ea38dc182f7a305cdc257215c5a00e3e1417ed336d",
         "parameters": [
           "key_columns",
-          "source_extract_query",
           "source_key_eligibility_condition",
+          "subject_query",
           "target_extract_query",
           "target_key_eligibility_condition"
         ]
@@ -7414,16 +7424,16 @@
       "planned_pattern_id": "extract_key_membership",
       "implementation": {
         "template_id": "oracle.extract_union_counts",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "p.source_count > 0 AND p.target_count = 0"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "7562a97183f352e68f66d86f7c64b0e8c80c4bbe8fb0bcd1658b8281f074936d",
+        "rendered_sql_sha256": "9bd54e53a92f706d9b8bd2093a01645b80afe24e2ed81623ed68fa4f29bb1422",
         "parameters": [
           "key_columns",
-          "source_extract_query",
           "source_key_eligibility_condition",
+          "subject_query",
           "target_extract_query",
           "target_key_eligibility_condition"
         ]
@@ -7435,16 +7445,16 @@
       "planned_pattern_id": "extract_key_membership",
       "implementation": {
         "template_id": "oracle.extract_union_counts",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "p.source_count = 0 AND p.target_count > 0"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "a98ffbc34d8a9b054bb42d71a4f532d00788ced505f26102dfe0363f332e4bb2",
+        "rendered_sql_sha256": "fb99efc0b57923c28c57ea52dc22186df2c5529506fbfa143009d00a73b8d560",
         "parameters": [
           "key_columns",
-          "source_extract_query",
           "source_key_eligibility_condition",
+          "subject_query",
           "target_extract_query",
           "target_key_eligibility_condition"
         ]
@@ -7456,12 +7466,12 @@
       "planned_pattern_id": "value_agreement",
       "implementation": {
         "template_id": "oracle.unique_extract_agreement",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "branch": "1"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "ef4d5e3f62d805209487eec20ae6be99c52ec726a0d52e3ae6a7a6bd0d0eb037",
+        "rendered_sql_sha256": "7edee4dcd5d8a169b55abed8eb0d75ac11a71373c25632db27678a493362e821",
         "parameters": [
           "comparison_output_columns",
           "record_agreement_condition",
@@ -7469,7 +7479,7 @@
           "record_key_match_condition",
           "source_key_columns",
           "source_record_eligibility_condition",
-          "source_record_query",
+          "subject_query",
           "target_key_columns",
           "target_record_eligibility_condition",
           "target_record_query"
@@ -7482,12 +7492,12 @@
       "planned_pattern_id": "value_agreement",
       "implementation": {
         "template_id": "oracle.unique_extract_agreement",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "branch": "0"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "656d0e09e3e6ba21e1be0a7b2db7a72a6b640236e09676eda7c1d8a284c4d98e",
+        "rendered_sql_sha256": "aabd7aedf25fac73d033c8244eefef8fe092bf52f3155280cdd0d43120b2a634",
         "parameters": [
           "comparison_output_columns",
           "record_agreement_condition",
@@ -7495,7 +7505,7 @@
           "record_key_match_condition",
           "source_key_columns",
           "source_record_eligibility_condition",
-          "source_record_query",
+          "subject_query",
           "target_key_columns",
           "target_record_eligibility_condition",
           "target_record_query"
@@ -7508,24 +7518,24 @@
       "planned_pattern_id": "aggregate_reconcile",
       "implementation": {
         "template_id": "oracle.aligned_numeric_aggregate_comparison",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "ABS(p.profile_left_measure - p.profile_right_measure) <= {{difference_tolerance}}",
           "aggregate": "SUM"
         },
         "source_batch": "10",
-        "rendered_sql_sha256": "46fc4cfb90e04ff55bf98340a142b3c0bd7594c350720539be24330dd63cc89b",
+        "rendered_sql_sha256": "894fba669adc19efa0b6bf41b0d6a461718b1b886fd65c47cc64db24fd462ee3",
         "parameters": [
           "difference_tolerance",
-          "left_schema",
           "left_scope_condition",
-          "left_table",
           "left_value_expression",
           "minimum_sample_size",
           "right_schema",
           "right_scope_condition",
           "right_table",
-          "right_value_expression"
+          "right_value_expression",
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -7535,24 +7545,24 @@
       "planned_pattern_id": "aggregate_reconcile",
       "implementation": {
         "template_id": "oracle.aligned_numeric_aggregate_comparison",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "NOT (ABS(p.profile_left_measure - p.profile_right_measure) <= {{difference_tolerance}})",
           "aggregate": "SUM"
         },
         "source_batch": "10",
-        "rendered_sql_sha256": "01e3e751fbbb25c292a9b4e5de0111658a30f5e17b54effb0bfd7f4c32ced19f",
+        "rendered_sql_sha256": "d905e0be139f4a694bcabcf5e0110e4cefed64937742ed885a1a6f0b620d859c",
         "parameters": [
           "difference_tolerance",
-          "left_schema",
           "left_scope_condition",
-          "left_table",
           "left_value_expression",
           "minimum_sample_size",
           "right_schema",
           "right_scope_condition",
           "right_table",
-          "right_value_expression"
+          "right_value_expression",
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -7562,16 +7572,16 @@
       "planned_pattern_id": "multiplicity_reconcile",
       "implementation": {
         "template_id": "oracle.extract_union_counts",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "p.source_count = p.target_count"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "6c4056b407e49a0fda7e4f4fe1f51497291329633537b116e2766661d6824446",
+        "rendered_sql_sha256": "28350bd5b5d0d59b07ed64c921b92c7023c62e919f0254d10994db01420dadf1",
         "parameters": [
           "key_columns",
-          "source_extract_query",
           "source_key_eligibility_condition",
+          "subject_query",
           "target_extract_query",
           "target_key_eligibility_condition"
         ]
@@ -7583,16 +7593,16 @@
       "planned_pattern_id": "multiplicity_reconcile",
       "implementation": {
         "template_id": "oracle.extract_union_counts",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "p.source_count <> p.target_count"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "c96e69eff4da9f8c6fbd4d5e4cc348659b355617b0542a2f28424653a384c05f",
+        "rendered_sql_sha256": "2eb85320b9cb2195d625cb07a2e6ccab519ded695986c49402b01e444f0bd5d2",
         "parameters": [
           "key_columns",
-          "source_extract_query",
           "source_key_eligibility_condition",
+          "subject_query",
           "target_extract_query",
           "target_key_eligibility_condition"
         ]
@@ -7604,16 +7614,16 @@
       "planned_pattern_id": "extract_key_membership",
       "implementation": {
         "template_id": "oracle.extract_union_counts",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "p.source_count > 0 AND p.target_count = 0"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "7562a97183f352e68f66d86f7c64b0e8c80c4bbe8fb0bcd1658b8281f074936d",
+        "rendered_sql_sha256": "9bd54e53a92f706d9b8bd2093a01645b80afe24e2ed81623ed68fa4f29bb1422",
         "parameters": [
           "key_columns",
-          "source_extract_query",
           "source_key_eligibility_condition",
+          "subject_query",
           "target_extract_query",
           "target_key_eligibility_condition"
         ]
@@ -7625,16 +7635,16 @@
       "planned_pattern_id": "extract_key_membership",
       "implementation": {
         "template_id": "oracle.extract_union_counts",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "p.source_count > 0 AND p.target_count > 0"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "e8d51e07de006d1d17841dc933a21b40b0c3f9e116860c20479e7d62b6101b63",
+        "rendered_sql_sha256": "6d2e0226f9486c2315ba48ea38dc182f7a305cdc257215c5a00e3e1417ed336d",
         "parameters": [
           "key_columns",
-          "source_extract_query",
           "source_key_eligibility_condition",
+          "subject_query",
           "target_extract_query",
           "target_key_eligibility_condition"
         ]
@@ -7648,7 +7658,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{node_query}})",
+          "subject_table": "({{subject_query}})",
           "eligibility": "t.node_id IS NOT NULL",
           "existence": "NOT EXISTS",
           "related_table": "({{parent_assignment_query}})",
@@ -7656,10 +7666,10 @@
           "scope": "1 = 1 AND r.parent_id IS NOT NULL"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "06d86377f79b7a7e0243ab642226dcba2ee94ea4919919acbc81f4428ba5b110",
+        "rendered_sql_sha256": "81626284df228eede94191e43b6e4ab05b3c231596455c1d72de11f9f271865d",
         "parameters": [
-          "node_query",
-          "parent_assignment_query"
+          "parent_assignment_query",
+          "subject_query"
         ]
       }
     },
@@ -7671,7 +7681,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{node_query}})",
+          "subject_table": "({{subject_query}})",
           "eligibility": "t.node_id IS NOT NULL",
           "existence": "EXISTS",
           "related_table": "({{parent_assignment_query}})",
@@ -7679,10 +7689,10 @@
           "scope": "1 = 1 AND r.parent_id IS NOT NULL"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "1343978b64655f6f9dacd2e6e7e7f071c76221c6a61e26147bed745eaadb3a33",
+        "rendered_sql_sha256": "d1982a2472f777f6a959b84505f3d7eb718ef49f4d7ecbb06bb97b65188d629d",
         "parameters": [
-          "node_query",
-          "parent_assignment_query"
+          "parent_assignment_query",
+          "subject_query"
         ]
       }
     },
@@ -7694,7 +7704,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{node_query}})",
+          "subject_table": "({{subject_query}})",
           "eligibility": "t.node_id IS NOT NULL",
           "existence": "NOT EXISTS",
           "related_table": "({{parent_assignment_query}})",
@@ -7702,10 +7712,11 @@
           "scope": "EXISTS (SELECT 1 FROM ({{node_query}}) c WHERE c.node_id = r.child_id)"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "912a6dd2f2cbeabe1355c0ecf4d8ede1ba2204b39bd16b8882f2e656abecbd85",
+        "rendered_sql_sha256": "8351d7e98c641633c3a84d1111e82fd0539630bea7d5b267a594b38969247f8a",
         "parameters": [
           "node_query",
-          "parent_assignment_query"
+          "parent_assignment_query",
+          "subject_query"
         ]
       }
     },
@@ -7717,7 +7728,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{node_query}})",
+          "subject_table": "({{subject_query}})",
           "eligibility": "t.node_id IS NOT NULL",
           "existence": "EXISTS",
           "related_table": "({{parent_assignment_query}})",
@@ -7725,10 +7736,11 @@
           "scope": "EXISTS (SELECT 1 FROM ({{node_query}}) c WHERE c.node_id = r.child_id)"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "9740387af9ec84945e9dc19d658853a50247185a08a88c98398598bfc7fb2e40",
+        "rendered_sql_sha256": "e224947daee95818c590712d72728efee34d6207f5cf5e7b375d3ff91cc8d54f",
         "parameters": [
           "node_query",
-          "parent_assignment_query"
+          "parent_assignment_query",
+          "subject_query"
         ]
       }
     },
@@ -7740,7 +7752,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{node_query}})",
+          "subject_table": "({{subject_query}})",
           "eligibility": "t.node_id IS NOT NULL",
           "existence": "EXISTS",
           "related_table": "({{incident_edge_query}})",
@@ -7748,11 +7760,11 @@
           "scope": "({{incident_edge_scope_condition}})"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "9603a16cdf6d83eca85c2f2a7acc9aa4a81801232d80782ef47944d8c4f69889",
+        "rendered_sql_sha256": "c5080b5e352fb9f5f53d5819a81c50135111c886a97162e2bad0f373581b57bd",
         "parameters": [
           "incident_edge_query",
           "incident_edge_scope_condition",
-          "node_query"
+          "subject_query"
         ]
       }
     },
@@ -7764,7 +7776,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{node_query}})",
+          "subject_table": "({{subject_query}})",
           "eligibility": "t.node_id IS NOT NULL",
           "existence": "NOT EXISTS",
           "related_table": "({{incident_edge_query}})",
@@ -7772,11 +7784,11 @@
           "scope": "({{incident_edge_scope_condition}})"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "279e9e8fe2f4db58ece8b683ae7635291f201f4593c841f6b1b8bf4d09792cbf",
+        "rendered_sql_sha256": "0f663fd555c3364deafb039571a46f6855fbab253ca67a26a308407699910ab0",
         "parameters": [
           "incident_edge_query",
           "incident_edge_scope_condition",
-          "node_query"
+          "subject_query"
         ]
       }
     },
@@ -7786,15 +7798,15 @@
       "planned_pattern_id": "graph_traversal",
       "implementation": {
         "template_id": "oracle.graph_cycle_participation",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "anchor": "1 = 1",
           "existence": "EXISTS"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "aec5dc74e31749883acc0201f9b97df8fcf215092cc67b20aa6fb555dca21387",
+        "rendered_sql_sha256": "f2fcd0c6e87dbd3a6ff3fd44688981e6365e582c3e2e1a41ee105906a52896b9",
         "parameters": [
-          "node_query",
+          "subject_query",
           "traversal_edge_query",
           "walk_step_condition"
         ]
@@ -7806,15 +7818,15 @@
       "planned_pattern_id": "graph_traversal",
       "implementation": {
         "template_id": "oracle.graph_cycle_participation",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "anchor": "1 = 1",
           "existence": "NOT EXISTS"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "d120d44015ad6cb56eb958a0d54471e5e2d9c0a83da822741e474817973843fb",
+        "rendered_sql_sha256": "710169cbc88d0c4363c63180b776b8d1890afd98ea1bbb71ecc758a79069d51e",
         "parameters": [
-          "node_query",
+          "subject_query",
           "traversal_edge_query",
           "walk_step_condition"
         ]
@@ -7826,16 +7838,16 @@
       "planned_pattern_id": "graph_traversal",
       "implementation": {
         "template_id": "oracle.graph_rooted_reachability",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "anchor": "EXISTS (SELECT 1 FROM ({{root_query}}) r WHERE r.node_id = n.node_id)",
           "existence": "EXISTS"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "c3eeb4b4b21e63ce64d2d86bf10feed78525c480bdad301ec26774b006c07ede",
+        "rendered_sql_sha256": "e8b8f8aaf9b403584602cac52de580788fa8728667c696a14ece506dfaf9472e",
         "parameters": [
-          "node_query",
           "root_query",
+          "subject_query",
           "traversal_edge_query",
           "walk_step_condition"
         ]
@@ -7847,16 +7859,16 @@
       "planned_pattern_id": "graph_traversal",
       "implementation": {
         "template_id": "oracle.graph_rooted_reachability",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "anchor": "EXISTS (SELECT 1 FROM ({{root_query}}) r WHERE r.node_id = n.node_id)",
           "existence": "NOT EXISTS"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "6e4dbed81abbdeb20440128c874435268fb14d6e0958cea720eea1d2a731cee6",
+        "rendered_sql_sha256": "43f5be619874f1942edbca96e0cdc9c8e5feaafb402958179d0db3c356a839b0",
         "parameters": [
-          "node_query",
           "root_query",
+          "subject_query",
           "traversal_edge_query",
           "walk_step_condition"
         ]
@@ -7870,17 +7882,17 @@
         "template_id": "oracle.evaluable_agreement",
         "template_revision": 1,
         "slots": {
-          "input_query": "{{node_reference_query}}",
+          "input_query": "{{subject_query}}",
           "eligibility": "{{node_and_reference_nonnull_condition}}",
           "agreement": "{{self_reference_equality_condition}}",
           "branch": "1"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "c8d556325805261580f7bc8ee5b7b3187217937577028ac2a811996ec5f0ecd8",
+        "rendered_sql_sha256": "32b9a4158c54343fe8b613f3bb95cf61675844e75aad2963a5d657d16cde117a",
         "parameters": [
           "node_and_reference_nonnull_condition",
-          "node_reference_query",
-          "self_reference_equality_condition"
+          "self_reference_equality_condition",
+          "subject_query"
         ]
       }
     },
@@ -7892,17 +7904,17 @@
         "template_id": "oracle.evaluable_agreement",
         "template_revision": 1,
         "slots": {
-          "input_query": "{{node_reference_query}}",
+          "input_query": "{{subject_query}}",
           "eligibility": "{{node_and_reference_nonnull_condition}}",
           "agreement": "{{self_reference_equality_condition}}",
           "branch": "0"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "e3f8998aadf7b368106abb9211ba95d20fafcf877e28d5c9655a158b2c00278f",
+        "rendered_sql_sha256": "56706786a24d955d3c20e3174298b0f2e8e6bfea84cd59ffa2228ebd04b207a8",
         "parameters": [
           "node_and_reference_nonnull_condition",
-          "node_reference_query",
-          "self_reference_equality_condition"
+          "self_reference_equality_condition",
+          "subject_query"
         ]
       }
     },
@@ -7912,18 +7924,18 @@
       "planned_pattern_id": "graph_traversal",
       "implementation": {
         "template_id": "oracle.graph_shortest_depth",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "anchor": "EXISTS (SELECT 1 FROM ({{root_query}}) r WHERE r.node_id = n.node_id)",
           "test": "p.profile_depth BETWEEN {{minimum_depth}} AND {{maximum_depth}}"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "24d18f153f98a12c7740a3c23029bd76cf4da0793c4c746485cc85cd0dced4f1",
+        "rendered_sql_sha256": "98605c07f514d59b92eb71b2c1fa7ba5861fb8ab0677fed6bae41a8937c8a160",
         "parameters": [
           "maximum_depth",
           "minimum_depth",
-          "node_query",
           "root_query",
+          "subject_query",
           "traversal_edge_query",
           "walk_step_condition"
         ]
@@ -7935,18 +7947,18 @@
       "planned_pattern_id": "graph_traversal",
       "implementation": {
         "template_id": "oracle.graph_shortest_depth",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "anchor": "EXISTS (SELECT 1 FROM ({{root_query}}) r WHERE r.node_id = n.node_id)",
           "test": "(p.profile_depth < {{minimum_depth}} OR p.profile_depth > {{maximum_depth}})"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "07d66bd7bc5709a031fefe65962715e86c2278752af325b6c51a67bd29348ee1",
+        "rendered_sql_sha256": "98da18ec07d6eb931afe88723f7f7b487ba58ea0ff6cb96fcf52b426ba56ca71",
         "parameters": [
           "maximum_depth",
           "minimum_depth",
-          "node_query",
           "root_query",
+          "subject_query",
           "traversal_edge_query",
           "walk_step_condition"
         ]
@@ -8226,7 +8238,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{verification_subject_query}})",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "eligibility": "{{verification_subject_eligibility_condition}}",
           "existence": "EXISTS",
           "related_table": "({{verification_evidence_query}})",
@@ -8234,13 +8246,14 @@
           "scope": "{{verification_rule_scope_condition}}"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "1c4b72f83b93c6c5dff7464b815d984abf54a29e715331a7523f288db6bdf221",
+        "rendered_sql_sha256": "b7e0637b3229027eaefecb8a1eb7655440443166ee94549f9dbb6b17a08547b3",
         "parameters": [
+          "schema_name",
+          "table_name",
           "verification_evidence_query",
           "verification_rule_scope_condition",
           "verification_subject_eligibility_condition",
-          "verification_subject_match_condition",
-          "verification_subject_query"
+          "verification_subject_match_condition"
         ]
       }
     },
@@ -8252,7 +8265,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{verification_subject_query}})",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "eligibility": "{{verification_subject_eligibility_condition}}",
           "existence": "NOT EXISTS",
           "related_table": "({{verification_evidence_query}})",
@@ -8260,13 +8273,14 @@
           "scope": "{{verification_rule_scope_condition}}"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "1cd47d81196ddd1c8fd2c6b58e019e10c98755eb57c055815aff1cb8d3bff351",
+        "rendered_sql_sha256": "fa9cb5d2f0ef23085120f06f4baa6bad880915803f2ae2292823fe119aa59def",
         "parameters": [
+          "schema_name",
+          "table_name",
           "verification_evidence_query",
           "verification_rule_scope_condition",
           "verification_subject_eligibility_condition",
-          "verification_subject_match_condition",
-          "verification_subject_query"
+          "verification_subject_match_condition"
         ]
       }
     },
@@ -8278,7 +8292,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{approved_source_subject_query}})",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "eligibility": "{{approved_source_evaluable_condition}}",
           "existence": "EXISTS",
           "related_table": "({{approved_source_relation_query}})",
@@ -8286,13 +8300,14 @@
           "scope": "{{approved_source_scope_condition}}"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "0f1013beaa1042c2156706d5191625c5def8911148c8be298cb05995601f1db3",
+        "rendered_sql_sha256": "3961abf35b8a066933b6011643fdcf87919d5bdef99cc4c0ae9b7f9a215fdd49",
         "parameters": [
           "approved_source_evaluable_condition",
           "approved_source_match_condition",
           "approved_source_relation_query",
           "approved_source_scope_condition",
-          "approved_source_subject_query"
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -8304,7 +8319,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "({{approved_source_subject_query}})",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "eligibility": "{{approved_source_evaluable_condition}}",
           "existence": "NOT EXISTS",
           "related_table": "({{approved_source_relation_query}})",
@@ -8312,13 +8327,14 @@
           "scope": "{{approved_source_scope_condition}}"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "0fd4cb17c233a5b6077ca25c4b560609b297e61410f20bccbd29964e44b696b4",
+        "rendered_sql_sha256": "7d244acdb0a76ef6e7de775797cb101e39b9e8fa380d612a578a244a91c41954",
         "parameters": [
           "approved_source_evaluable_condition",
           "approved_source_match_condition",
           "approved_source_relation_query",
           "approved_source_scope_condition",
-          "approved_source_subject_query"
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -8330,18 +8346,18 @@
         "template_id": "oracle.evaluable_agreement",
         "template_revision": 1,
         "slots": {
-          "input_query": "{{independent_evidence_pair_query}}",
+          "input_query": "{{subject_query}}",
           "eligibility": "{{evidence_evaluable_condition}}",
           "agreement": "{{first_assertion_expression}} = {{second_assertion_expression}}",
           "branch": "1"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "3cc1164f030dbbd258458ac390a4cf4c0d1e8cd1c959930a5143ada839334c6b",
+        "rendered_sql_sha256": "a4576439c0439ad36c0fab2af6536c41adb1fa89691b0d33754ca329b8248d81",
         "parameters": [
           "evidence_evaluable_condition",
           "first_assertion_expression",
-          "independent_evidence_pair_query",
-          "second_assertion_expression"
+          "second_assertion_expression",
+          "subject_query"
         ]
       }
     },
@@ -8353,18 +8369,18 @@
         "template_id": "oracle.evaluable_agreement",
         "template_revision": 1,
         "slots": {
-          "input_query": "{{independent_evidence_pair_query}}",
+          "input_query": "{{subject_query}}",
           "eligibility": "{{evidence_evaluable_condition}}",
           "agreement": "{{first_assertion_expression}} = {{second_assertion_expression}}",
           "branch": "0"
         },
         "source_batch": "13",
-        "rendered_sql_sha256": "5d98269150d1777a0312563c875efc5b98e0d0cdcefc787a0b743deebdbd3f7d",
+        "rendered_sql_sha256": "eea1a4cedaccee9409725ab3891ed9eda30d81cab852f12fbea471c073e40102",
         "parameters": [
           "evidence_evaluable_condition",
           "first_assertion_expression",
-          "independent_evidence_pair_query",
-          "second_assertion_expression"
+          "second_assertion_expression",
+          "subject_query"
         ]
       }
     },
@@ -8376,7 +8392,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{expected_object_schema}}.{{expected_object_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{inventory_object_schema}}.{{inventory_object_table}}",
           "match": "{{object_identity_match}}",
           "eligibility": "{{expected_object_evaluable_condition}}",
@@ -8384,15 +8400,15 @@
           "existence": "EXISTS"
         },
         "source_batch": "14",
-        "rendered_sql_sha256": "0fde5c54472b43835458ebfb1eb4e25e89c6ab9796af5a1bb48931877bd96f78",
+        "rendered_sql_sha256": "6c245d3b4831ab8d12f4c9859a6a3e62ab898e2933445c695922effc42d3f619",
         "parameters": [
           "expected_object_evaluable_condition",
-          "expected_object_schema",
-          "expected_object_table",
           "inventory_object_schema",
           "inventory_object_table",
           "inventory_scope_condition",
-          "object_identity_match"
+          "object_identity_match",
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -8404,7 +8420,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{expected_object_schema}}.{{expected_object_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{inventory_object_schema}}.{{inventory_object_table}}",
           "match": "{{object_identity_match}}",
           "eligibility": "{{expected_object_evaluable_condition}}",
@@ -8412,15 +8428,15 @@
           "existence": "NOT EXISTS"
         },
         "source_batch": "14",
-        "rendered_sql_sha256": "2eb4476bdf973b766dad50fa2ac3e27e866fe75ee889db9296311ede39da2f97",
+        "rendered_sql_sha256": "a05ea058a3313e117da9e55e1887cd1bb4931e31e6bd91ae7e476b39181cea7a",
         "parameters": [
           "expected_object_evaluable_condition",
-          "expected_object_schema",
-          "expected_object_table",
           "inventory_object_schema",
           "inventory_object_table",
           "inventory_scope_condition",
-          "object_identity_match"
+          "object_identity_match",
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -8516,7 +8532,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{required_constraint_schema}}.{{required_constraint_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{inventory_constraint_schema}}.{{inventory_constraint_table}}",
           "match": "{{constraint_requirement_match}}",
           "eligibility": "{{constraint_requirement_evaluable_condition}}",
@@ -8524,15 +8540,15 @@
           "existence": "EXISTS"
         },
         "source_batch": "14",
-        "rendered_sql_sha256": "9f2aad3a2aea86b9ee1ac2b85c1624b272290711b20ea1b173fb04526415db7e",
+        "rendered_sql_sha256": "0faff95d747cc40659a6a7ba1c46acb48472a8f7bc9d4b66f9c2bc22da00cb4c",
         "parameters": [
           "constraint_inventory_scope_condition",
           "constraint_requirement_evaluable_condition",
           "constraint_requirement_match",
           "inventory_constraint_schema",
           "inventory_constraint_table",
-          "required_constraint_schema",
-          "required_constraint_table"
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -8544,7 +8560,7 @@
         "template_id": "oracle.related_existence",
         "template_revision": 1,
         "slots": {
-          "subject_table": "{{required_constraint_schema}}.{{required_constraint_table}}",
+          "subject_table": "{{schema_name}}.{{table_name}}",
           "related_table": "{{inventory_constraint_schema}}.{{inventory_constraint_table}}",
           "match": "{{constraint_requirement_match}}",
           "eligibility": "{{constraint_requirement_evaluable_condition}}",
@@ -8552,15 +8568,15 @@
           "existence": "NOT EXISTS"
         },
         "source_batch": "14",
-        "rendered_sql_sha256": "6b2f6d9879035ebf16625a742c668c7514a54e11730fdcc289707d4c4566c1fb",
+        "rendered_sql_sha256": "fe5d2033e66b37976a4d8ebb68e227e95436b9796577edc1ae7093f2c6c66488",
         "parameters": [
           "constraint_inventory_scope_condition",
           "constraint_requirement_evaluable_condition",
           "constraint_requirement_match",
           "inventory_constraint_schema",
           "inventory_constraint_table",
-          "required_constraint_schema",
-          "required_constraint_table"
+          "schema_name",
+          "table_name"
         ]
       }
     },
@@ -8650,17 +8666,17 @@
       "planned_pattern_id": "metadata_inventory",
       "implementation": {
         "template_id": "oracle.metadata_set_difference",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "p.profile_old_only_count + p.profile_new_only_count = 0"
         },
         "source_batch": "14",
-        "rendered_sql_sha256": "090f9afeb774754b2c53f71bb749b5c1a3977edec6a9a914843e37aa888c1aef",
+        "rendered_sql_sha256": "cb2a0509f0869f1a78e665da49ff7c4b8e608d33b9191e0a0190651f1e1ac18f",
         "parameters": [
           "metadata_columns",
-          "new_metadata_query",
           "old_metadata_query",
-          "snapshot_scope_known_condition"
+          "snapshot_scope_known_condition",
+          "subject_query"
         ]
       }
     },
@@ -8670,17 +8686,17 @@
       "planned_pattern_id": "metadata_inventory",
       "implementation": {
         "template_id": "oracle.metadata_set_difference",
-        "template_revision": 1,
+        "template_revision": 2,
         "slots": {
           "test": "p.profile_old_only_count + p.profile_new_only_count > 0"
         },
         "source_batch": "14",
-        "rendered_sql_sha256": "150d9eaf07b04599b00408f2f25a5aa13226fa63d3d7456068465ac32d0990f6",
+        "rendered_sql_sha256": "ef0546b76f6f972a9a37118b54e44ed651102c818a0290de1e93ca3045a21827",
         "parameters": [
           "metadata_columns",
-          "new_metadata_query",
           "old_metadata_query",
-          "snapshot_scope_known_condition"
+          "snapshot_scope_known_condition",
+          "subject_query"
         ]
       }
     },

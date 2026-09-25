@@ -34,7 +34,7 @@ def validate():
 
     require(hashlib.sha256(ENUMERATION.read_bytes()).hexdigest() == graph["source"]["sha256"], "Frozen enumeration does not match graph source hash")
     require(graph["catalogueVersion"] == library["catalogue_version"] == mapping["catalogue_version"] == "1.0.0", "Catalogue version mismatch")
-    require(library["library_revision"] == mapping["mapping_revision"] == 6, "SQL revision mismatch")
+    require(library["library_revision"] == mapping["mapping_revision"] == 7, "SQL revision mismatch")
 
     templates = {item["id"]: item for item in library["templates"]}
     rows = {item["predicate_id"]: item for item in mapping["predicates"]}
@@ -68,6 +68,8 @@ def validate():
         rendered = INTERNAL.sub(lambda match: implementation["slots"][match.group(1)], template["body"])
         require(hashlib.sha256(rendered.encode("utf-8")).hexdigest() == implementation["rendered_sql_sha256"], "Rendered fingerprint mismatch: " + predicate_id)
         require(sorted(set(OPERATIONAL.findall(rendered))) == implementation["parameters"], "Operational tag mismatch: " + predicate_id)
+        require("{{schema_name}}.{{table_name}}" in rendered or "{{subject_query}}" in rendered,
+                "Subject relation is neither {{schema_name}}.{{table_name}} nor {{subject_query}}: " + predicate_id)
         graph_sql = predicates[predicate_id]["attributes"]["sql"]
         require(graph_sql["template"] == implementation["template_id"]
                 and graph_sql["templateRevision"] == implementation["template_revision"]

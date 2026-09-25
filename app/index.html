@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Predicate Workbench</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="toolbar" id="toolbar"></header>
+<div class="banner" id="banner" hidden></div>
+<div class="banner error-banner" id="error-banner" role="alert" hidden></div>
+<main class="layout">
+  <section class="outline-pane" aria-label="Outline">
+    <div class="filter-bar" id="filter-bar" role="search"></div>
+    <nav class="breadcrumb" id="breadcrumb" aria-label="Zoom path"></nav>
+    <div class="selection-bar" id="selection-bar" hidden></div>
+    <div class="outline" id="outline" role="tree" aria-label="Tables, columns and predicates"></div>
+  </section>
+  <aside class="detail-pane" id="detail" aria-label="Details"></aside>
+</main>
+<noscript>The workbench needs JavaScript.</noscript>
+<!-- build/build.py inlines everything below; the page makes no network requests. -->
+<script src="vendor/xlsx.full.min.js"></script>
+<script type="application/json" id="catalogue-bundle"></script>
+<script type="module" src="main.js"></script>
+</body>
+</html>
