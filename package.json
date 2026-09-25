@@ -1,0 +1,10 @@
+{
+  "name": "predicate-workbench",
+  "private": true,
+  "type": "module",
+  "description": "Predicate investigation workbench. No runtime dependencies; see docs/APPLICATION-DESIGN.md.",
+  "scripts": {
+    "build": "python3 build/build.py",
+    "test": "node --test \"tests/*.test.js\""
+  }
+}
