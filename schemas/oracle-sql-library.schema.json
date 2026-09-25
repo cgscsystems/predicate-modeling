@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Canonical Oracle SQL template library",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format_version",
+    "library_revision",
+    "catalogue_version",
+    "sql_dialect",
+    "authority",
+    "source_batches",
+    "templates"
+  ],
+  "properties": {
+    "format_version": {
+      "const": "1.0"
+    },
+    "library_revision": {
+      "const": 6
+    },
+    "catalogue_version": {
+      "const": "1.0.0"
+    },
+    "sql_dialect": {
+      "const": "oracle"
+    },
+    "authority": {
+      "type": "string"
+    },
+    "source_batches": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "templates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "revision",
+          "dialect",
+          "status",
+          "body",
+          "description",
+          "review_status",
+          "oracle_test_status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^oracle\\.[a-z0-9_]+$"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "dialect": {
+            "const": "oracle"
+          },
+          "status": {
+            "const": "drafted"
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string"
+          },
+          "review_status": {
+            "const": "reviewed"
+          },
+          "oracle_test_status": {
+            "const": "not_run"
+          }
+        }
+      }
+    }
+  }
+}

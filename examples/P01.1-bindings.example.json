@@ -1,0 +1,11 @@
+{
+  "predicateId": "P01.1",
+  "mappingRevision": 6,
+  "replacements": {
+    "column_name": "EMAIL_ADDRESS",
+    "population_condition": "1 = 1",
+    "schema_name": "APP_SCHEMA",
+    "table_name": "CUSTOMER"
+  },
+  "bindValues": {}
+}

@@ -1,0 +1,31 @@
+{
+  "status": "passed",
+  "catalogueVersion": "1.0.0",
+  "graphRevision": 2,
+  "libraryRevision": 6,
+  "mappingRevision": 6,
+  "predicateCount": 364,
+  "mappedPredicateCount": 364,
+  "graphSqlReferenceCount": 364,
+  "templateCount": 46,
+  "operationalTagCount": 350,
+  "nativeOracleExecution": "not_run",
+  "manifestFileCount": 16,
+  "checks": [
+    "manifest sizes and SHA256",
+    "JSON schema documents readable",
+    "graph node/edge integrity",
+    "frozen IDs and labels",
+    "364 graph-to-mapping joins",
+    "planned pattern joins",
+    "template IDs and revisions",
+    "internal slot completeness",
+    "rendered SQL fingerprints",
+    "operational tag inventories",
+    "graph SQL references",
+    "all 46 templates used",
+    "no duplicate normalized template bodies",
+    "runtime binding example"
+  ],
+  "errors": []
+}

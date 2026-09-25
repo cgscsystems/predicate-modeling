@@ -1,0 +1,1826 @@
+{
+  "catalogue_version": "1.0.0",
+  "source_catalogue_sha256": "a4021e1b175f95c685a1bfe58fab5f3b6cf8ec8a1e69ec30c544c15b0fb5b778",
+  "predicates": [
+    {
+      "predicate_id": "P01.1",
+      "label": "Null",
+      "definition": "Stored value is NULL / is not NULL."
+    },
+    {
+      "predicate_id": "P01.2",
+      "label": "Non-null",
+      "definition": "Stored value is NULL / is not NULL."
+    },
+    {
+      "predicate_id": "P02.1",
+      "label": "Semantically missing",
+      "definition": "Value matches the declared missingness rule / supplies a value under that rule. Rule may include nulls, blanks and sentinels."
+    },
+    {
+      "predicate_id": "P02.2",
+      "label": "Semantically present",
+      "definition": "Value matches the declared missingness rule / supplies a value under that rule. Rule may include nulls, blanks and sentinels."
+    },
+    {
+      "predicate_id": "P03.1",
+      "label": "Whitespace-only",
+      "definition": "A non-null string consists entirely of the selected whitespace characters / contains at least one other character."
+    },
+    {
+      "predicate_id": "P03.2",
+      "label": "Contains non-whitespace",
+      "definition": "A non-null string consists entirely of the selected whitespace characters / contains at least one other character."
+    },
+    {
+      "predicate_id": "P04.1",
+      "label": "Default-valued",
+      "definition": "Value equals the selected default value / differs; does not infer whether a default mechanism produced it."
+    },
+    {
+      "predicate_id": "P04.2",
+      "label": "Non-default-valued",
+      "definition": "Value equals the selected default value / differs; does not infer whether a default mechanism produced it."
+    },
+    {
+      "predicate_id": "P05.1",
+      "label": "Sentinel-valued",
+      "definition": "Value belongs / does not belong to a declared placeholder set, e.g. unknown-code markers."
+    },
+    {
+      "predicate_id": "P05.2",
+      "label": "Non-sentinel-valued",
+      "definition": "Value belongs / does not belong to a declared placeholder set, e.g. unknown-code markers."
+    },
+    {
+      "predicate_id": "P06.1",
+      "label": "Empty payload",
+      "definition": "A non-null LOB/document collection has zero content length or zero members / more than zero, under the chosen representation."
+    },
+    {
+      "predicate_id": "P06.2",
+      "label": "Non-empty payload",
+      "definition": "A non-null LOB/document collection has zero content length or zero members / more than zero, under the chosen representation."
+    },
+    {
+      "predicate_id": "C01.1",
+      "label": "Complete record",
+      "definition": "All required fields are semantically present / at least one required field is missing."
+    },
+    {
+      "predicate_id": "C01.2",
+      "label": "Incomplete record",
+      "definition": "All required fields are semantically present / at least one required field is missing."
+    },
+    {
+      "predicate_id": "C02.1",
+      "label": "All populated",
+      "definition": "In a nonempty selected column/group: every value is present; some but not all are present; none are present."
+    },
+    {
+      "predicate_id": "C02.2",
+      "label": "Partly populated",
+      "definition": "In a nonempty selected column/group: every value is present; some but not all are present; none are present."
+    },
+    {
+      "predicate_id": "C02.3",
+      "label": "All missing",
+      "definition": "In a nonempty selected column/group: every value is present; some but not all are present; none are present."
+    },
+    {
+      "predicate_id": "C03.1",
+      "label": "Required value supplied",
+      "definition": "Among rows where a declared condition requires a field, that field is present / missing."
+    },
+    {
+      "predicate_id": "C03.2",
+      "label": "Required value missing",
+      "definition": "Among rows where a declared condition requires a field, that field is present / missing."
+    },
+    {
+      "predicate_id": "C04.1",
+      "label": "Sufficient completeness",
+      "definition": "Present-value fraction meets / fails a declared minimum, for a nonempty column or group."
+    },
+    {
+      "predicate_id": "C04.2",
+      "label": "Insufficient completeness",
+      "definition": "Present-value fraction meets / fails a declared minimum, for a nonempty column or group."
+    },
+    {
+      "predicate_id": "C05.1",
+      "label": "Required combination satisfied",
+      "definition": "A specified field-presence rule, such as at least one contact field or both coordinate fields, holds / fails."
+    },
+    {
+      "predicate_id": "C05.2",
+      "label": "Required combination violated",
+      "definition": "A specified field-presence rule, such as at least one contact field or both coordinate fields, holds / fails."
+    },
+    {
+      "predicate_id": "U01.1",
+      "label": "Uniqueness",
+      "definition": "A row's selected value occurs exactly once / more than once in the chosen population; includes null groups as in the supplied example."
+    },
+    {
+      "predicate_id": "U01.2",
+      "label": "Non-uniqueness",
+      "definition": "A row's selected value occurs exactly once / more than once in the chosen population; includes null groups as in the supplied example."
+    },
+    {
+      "predicate_id": "U02.1",
+      "label": "Composite uniqueness",
+      "definition": "The selected tuple occurs exactly once / more than once. Includes null components using a consistent grouping convention."
+    },
+    {
+      "predicate_id": "U02.2",
+      "label": "Composite non-uniqueness",
+      "definition": "The selected tuple occurs exactly once / more than once. Includes null components using a consistent grouping convention."
+    },
+    {
+      "predicate_id": "U03.1",
+      "label": "Record uniqueness",
+      "definition": "The complete declared record projection occurs once / more than once. “Record” means the selected comparison fields, not an assumed business entity."
+    },
+    {
+      "predicate_id": "U03.2",
+      "label": "Record duplication",
+      "definition": "The complete declared record projection occurs once / more than once. “Record” means the selected comparison fields, not an assumed business entity."
+    },
+    {
+      "predicate_id": "U04.1",
+      "label": "Unique column or key",
+      "definition": "Across a selected nonempty population, no selected value/tuple repeats / at least one repeats. Null policy must be the same on both sides."
+    },
+    {
+      "predicate_id": "U04.2",
+      "label": "Non-unique column or key",
+      "definition": "Across a selected nonempty population, no selected value/tuple repeats / at least one repeats. Null policy must be the same on both sides."
+    },
+    {
+      "predicate_id": "U05.1",
+      "label": "Constant",
+      "definition": "A nonempty eligible population has exactly one distinct value / more than one. An all-null population is handled by C02 if nulls are excluded."
+    },
+    {
+      "predicate_id": "U05.2",
+      "label": "Varying",
+      "definition": "A nonempty eligible population has exactly one distinct value / more than one. An all-null population is handled by C02 if nulls are excluded."
+    },
+    {
+      "predicate_id": "U06.1",
+      "label": "Cardinality within bounds",
+      "definition": "Distinct-value count is / is not inside a declared interval; can include zero."
+    },
+    {
+      "predicate_id": "U06.2",
+      "label": "Cardinality outside bounds",
+      "definition": "Distinct-value count is / is not inside a declared interval; can include zero."
+    },
+    {
+      "predicate_id": "U07.1",
+      "label": "Key candidate",
+      "definition": "Selected key fields are jointly unique and non-null / one or both requirements fail in the observed population. This does not prove future uniqueness."
+    },
+    {
+      "predicate_id": "U07.2",
+      "label": "Not a key candidate",
+      "definition": "Selected key fields are jointly unique and non-null / one or both requirements fail in the observed population. This does not prove future uniqueness."
+    },
+    {
+      "predicate_id": "M01.1",
+      "label": "Equals selected value",
+      "definition": "Value equals / differs from a specified non-null value. Instantiating this for code 1 produces the original TABLE1.COL1 = 1 partition."
+    },
+    {
+      "predicate_id": "M01.2",
+      "label": "Differs from selected value",
+      "definition": "Value equals / differs from a specified non-null value. Instantiating this for code 1 produces the original TABLE1.COL1 = 1 partition."
+    },
+    {
+      "predicate_id": "M02.1",
+      "label": "In selected set",
+      "definition": "Value belongs / does not belong to an explicitly selected set."
+    },
+    {
+      "predicate_id": "M02.2",
+      "label": "Outside selected set",
+      "definition": "Value belongs / does not belong to an explicitly selected set."
+    },
+    {
+      "predicate_id": "M03.1",
+      "label": "Allowed value",
+      "definition": "Value belongs / does not belong to the business-approved domain. Same membership operation as M02, with a normative role."
+    },
+    {
+      "predicate_id": "M03.2",
+      "label": "Disallowed value",
+      "definition": "Value belongs / does not belong to the business-approved domain. Same membership operation as M02, with a normative role."
+    },
+    {
+      "predicate_id": "M04.1",
+      "label": "True encoding",
+      "definition": "Non-null flag value belongs to the declared true set, false set, or neither; sets must be disjoint."
+    },
+    {
+      "predicate_id": "M04.2",
+      "label": "False encoding",
+      "definition": "Non-null flag value belongs to the declared true set, false set, or neither; sets must be disjoint."
+    },
+    {
+      "predicate_id": "M04.3",
+      "label": "Unrecognized encoding",
+      "definition": "Non-null flag value belongs to the declared true set, false set, or neither; sets must be disjoint."
+    },
+    {
+      "predicate_id": "V01.1",
+      "label": "Parseable",
+      "definition": "Representation can / cannot be interpreted using the selected grammar and locale."
+    },
+    {
+      "predicate_id": "V01.2",
+      "label": "Unparseable",
+      "definition": "Representation can / cannot be interpreted using the selected grammar and locale."
+    },
+    {
+      "predicate_id": "V02.1",
+      "label": "Convertible",
+      "definition": "Value can / cannot be converted to the specified target datatype under the selected conversion rules."
+    },
+    {
+      "predicate_id": "V02.2",
+      "label": "Non-convertible",
+      "definition": "Value can / cannot be converted to the specified target datatype under the selected conversion rules."
+    },
+    {
+      "predicate_id": "V03.1",
+      "label": "Lossless conversion",
+      "definition": "Among successfully converted values, specified value or representation information is / is not preserved by the defined comparison."
+    },
+    {
+      "predicate_id": "V03.2",
+      "label": "Lossy conversion",
+      "definition": "Among successfully converted values, specified value or representation information is / is not preserved by the defined comparison."
+    },
+    {
+      "predicate_id": "V04.1",
+      "label": "Well formed",
+      "definition": "Value satisfies / violates its declared semantic representation contract, e.g. a ten-digit identifier."
+    },
+    {
+      "predicate_id": "V04.2",
+      "label": "Malformed",
+      "definition": "Value satisfies / violates its declared semantic representation contract, e.g. a ten-digit identifier."
+    },
+    {
+      "predicate_id": "V05.1",
+      "label": "Canonical representation",
+      "definition": "Representation equals / differs from the result of a specified normalization procedure."
+    },
+    {
+      "predicate_id": "V05.2",
+      "label": "Noncanonical representation",
+      "definition": "Representation equals / differs from the result of a specified normalization procedure."
+    },
+    {
+      "predicate_id": "V06.1",
+      "label": "Decoding-valid",
+      "definition": "Available source bytes can / cannot be decoded under a selected encoding. Correct decoding alone does not prove intended wording."
+    },
+    {
+      "predicate_id": "V06.2",
+      "label": "Decoding-invalid",
+      "definition": "Available source bytes can / cannot be decoded under a selected encoding. Correct decoding alone does not prove intended wording."
+    },
+    {
+      "predicate_id": "F01.1",
+      "label": "Pattern match",
+      "definition": "Value satisfies / fails a specified full-string or substring pattern; matching mode is explicit."
+    },
+    {
+      "predicate_id": "F01.2",
+      "label": "Pattern mismatch",
+      "definition": "Value satisfies / fails a specified full-string or substring pattern; matching mode is explicit."
+    },
+    {
+      "predicate_id": "F02.1",
+      "label": "Expected length",
+      "definition": "Length equals / differs from a specified length; character versus byte length is declared."
+    },
+    {
+      "predicate_id": "F02.2",
+      "label": "Unexpected length",
+      "definition": "Length equals / differs from a specified length; character versus byte length is declared."
+    },
+    {
+      "predicate_id": "F03.1",
+      "label": "Length within bounds",
+      "definition": "Length lies / does not lie inside the specified interval."
+    },
+    {
+      "predicate_id": "F03.2",
+      "label": "Length outside bounds",
+      "definition": "Length lies / does not lie inside the specified interval."
+    },
+    {
+      "predicate_id": "F04.1",
+      "label": "Uniform length",
+      "definition": "All values in a nonempty population have the same measured length / at least two lengths occur. This is a population property."
+    },
+    {
+      "predicate_id": "F04.2",
+      "label": "Varying length",
+      "definition": "All values in a nonempty population have the same measured length / at least two lengths occur. This is a population property."
+    },
+    {
+      "predicate_id": "F05.1",
+      "label": "Checksum-valid",
+      "definition": "An available checksum/check digit agrees / disagrees with the specified algorithm on an evaluable value."
+    },
+    {
+      "predicate_id": "F05.2",
+      "label": "Checksum-invalid",
+      "definition": "An available checksum/check digit agrees / disagrees with the specified algorithm on an evaluable value."
+    },
+    {
+      "predicate_id": "F06.1",
+      "label": "Allowed characters",
+      "definition": "All characters belong to a specified repertoire / at least one does not."
+    },
+    {
+      "predicate_id": "F06.2",
+      "label": "Disallowed characters present",
+      "definition": "All characters belong to a specified repertoire / at least one does not."
+    },
+    {
+      "predicate_id": "F07.1",
+      "label": "Delimited structure valid",
+      "definition": "Record text follows / violates declared delimiter, quoting and field-count rules."
+    },
+    {
+      "predicate_id": "F07.2",
+      "label": "Delimited structure invalid",
+      "definition": "Record text follows / violates declared delimiter, quoting and field-count rules."
+    },
+    {
+      "predicate_id": "X01.1",
+      "label": "Alphabetic-only",
+      "definition": "Nonempty string contains only letters under the chosen character rules / contains something else."
+    },
+    {
+      "predicate_id": "X01.2",
+      "label": "Not alphabetic-only",
+      "definition": "Nonempty string contains only letters under the chosen character rules / contains something else."
+    },
+    {
+      "predicate_id": "X02.1",
+      "label": "Digit-only",
+      "definition": "Nonempty string consists entirely of digits from the selected repertoire / does not. Signs and decimal separators are not digits."
+    },
+    {
+      "predicate_id": "X02.2",
+      "label": "Not digit-only",
+      "definition": "Nonempty string consists entirely of digits from the selected repertoire / does not. Signs and decimal separators are not digits."
+    },
+    {
+      "predicate_id": "X03.1",
+      "label": "Alphanumeric-only",
+      "definition": "Nonempty string contains only selected letters/digits / contains other characters."
+    },
+    {
+      "predicate_id": "X03.2",
+      "label": "Not alphanumeric-only",
+      "definition": "Nonempty string contains only selected letters/digits / contains other characters."
+    },
+    {
+      "predicate_id": "X04.1",
+      "label": "ASCII-only",
+      "definition": "Every character is in ASCII / at least one is not. “Unicode” is not the opposite of ASCII."
+    },
+    {
+      "predicate_id": "X04.2",
+      "label": "Contains non-ASCII",
+      "definition": "Every character is in ASCII / at least one is not. “Unicode” is not the opposite of ASCII."
+    },
+    {
+      "predicate_id": "X05.1",
+      "label": "Mixed scripts",
+      "definition": "Among strings with at least one script-bearing character, more than one script / exactly one script occurs under selected script rules."
+    },
+    {
+      "predicate_id": "X05.2",
+      "label": "Single script",
+      "definition": "Among strings with at least one script-bearing character, more than one script / exactly one script occurs under selected script rules."
+    },
+    {
+      "predicate_id": "X06.1",
+      "label": "Has control characters",
+      "definition": "At least one character belongs to the declared control-character set / none does."
+    },
+    {
+      "predicate_id": "X06.2",
+      "label": "No control characters",
+      "definition": "At least one character belongs to the declared control-character set / none does."
+    },
+    {
+      "predicate_id": "X07.1",
+      "label": "Uppercase",
+      "definition": "Among nonempty strings: all cased letters are upper; all are lower; both occur; no cased letters occur. Character/locale rules are explicit."
+    },
+    {
+      "predicate_id": "X07.2",
+      "label": "Lowercase",
+      "definition": "Among nonempty strings: all cased letters are upper; all are lower; both occur; no cased letters occur. Character/locale rules are explicit."
+    },
+    {
+      "predicate_id": "X07.3",
+      "label": "Mixed case",
+      "definition": "Among nonempty strings: all cased letters are upper; all are lower; both occur; no cased letters occur. Character/locale rules are explicit."
+    },
+    {
+      "predicate_id": "X07.4",
+      "label": "No cased letters",
+      "definition": "Among nonempty strings: all cased letters are upper; all are lower; both occur; no cased letters occur. Character/locale rules are explicit."
+    },
+    {
+      "predicate_id": "X08.1",
+      "label": "Title-case conforming",
+      "definition": "String follows / fails a chosen title-case convention. This is not assumed to be correct spelling for personal names."
+    },
+    {
+      "predicate_id": "X08.2",
+      "label": "Title-case nonconforming",
+      "definition": "String follows / fails a chosen title-case convention. This is not assumed to be correct spelling for personal names."
+    },
+    {
+      "predicate_id": "X09.1",
+      "label": "Leading whitespace",
+      "definition": "Selected whitespace occurs / does not occur at the start of a nonempty string."
+    },
+    {
+      "predicate_id": "X09.2",
+      "label": "No leading whitespace",
+      "definition": "Selected whitespace occurs / does not occur at the start of a nonempty string."
+    },
+    {
+      "predicate_id": "X10.1",
+      "label": "Trailing whitespace",
+      "definition": "Selected whitespace occurs / does not occur at the end of a nonempty string."
+    },
+    {
+      "predicate_id": "X10.2",
+      "label": "No trailing whitespace",
+      "definition": "Selected whitespace occurs / does not occur at the end of a nonempty string."
+    },
+    {
+      "predicate_id": "X11.1",
+      "label": "Internal whitespace",
+      "definition": "Selected whitespace occurs / does not occur between non-whitespace characters."
+    },
+    {
+      "predicate_id": "X11.2",
+      "label": "No internal whitespace",
+      "definition": "Selected whitespace occurs / does not occur between non-whitespace characters."
+    },
+    {
+      "predicate_id": "X12.1",
+      "label": "Contains whitespace",
+      "definition": "At least one selected whitespace character occurs / none occurs."
+    },
+    {
+      "predicate_id": "X12.2",
+      "label": "Whitespace-free",
+      "definition": "At least one selected whitespace character occurs / none occurs."
+    },
+    {
+      "predicate_id": "X13.1",
+      "label": "Token present",
+      "definition": "A specified token or keyword occurs / does not occur with declared token boundaries and case rules."
+    },
+    {
+      "predicate_id": "X13.2",
+      "label": "Token absent",
+      "definition": "A specified token or keyword occurs / does not occur with declared token boundaries and case rules."
+    },
+    {
+      "predicate_id": "X14.1",
+      "label": "Prefix match",
+      "definition": "String begins / does not begin with a specified sequence."
+    },
+    {
+      "predicate_id": "X14.2",
+      "label": "Prefix mismatch",
+      "definition": "String begins / does not begin with a specified sequence."
+    },
+    {
+      "predicate_id": "X15.1",
+      "label": "Suffix match",
+      "definition": "String ends / does not end with a specified sequence."
+    },
+    {
+      "predicate_id": "X15.2",
+      "label": "Suffix mismatch",
+      "definition": "String ends / does not end with a specified sequence."
+    },
+    {
+      "predicate_id": "X16.1",
+      "label": "Substring present",
+      "definition": "A specified character sequence occurs anywhere / does not occur, without requiring token boundaries."
+    },
+    {
+      "predicate_id": "X16.2",
+      "label": "Substring absent",
+      "definition": "A specified character sequence occurs anywhere / does not occur, without requiring token boundaries."
+    },
+    {
+      "predicate_id": "X17.1",
+      "label": "Trimmed",
+      "definition": "A nonempty string has neither leading nor trailing selected whitespace / has at least one. Composite of X09 and X10."
+    },
+    {
+      "predicate_id": "X17.2",
+      "label": "Untrimmed",
+      "definition": "A nonempty string has neither leading nor trailing selected whitespace / has at least one. Composite of X09 and X10."
+    },
+    {
+      "predicate_id": "N01.1",
+      "label": "Negative",
+      "definition": "A finite numeric value is below zero, equal to zero, or above zero."
+    },
+    {
+      "predicate_id": "N01.2",
+      "label": "Zero",
+      "definition": "A finite numeric value is below zero, equal to zero, or above zero."
+    },
+    {
+      "predicate_id": "N01.3",
+      "label": "Positive",
+      "definition": "A finite numeric value is below zero, equal to zero, or above zero."
+    },
+    {
+      "predicate_id": "N02.1",
+      "label": "Integral",
+      "definition": "Finite value has no fractional component / has a fractional component. Decimal storage alone does not imply fractional content."
+    },
+    {
+      "predicate_id": "N02.2",
+      "label": "Fractional",
+      "definition": "Finite value has no fractional component / has a fractional component. Decimal storage alone does not imply fractional content."
+    },
+    {
+      "predicate_id": "N03.1",
+      "label": "Even",
+      "definition": "An integral value is divisible by two / is not."
+    },
+    {
+      "predicate_id": "N03.2",
+      "label": "Odd",
+      "definition": "An integral value is divisible by two / is not."
+    },
+    {
+      "predicate_id": "N04.1",
+      "label": "Multiple of increment",
+      "definition": "Value lies / does not lie on a declared numerical grid, with any tolerance specified."
+    },
+    {
+      "predicate_id": "N04.2",
+      "label": "Not a multiple of increment",
+      "definition": "Value lies / does not lie on a declared numerical grid, with any tolerance specified."
+    },
+    {
+      "predicate_id": "N05.1",
+      "label": "Within precision/scale contract",
+      "definition": "Value can / cannot be represented within a stated decimal precision/scale without disallowed change. Does not infer historical rounding."
+    },
+    {
+      "predicate_id": "N05.2",
+      "label": "Outside precision/scale contract",
+      "definition": "Value can / cannot be represented within a stated decimal precision/scale without disallowed change. Does not infer historical rounding."
+    },
+    {
+      "predicate_id": "N06.1",
+      "label": "Finite",
+      "definition": "Floating-point value is finite, an infinity, or not-a-number."
+    },
+    {
+      "predicate_id": "N06.2",
+      "label": "Infinite",
+      "definition": "Floating-point value is finite, an infinity, or not-a-number."
+    },
+    {
+      "predicate_id": "N06.3",
+      "label": "NaN",
+      "definition": "Floating-point value is finite, an infinity, or not-a-number."
+    },
+    {
+      "predicate_id": "N07.1",
+      "label": "Consistent with rounded source",
+      "definition": "Target equals / differs from rounding an available source to declared precision. Does not prove the transformation actually occurred."
+    },
+    {
+      "predicate_id": "N07.2",
+      "label": "Inconsistent with rounded source",
+      "definition": "Target equals / differs from rounding an available source to declared precision. Does not prove the transformation actually occurred."
+    },
+    {
+      "predicate_id": "N08.1",
+      "label": "Consistent with truncated source",
+      "definition": "Target equals / differs from truncating an available source to declared precision."
+    },
+    {
+      "predicate_id": "N08.2",
+      "label": "Inconsistent with truncated source",
+      "definition": "Target equals / differs from truncating an available source to declared precision."
+    },
+    {
+      "predicate_id": "R01.1",
+      "label": "Less than reference",
+      "definition": "Value falls below, equals, or exceeds a specified comparable reference."
+    },
+    {
+      "predicate_id": "R01.2",
+      "label": "Equal to reference",
+      "definition": "Value falls below, equals, or exceeds a specified comparable reference."
+    },
+    {
+      "predicate_id": "R01.3",
+      "label": "Greater than reference",
+      "definition": "Value falls below, equals, or exceeds a specified comparable reference."
+    },
+    {
+      "predicate_id": "R02.1",
+      "label": "Within range",
+      "definition": "Value lies / does not lie between selected bounds with explicit endpoint inclusion."
+    },
+    {
+      "predicate_id": "R02.2",
+      "label": "Outside range",
+      "definition": "Value lies / does not lie between selected bounds with explicit endpoint inclusion."
+    },
+    {
+      "predicate_id": "R03.1",
+      "label": "Lower boundary",
+      "definition": "For distinct bounds, value equals the lower bound, lies strictly between, equals the upper bound, or lies outside."
+    },
+    {
+      "predicate_id": "R03.2",
+      "label": "Interior",
+      "definition": "For distinct bounds, value equals the lower bound, lies strictly between, equals the upper bound, or lies outside."
+    },
+    {
+      "predicate_id": "R03.3",
+      "label": "Upper boundary",
+      "definition": "For distinct bounds, value equals the lower bound, lies strictly between, equals the upper bound, or lies outside."
+    },
+    {
+      "predicate_id": "R03.4",
+      "label": "Outside interval",
+      "definition": "For distinct bounds, value equals the lower bound, lies strictly between, equals the upper bound, or lies outside."
+    },
+    {
+      "predicate_id": "R04.1",
+      "label": "At observed minimum",
+      "definition": "Value equals / exceeds the minimum of its nonempty eligible population."
+    },
+    {
+      "predicate_id": "R04.2",
+      "label": "Above observed minimum",
+      "definition": "Value equals / exceeds the minimum of its nonempty eligible population."
+    },
+    {
+      "predicate_id": "R05.1",
+      "label": "At observed maximum",
+      "definition": "Value equals / is below the maximum of its nonempty eligible population."
+    },
+    {
+      "predicate_id": "R05.2",
+      "label": "Below observed maximum",
+      "definition": "Value equals / is below the maximum of its nonempty eligible population."
+    },
+    {
+      "predicate_id": "R06.1",
+      "label": "Within tolerance",
+      "definition": "Distance from a stated reference is at most / greater than the specified tolerance, using a defined distance measure."
+    },
+    {
+      "predicate_id": "R06.2",
+      "label": "Outside tolerance",
+      "definition": "Distance from a stated reference is at most / greater than the specified tolerance, using a defined distance measure."
+    },
+    {
+      "predicate_id": "D01.1",
+      "label": "Valid calendar value",
+      "definition": "Text/components represent / fail to represent a real date/time under the selected calendar and grammar. Not a search for impossible dates in an already valid native DATE column."
+    },
+    {
+      "predicate_id": "D01.2",
+      "label": "Invalid calendar value",
+      "definition": "Text/components represent / fail to represent a real date/time under the selected calendar and grammar. Not a search for impossible dates in an already valid native DATE column."
+    },
+    {
+      "predicate_id": "D02.1",
+      "label": "Unambiguous interpretation",
+      "definition": "Among values with at least one valid interpretation, the permitted formats/timezones produce one distinct meaning / more than one."
+    },
+    {
+      "predicate_id": "D02.2",
+      "label": "Ambiguous interpretation",
+      "definition": "Among values with at least one valid interpretation, the permitted formats/timezones produce one distinct meaning / more than one."
+    },
+    {
+      "predicate_id": "D03.1",
+      "label": "Complete date/time specification",
+      "definition": "All components required by the selected granularity are supplied / one or more are absent."
+    },
+    {
+      "predicate_id": "D03.2",
+      "label": "Partial date/time specification",
+      "definition": "All components required by the selected granularity are supplied / one or more are absent."
+    },
+    {
+      "predicate_id": "D04.1",
+      "label": "Required granularity satisfied",
+      "definition": "Interpreted value obeys / fails the declared granularity, e.g. date-only values contain no non-midnight time component."
+    },
+    {
+      "predicate_id": "D04.2",
+      "label": "Required granularity violated",
+      "definition": "Interpreted value obeys / fails the declared granularity, e.g. date-only values contain no non-midnight time component."
+    },
+    {
+      "predicate_id": "D05.1",
+      "label": "Timezone specified",
+      "definition": "Representation or accompanying metadata supplies / does not supply the timezone needed for interpretation."
+    },
+    {
+      "predicate_id": "D05.2",
+      "label": "Timezone unspecified",
+      "definition": "Representation or accompanying metadata supplies / does not supply the timezone needed for interpretation."
+    },
+    {
+      "predicate_id": "T01.1",
+      "label": "Before cutoff",
+      "definition": "Interpreted value precedes, equals, or follows a fixed cutoff. Past/present/future are aliases when the reference instant is “now”; a present-day window instead uses T03."
+    },
+    {
+      "predicate_id": "T01.2",
+      "label": "At cutoff",
+      "definition": "Interpreted value precedes, equals, or follows a fixed cutoff. Past/present/future are aliases when the reference instant is “now”; a present-day window instead uses T03."
+    },
+    {
+      "predicate_id": "T01.3",
+      "label": "After cutoff",
+      "definition": "Interpreted value precedes, equals, or follows a fixed cutoff. Past/present/future are aliases when the reference instant is “now”; a present-day window instead uses T03."
+    },
+    {
+      "predicate_id": "T02.1",
+      "label": "On or before cutoff",
+      "definition": "Value is at most / greater than a fixed cutoff. Retained as a convenient pair, distinct from strict Before."
+    },
+    {
+      "predicate_id": "T02.2",
+      "label": "After cutoff",
+      "definition": "Value is at most / greater than a fixed cutoff. Retained as a convenient pair, distinct from strict Before."
+    },
+    {
+      "predicate_id": "T03.1",
+      "label": "Within period",
+      "definition": "Value belongs / does not belong to a declared calendar/time interval."
+    },
+    {
+      "predicate_id": "T03.2",
+      "label": "Outside period",
+      "definition": "Value belongs / does not belong to a declared calendar/time interval."
+    },
+    {
+      "predicate_id": "T04.1",
+      "label": "Selected calendar class",
+      "definition": "Value belongs / does not belong to a chosen weekday, month, fiscal period or business-calendar class."
+    },
+    {
+      "predicate_id": "T04.2",
+      "label": "Other calendar class",
+      "definition": "Value belongs / does not belong to a chosen weekday, month, fiscal period or business-calendar class."
+    },
+    {
+      "predicate_id": "T05.1",
+      "label": "Fresh",
+      "definition": "A non-future record age is at most / greater than a declared freshness limit relative to a fixed evaluation instant. Future-dated rows use T01."
+    },
+    {
+      "predicate_id": "T05.2",
+      "label": "Stale",
+      "definition": "A non-future record age is at most / greater than a declared freshness limit relative to a fixed evaluation instant. Future-dated rows use T01."
+    },
+    {
+      "predicate_id": "T06.1",
+      "label": "On-time",
+      "definition": "Recorded event time is at most / greater than its applicable deadline. Missing events use P02 or E03; they are not automatically late completed events."
+    },
+    {
+      "predicate_id": "T06.2",
+      "label": "Late",
+      "definition": "Recorded event time is at most / greater than its applicable deadline. Missing events use P02 or E03; they are not automatically late completed events."
+    },
+    {
+      "predicate_id": "T07.1",
+      "label": "Within latency allowance",
+      "definition": "A nonnegative observed delay between specified events meets / exceeds the allowed duration. Reversed event order uses E01."
+    },
+    {
+      "predicate_id": "T07.2",
+      "label": "Exceeds latency allowance",
+      "definition": "A nonnegative observed delay between specified events meets / exceeds the allowed duration. Reversed event order uses E01."
+    },
+    {
+      "predicate_id": "E01.1",
+      "label": "Ordered endpoints",
+      "definition": "Start is at or before end / start is after end, for a pair with both endpoints supplied."
+    },
+    {
+      "predicate_id": "E01.2",
+      "label": "Reversed endpoints",
+      "definition": "Start is at or before end / start is after end, for a pair with both endpoints supplied."
+    },
+    {
+      "predicate_id": "E02.1",
+      "label": "Expired",
+      "definition": "For a valid period and as-of instant: instant is at/after end, within [start,end), or before start. Declared open endpoints may represent infinities."
+    },
+    {
+      "predicate_id": "E02.2",
+      "label": "Effective",
+      "definition": "For a valid period and as-of instant: instant is at/after end, within [start,end), or before start. Declared open endpoints may represent infinities."
+    },
+    {
+      "predicate_id": "E02.3",
+      "label": "Not yet effective",
+      "definition": "For a valid period and as-of instant: instant is at/after end, within [start,end), or before start. Declared open endpoints may represent infinities."
+    },
+    {
+      "predicate_id": "E03.1",
+      "label": "Required event present",
+      "definition": "A required matching event exists / does not exist for the subject in the chosen observation window."
+    },
+    {
+      "predicate_id": "E03.2",
+      "label": "Required event absent",
+      "definition": "A required matching event exists / does not exist for the subject in the chosen observation window."
+    },
+    {
+      "predicate_id": "E04.1",
+      "label": "Overlapping intervals",
+      "definition": "Two valid intervals share eligible time / do not; boundary-touch policy is declared."
+    },
+    {
+      "predicate_id": "E04.2",
+      "label": "Nonoverlapping intervals",
+      "definition": "Two valid intervals share eligible time / do not; boundary-touch policy is declared."
+    },
+    {
+      "predicate_id": "E05.1",
+      "label": "Contiguous succession",
+      "definition": "Consecutive valid intervals meet at the selected boundary / have a gap or overlap."
+    },
+    {
+      "predicate_id": "E05.2",
+      "label": "Noncontiguous succession",
+      "definition": "Consecutive valid intervals meet at the selected boundary / have a gap or overlap."
+    },
+    {
+      "predicate_id": "E06.1",
+      "label": "Expected next step",
+      "definition": "A row with a predecessor advances by the required sequence increment / does not. First rows are outside this population."
+    },
+    {
+      "predicate_id": "E06.2",
+      "label": "Unexpected next step",
+      "definition": "A row with a predecessor advances by the required sequence increment / does not. First rows are outside this population."
+    },
+    {
+      "predicate_id": "E07.1",
+      "label": "Nondecreasing sequence",
+      "definition": "A row with a predecessor is at least as large as that predecessor / is smaller, under the declared order."
+    },
+    {
+      "predicate_id": "E07.2",
+      "label": "Sequence regression",
+      "definition": "A row with a predecessor is at least as large as that predecessor / is smaller, under the declared order."
+    },
+    {
+      "predicate_id": "E08.1",
+      "label": "Permitted transition",
+      "definition": "A known ordered state pair is / is not in the allowed transition relation."
+    },
+    {
+      "predicate_id": "E08.2",
+      "label": "Forbidden transition",
+      "definition": "A known ordered state pair is / is not in the allowed transition relation."
+    },
+    {
+      "predicate_id": "E09.1",
+      "label": "First occurrence",
+      "definition": "Row is the earliest for an entity under a declared total order / has a predecessor."
+    },
+    {
+      "predicate_id": "E09.2",
+      "label": "Later occurrence",
+      "definition": "Row is the earliest for an entity under a declared total order / has a predecessor."
+    },
+    {
+      "predicate_id": "E10.1",
+      "label": "Latest occurrence",
+      "definition": "Row is the latest for an entity under a declared total order / has a successor."
+    },
+    {
+      "predicate_id": "E10.2",
+      "label": "Earlier occurrence",
+      "definition": "Row is the latest for an entity under a declared total order / has a successor."
+    },
+    {
+      "predicate_id": "E11.1",
+      "label": "Increasing",
+      "definition": "Value is greater than, equal to, or smaller than its predecessor under a declared ordering. First rows are excluded."
+    },
+    {
+      "predicate_id": "E11.2",
+      "label": "Unchanged",
+      "definition": "Value is greater than, equal to, or smaller than its predecessor under a declared ordering. First rows are excluded."
+    },
+    {
+      "predicate_id": "E11.3",
+      "label": "Decreasing",
+      "definition": "Value is greater than, equal to, or smaller than its predecessor under a declared ordering. First rows are excluded."
+    },
+    {
+      "predicate_id": "K01.1",
+      "label": "In reference set",
+      "definition": "Non-null source value or tuple has / lacks a matching key in a designated reference population."
+    },
+    {
+      "predicate_id": "K01.2",
+      "label": "Outside reference set",
+      "definition": "Non-null source value or tuple has / lacks a matching key in a designated reference population."
+    },
+    {
+      "predicate_id": "K02.1",
+      "label": "Referenced",
+      "definition": "A reference-side key is used / unused by the designated source population. Includes Has child / No child for a declared parent-child relation."
+    },
+    {
+      "predicate_id": "K02.2",
+      "label": "Unreferenced",
+      "definition": "A reference-side key is used / unused by the designated source population. Includes Has child / No child for a declared parent-child relation."
+    },
+    {
+      "predicate_id": "K03.1",
+      "label": "Parent exists",
+      "definition": "A non-null child parent-key has / lacks a matching parent. Role-specific form of K01; a legitimate root without a parent key is not automatically orphaned."
+    },
+    {
+      "predicate_id": "K03.2",
+      "label": "Orphan reference",
+      "definition": "A non-null child parent-key has / lacks a matching parent. Role-specific form of K01; a legitimate root without a parent key is not automatically orphaned."
+    },
+    {
+      "predicate_id": "K04.1",
+      "label": "Zero matches",
+      "definition": "A source row matches zero, exactly one, or more than one reference record under a declared join condition."
+    },
+    {
+      "predicate_id": "K04.2",
+      "label": "One match",
+      "definition": "A source row matches zero, exactly one, or more than one reference record under a declared join condition."
+    },
+    {
+      "predicate_id": "K04.3",
+      "label": "Multiple matches",
+      "definition": "A source row matches zero, exactly one, or more than one reference record under a declared join condition."
+    },
+    {
+      "predicate_id": "K05.1",
+      "label": "Effective reference",
+      "definition": "Among matched reference records with known validity periods, the reference is / is not effective at the subject's relevant date."
+    },
+    {
+      "predicate_id": "K05.2",
+      "label": "Ineffective reference",
+      "definition": "Among matched reference records with known validity periods, the reference is / is not effective at the subject's relevant date."
+    },
+    {
+      "predicate_id": "K06.1",
+      "label": "Approved reference",
+      "definition": "Matched reference carries approved, deprecated or another known lifecycle status under disjoint specified sets. An unmatched key is K01, not Deprecated."
+    },
+    {
+      "predicate_id": "K06.2",
+      "label": "Deprecated reference",
+      "definition": "Matched reference carries approved, deprecated or another known lifecycle status under disjoint specified sets. An unmatched key is K01, not Deprecated."
+    },
+    {
+      "predicate_id": "K06.3",
+      "label": "Other reference status",
+      "definition": "Matched reference carries approved, deprecated or another known lifecycle status under disjoint specified sets. An unmatched key is K01, not Deprecated."
+    },
+    {
+      "predicate_id": "K07.1",
+      "label": "Mapping available",
+      "definition": "A declared translation/crosswalk supplies / does not supply at least one mapping for a source value. Mapping ambiguity is K04."
+    },
+    {
+      "predicate_id": "K07.2",
+      "label": "Mapping unavailable",
+      "definition": "A declared translation/crosswalk supplies / does not supply at least one mapping for a source value. Mapping ambiguity is K04."
+    },
+    {
+      "predicate_id": "L01.1",
+      "label": "One-to-one",
+      "definition": "On deduplicated observed entity-pairs with at least one edge: classify by whether every left entity has at most one right and every right at most one left; both, left only unrestricted, right only unrestricted, or both unrestricted. More precisely: 1:1 both maxima=1; 1:M left max>1/right max=1; M:1 left max=1/right max>1; M:M both maxima>1. Orientation and population are fixed."
+    },
+    {
+      "predicate_id": "L01.2",
+      "label": "One-to-many",
+      "definition": "On deduplicated observed entity-pairs with at least one edge: classify by whether every left entity has at most one right and every right at most one left; both, left only unrestricted, right only unrestricted, or both unrestricted. More precisely: 1:1 both maxima=1; 1:M left max>1/right max=1; M:1 left max=1/right max>1; M:M both maxima>1. Orientation and population are fixed."
+    },
+    {
+      "predicate_id": "L01.3",
+      "label": "Many-to-one",
+      "definition": "On deduplicated observed entity-pairs with at least one edge: classify by whether every left entity has at most one right and every right at most one left; both, left only unrestricted, right only unrestricted, or both unrestricted. More precisely: 1:1 both maxima=1; 1:M left max>1/right max=1; M:1 left max=1/right max>1; M:M both maxima>1. Orientation and population are fixed."
+    },
+    {
+      "predicate_id": "L01.4",
+      "label": "Many-to-many",
+      "definition": "On deduplicated observed entity-pairs with at least one edge: classify by whether every left entity has at most one right and every right at most one left; both, left only unrestricted, right only unrestricted, or both unrestricted. More precisely: 1:1 both maxima=1; 1:M left max>1/right max=1; M:1 left max=1/right max>1; M:M both maxima>1. Orientation and population are fixed."
+    },
+    {
+      "predicate_id": "L02.1",
+      "label": "Functionally dependent",
+      "definition": "For a nonempty determinant group X, all eligible rows have one Y value / multiple Y values. Testing all groups supports an observed X→Y claim."
+    },
+    {
+      "predicate_id": "L02.2",
+      "label": "Functional-dependency violation",
+      "definition": "For a nonempty determinant group X, all eligible rows have one Y value / multiple Y values. Testing all groups supports an observed X→Y claim."
+    },
+    {
+      "predicate_id": "L03.1",
+      "label": "One related entity",
+      "definition": "A subject with at least one relationship has one distinct target / more than one. Zero-related subjects are K04."
+    },
+    {
+      "predicate_id": "L03.2",
+      "label": "Multiple related entities",
+      "definition": "A subject with at least one relationship has one distinct target / more than one. Zero-related subjects are K04."
+    },
+    {
+      "predicate_id": "L04.1",
+      "label": "Required relationship coverage",
+      "definition": "Every eligible subject has the required relation / at least one does not."
+    },
+    {
+      "predicate_id": "L04.2",
+      "label": "Incomplete relationship coverage",
+      "definition": "Every eligible subject has the required relation / at least one does not."
+    },
+    {
+      "predicate_id": "L05.1",
+      "label": "Join multiplicity within allowance",
+      "definition": "Number of output matches per source row is at most / greater than the declared allowance. Counts matching records, unlike L03's distinct entities."
+    },
+    {
+      "predicate_id": "L05.2",
+      "label": "Join multiplicity exceeds allowance",
+      "definition": "Number of output matches per source row is at most / greater than the declared allowance. Counts matching records, unlike L03's distinct entities."
+    },
+    {
+      "predicate_id": "Q01.1",
+      "label": "Values agree",
+      "definition": "Two evaluable fields agree / disagree under a declared equality, normalization or tolerance rule."
+    },
+    {
+      "predicate_id": "Q01.2",
+      "label": "Values disagree",
+      "definition": "Two evaluable fields agree / disagree under a declared equality, normalization or tolerance rule."
+    },
+    {
+      "predicate_id": "Q02.1",
+      "label": "Column order respected",
+      "definition": "Selected A is at most B / exceeds B; may compare amounts, ranks or dates."
+    },
+    {
+      "predicate_id": "Q02.2",
+      "label": "Column order violated",
+      "definition": "Selected A is at most B / exceeds B; may compare amounts, ranks or dates."
+    },
+    {
+      "predicate_id": "Q03.1",
+      "label": "Derivation consistent",
+      "definition": "Stored result agrees / disagrees with the declared calculation from available inputs within any specified tolerance."
+    },
+    {
+      "predicate_id": "Q03.2",
+      "label": "Derivation inconsistent",
+      "definition": "Stored result agrees / disagrees with the declared calculation from available inputs within any specified tolerance."
+    },
+    {
+      "predicate_id": "Q04.1",
+      "label": "Aggregate reconciled",
+      "definition": "A defined sum/count/other aggregate agrees / disagrees with an available control value."
+    },
+    {
+      "predicate_id": "Q04.2",
+      "label": "Aggregate unreconciled",
+      "definition": "A defined sum/count/other aggregate agrees / disagrees with an available control value."
+    },
+    {
+      "predicate_id": "Q05.1",
+      "label": "Allowed combination",
+      "definition": "Evaluable tuple is / is not in the allowed cross-field relationship, e.g. country–province or currency–account type."
+    },
+    {
+      "predicate_id": "Q05.2",
+      "label": "Forbidden combination",
+      "definition": "Evaluable tuple is / is not in the allowed cross-field relationship, e.g. country–province or currency–account type."
+    },
+    {
+      "predicate_id": "Q06.1",
+      "label": "Group consistent",
+      "definition": "Rows for the same declared entity agree / disagree on a selected attribute at a fixed relevant scope/time."
+    },
+    {
+      "predicate_id": "Q06.2",
+      "label": "Group conflicting",
+      "definition": "Rows for the same declared entity agree / disagree on a selected attribute at a fixed relevant scope/time."
+    },
+    {
+      "predicate_id": "Q07.1",
+      "label": "Units compatible",
+      "definition": "Known units or currency designations can / cannot be compared under the selected dimensional/conversion policy."
+    },
+    {
+      "predicate_id": "Q07.2",
+      "label": "Units incompatible",
+      "definition": "Known units or currency designations can / cannot be compared under the selected dimensional/conversion policy."
+    },
+    {
+      "predicate_id": "A01.1",
+      "label": "Classified",
+      "definition": "Subject has at least one accepted assignment / has none in the specified scheme."
+    },
+    {
+      "predicate_id": "A01.2",
+      "label": "Unclassified",
+      "definition": "Subject has at least one accepted assignment / has none in the specified scheme."
+    },
+    {
+      "predicate_id": "A02.1",
+      "label": "Single-classified",
+      "definition": "Among classified subjects, exactly one distinct accepted class / more than one is assigned. Multiple classes may be legitimate."
+    },
+    {
+      "predicate_id": "A02.2",
+      "label": "Multi-classified",
+      "definition": "Among classified subjects, exactly one distinct accepted class / more than one is assigned. Multiple classes may be legitimate."
+    },
+    {
+      "predicate_id": "A03.1",
+      "label": "Unambiguous classification",
+      "definition": "Candidate evidence resolves to exactly one admissible class / multiple competing classes when the scheme requires one. Zero candidates are unresolved, not ambiguous."
+    },
+    {
+      "predicate_id": "A03.2",
+      "label": "Ambiguous classification",
+      "definition": "Candidate evidence resolves to exactly one admissible class / multiple competing classes when the scheme requires one. Zero candidates are unresolved, not ambiguous."
+    },
+    {
+      "predicate_id": "A04.1",
+      "label": "Classification consistent",
+      "definition": "Recorded classification agrees / disagrees with an available authoritative assignment or deterministic rule."
+    },
+    {
+      "predicate_id": "A04.2",
+      "label": "Classification inconsistent",
+      "definition": "Recorded classification agrees / disagrees with an available authoritative assignment or deterministic rule."
+    },
+    {
+      "predicate_id": "A05.1",
+      "label": "In selected category",
+      "definition": "Subject belongs / does not belong to a selected category in a defined scheme. A semantic specialization of M02."
+    },
+    {
+      "predicate_id": "A05.2",
+      "label": "Outside selected category",
+      "definition": "Subject belongs / does not belong to a selected category in a defined scheme. A semantic specialization of M02."
+    },
+    {
+      "predicate_id": "B01.1",
+      "label": "Rule compliant",
+      "definition": "An evaluable, explicitly named business rule holds / fails. Generic extension point, not an unqualified global label of validity."
+    },
+    {
+      "predicate_id": "B01.2",
+      "label": "Rule violation",
+      "definition": "An evaluable, explicitly named business rule holds / fails. Generic extension point, not an unqualified global label of validity."
+    },
+    {
+      "predicate_id": "B02.1",
+      "label": "Active",
+      "definition": "Subject is / is not active under a defined lifecycle rule at a fixed as-of point. Unknown lifecycle data is indeterminate."
+    },
+    {
+      "predicate_id": "B02.2",
+      "label": "Inactive",
+      "definition": "Subject is / is not active under a defined lifecycle rule at a fixed as-of point. Unknown lifecycle data is indeterminate."
+    },
+    {
+      "predicate_id": "B03.1",
+      "label": "Eligible",
+      "definition": "Available facts satisfy / fail a declared eligibility rule."
+    },
+    {
+      "predicate_id": "B03.2",
+      "label": "Ineligible",
+      "definition": "Available facts satisfy / fail a declared eligibility rule."
+    },
+    {
+      "predicate_id": "B04.1",
+      "label": "Authorized",
+      "definition": "An action/subject is permitted / prohibited by the applicable explicit authorization relation. Missing policy evidence is indeterminate."
+    },
+    {
+      "predicate_id": "B04.2",
+      "label": "Unauthorized",
+      "definition": "An action/subject is permitted / prohibited by the applicable explicit authorization relation. Missing policy evidence is indeterminate."
+    },
+    {
+      "predicate_id": "B05.1",
+      "label": "Current version",
+      "definition": "In a complete declared version chain, record is the selected current revision / an earlier superseded revision. Scheduled future revisions are outside this pair."
+    },
+    {
+      "predicate_id": "B05.2",
+      "label": "Superseded version",
+      "definition": "In a complete declared version chain, record is the selected current revision / an earlier superseded revision. Scheduled future revisions are outside this pair."
+    },
+    {
+      "predicate_id": "B06.1",
+      "label": "Deleted-marked",
+      "definition": "Available soft-deletion marker indicates deletion / does not. This does not inspect physically removed rows."
+    },
+    {
+      "predicate_id": "B06.2",
+      "label": "Not deleted-marked",
+      "definition": "Available soft-deletion marker indicates deletion / does not. This does not inspect physically removed rows."
+    },
+    {
+      "predicate_id": "G01.1",
+      "label": "Coordinates in domain",
+      "definition": "Coordinates meet / fail the legal numeric bounds of the declared reference system."
+    },
+    {
+      "predicate_id": "G01.2",
+      "label": "Coordinates outside domain",
+      "definition": "Coordinates meet / fail the legal numeric bounds of the declared reference system."
+    },
+    {
+      "predicate_id": "G02.1",
+      "label": "Geography known",
+      "definition": "Value or combination has / lacks a matching record in a selected geographic reference release."
+    },
+    {
+      "predicate_id": "G02.2",
+      "label": "Geography unknown to reference",
+      "definition": "Value or combination has / lacks a matching record in a selected geographic reference release."
+    },
+    {
+      "predicate_id": "G03.1",
+      "label": "Spatially resolvable",
+      "definition": "Available mappings resolve a subject to at least one usable spatial representation / none. Uniqueness of mapping is separate."
+    },
+    {
+      "predicate_id": "G03.2",
+      "label": "Spatially unresolved",
+      "definition": "Available mappings resolve a subject to at least one usable spatial representation / none. Uniqueness of mapping is separate."
+    },
+    {
+      "predicate_id": "G04.1",
+      "label": "Inside selected area",
+      "definition": "A resolved point/geometry satisfies / fails the selected spatial containment relation; treatment of boundaries and partial overlap is explicit."
+    },
+    {
+      "predicate_id": "G04.2",
+      "label": "Outside selected area",
+      "definition": "A resolved point/geometry satisfies / fails the selected spatial containment relation; treatment of boundaries and partial overlap is explicit."
+    },
+    {
+      "predicate_id": "G05.1",
+      "label": "Domestic",
+      "definition": "Known geography belongs / does not belong to the declared home jurisdiction."
+    },
+    {
+      "predicate_id": "G05.2",
+      "label": "Foreign",
+      "definition": "Known geography belongs / does not belong to the declared home jurisdiction."
+    },
+    {
+      "predicate_id": "G06.1",
+      "label": "Selected settlement class",
+      "definition": "Known classification is / is not the selected urban/rural/etc. class under an identified scheme. No universal binary urban/rural assumption."
+    },
+    {
+      "predicate_id": "G06.2",
+      "label": "Other settlement class",
+      "definition": "Known classification is / is not the selected urban/rural/etc. class under an identified scheme. No universal binary urban/rural assumption."
+    },
+    {
+      "predicate_id": "G07.1",
+      "label": "Geometry valid",
+      "definition": "Geometry satisfies / fails the spatial representation's specified validity rules."
+    },
+    {
+      "predicate_id": "G07.2",
+      "label": "Geometry invalid",
+      "definition": "Geometry satisfies / fails the spatial representation's specified validity rules."
+    },
+    {
+      "predicate_id": "G08.1",
+      "label": "Boundary release applicable",
+      "definition": "Known boundary version is / is not applicable to the relevant date and use."
+    },
+    {
+      "predicate_id": "G08.2",
+      "label": "Boundary release inapplicable",
+      "definition": "Known boundary version is / is not applicable to the relevant date and use."
+    },
+    {
+      "predicate_id": "S01.1",
+      "label": "Frequent",
+      "definition": "Observed value frequency is at least / below a declared count/share threshold. “Common” and “rare” are aliases."
+    },
+    {
+      "predicate_id": "S01.2",
+      "label": "Infrequent",
+      "definition": "Observed value frequency is at least / below a declared count/share threshold. “Common” and “rare” are aliases."
+    },
+    {
+      "predicate_id": "S02.1",
+      "label": "Modal",
+      "definition": "Observed category has / does not have the maximum frequency; all tied modes qualify."
+    },
+    {
+      "predicate_id": "S02.2",
+      "label": "Nonmodal",
+      "definition": "Observed category has / does not have the maximum frequency; all tied modes qualify."
+    },
+    {
+      "predicate_id": "S03.1",
+      "label": "Inlier",
+      "definition": "Value falls within / outside a declared statistical rule in its reference population. “Typical” is an alias for Inlier only under that rule."
+    },
+    {
+      "predicate_id": "S03.2",
+      "label": "Outlier",
+      "definition": "Value falls within / outside a declared statistical rule in its reference population. “Typical” is an alias for Inlier only under that rule."
+    },
+    {
+      "predicate_id": "S04.1",
+      "label": "Dispersion within bounds",
+      "definition": "A specified defined dispersion statistic lies / does not lie in its interval. Statistic and minimum sample requirements must be named."
+    },
+    {
+      "predicate_id": "S04.2",
+      "label": "Dispersion outside bounds",
+      "definition": "A specified defined dispersion statistic lies / does not lie in its interval. Statistic and minimum sample requirements must be named."
+    },
+    {
+      "predicate_id": "S05.1",
+      "label": "Distribution compatible",
+      "definition": "A declared comparison of an observed distribution to a baseline meets / fails its criterion. Compatibility does not prove identical distributions."
+    },
+    {
+      "predicate_id": "S05.2",
+      "label": "Distribution incompatible",
+      "definition": "A declared comparison of an observed distribution to a baseline meets / fails its criterion. Compatibility does not prove identical distributions."
+    },
+    {
+      "predicate_id": "S06.1",
+      "label": "Drift within allowance",
+      "definition": "A declared difference in a metric/distribution across matched populations or periods is at most / above its limit."
+    },
+    {
+      "predicate_id": "S06.2",
+      "label": "Drift exceeds allowance",
+      "definition": "A declared difference in a metric/distribution across matched populations or periods is at most / above its limit."
+    },
+    {
+      "predicate_id": "S07.1",
+      "label": "Entropy within bounds",
+      "definition": "Entropy under declared categories/bins and log base lies / does not lie in its chosen interval."
+    },
+    {
+      "predicate_id": "S07.2",
+      "label": "Entropy outside bounds",
+      "definition": "Entropy under declared categories/bins and log base lies / does not lie in its chosen interval."
+    },
+    {
+      "predicate_id": "S08.1",
+      "label": "Association meets criterion",
+      "definition": "A specified association statistic between variables meets / fails a threshold on an adequate sample. Does not establish causality or predictive performance."
+    },
+    {
+      "predicate_id": "S08.2",
+      "label": "Association below criterion",
+      "definition": "A specified association statistic between variables meets / fails a threshold on an adequate sample. Does not establish causality or predictive performance."
+    },
+    {
+      "predicate_id": "H01.1",
+      "label": "Empty population",
+      "definition": "Selected table/group contains zero / more than zero rows."
+    },
+    {
+      "predicate_id": "H01.2",
+      "label": "Nonempty population",
+      "definition": "Selected table/group contains zero / more than zero rows."
+    },
+    {
+      "predicate_id": "H02.1",
+      "label": "Volume within bounds",
+      "definition": "Row count lies / does not lie within a declared interval."
+    },
+    {
+      "predicate_id": "H02.2",
+      "label": "Volume outside bounds",
+      "definition": "Row count lies / does not lie within a declared interval."
+    },
+    {
+      "predicate_id": "H03.1",
+      "label": "Expected member observed",
+      "definition": "Member of an enumerated expected domain occurs / does not occur in the observed population. Selects expected-domain members, including those with no fact row."
+    },
+    {
+      "predicate_id": "H03.2",
+      "label": "Expected member absent",
+      "definition": "Member of an enumerated expected domain occurs / does not occur in the observed population. Selects expected-domain members, including those with no fact row."
+    },
+    {
+      "predicate_id": "H04.1",
+      "label": "Domain fully covered",
+      "definition": "Every expected domain member is observed / at least one is absent."
+    },
+    {
+      "predicate_id": "H04.2",
+      "label": "Domain incompletely covered",
+      "definition": "Every expected domain member is observed / at least one is absent."
+    },
+    {
+      "predicate_id": "H05.1",
+      "label": "Underrepresented",
+      "definition": "Category's observed share is below, inside, or above a declared interval around an external/declared baseline. No claim of sampling representativeness follows automatically."
+    },
+    {
+      "predicate_id": "H05.2",
+      "label": "Within representation bounds",
+      "definition": "Category's observed share is below, inside, or above a declared interval around an external/declared baseline. No claim of sampling representativeness follows automatically."
+    },
+    {
+      "predicate_id": "H05.3",
+      "label": "Overrepresented",
+      "definition": "Category's observed share is below, inside, or above a declared interval around an external/declared baseline. No claim of sampling representativeness follows automatically."
+    },
+    {
+      "predicate_id": "H06.1",
+      "label": "Balanced",
+      "definition": "Specified category proportions meet / fail an explicit balance criterion. Balance need not mean equal shares."
+    },
+    {
+      "predicate_id": "H06.2",
+      "label": "Unbalanced",
+      "definition": "Specified category proportions meet / fail an explicit balance criterion. Balance need not mean equal shares."
+    },
+    {
+      "predicate_id": "Z01.1",
+      "label": "Shared key",
+      "definition": "A key in the union of compared extracts occurs in both, source only, or target only. Align population filters and extraction times."
+    },
+    {
+      "predicate_id": "Z01.2",
+      "label": "Source-only key",
+      "definition": "A key in the union of compared extracts occurs in both, source only, or target only. Align population filters and extraction times."
+    },
+    {
+      "predicate_id": "Z01.3",
+      "label": "Target-only key",
+      "definition": "A key in the union of compared extracts occurs in both, source only, or target only. Align population filters and extraction times."
+    },
+    {
+      "predicate_id": "Z02.1",
+      "label": "Unchanged record",
+      "definition": "Among unambiguously matched keys, selected attributes agree / disagree across extracts."
+    },
+    {
+      "predicate_id": "Z02.2",
+      "label": "Changed record",
+      "definition": "Among unambiguously matched keys, selected attributes agree / disagree across extracts."
+    },
+    {
+      "predicate_id": "Z03.1",
+      "label": "Reconciled measure",
+      "definition": "A chosen count, total or statistic agrees / disagrees across aligned extracts within tolerance."
+    },
+    {
+      "predicate_id": "Z03.2",
+      "label": "Unreconciled measure",
+      "definition": "A chosen count, total or statistic agrees / disagrees across aligned extracts within tolerance."
+    },
+    {
+      "predicate_id": "Z04.1",
+      "label": "Multiplicity preserved",
+      "definition": "Occurrence count of a compared key or record projection agrees / differs between extracts."
+    },
+    {
+      "predicate_id": "Z04.2",
+      "label": "Multiplicity changed",
+      "definition": "Occurrence count of a compared key or record projection agrees / differs between extracts."
+    },
+    {
+      "predicate_id": "Z05.1",
+      "label": "New domain value",
+      "definition": "A current value is absent / present in the chosen historical reference population."
+    },
+    {
+      "predicate_id": "Z05.2",
+      "label": "Previously observed domain value",
+      "definition": "A current value is absent / present in the chosen historical reference population."
+    },
+    {
+      "predicate_id": "Y01.1",
+      "label": "Root",
+      "definition": "Node has no declared parent assignment / at least one; missing referenced parents remain K03."
+    },
+    {
+      "predicate_id": "Y01.2",
+      "label": "Non-root",
+      "definition": "Node has no declared parent assignment / at least one; missing referenced parents remain K03."
+    },
+    {
+      "predicate_id": "Y02.1",
+      "label": "Leaf",
+      "definition": "Node has no observed children / at least one."
+    },
+    {
+      "predicate_id": "Y02.2",
+      "label": "Non-leaf",
+      "definition": "Node has no observed children / at least one."
+    },
+    {
+      "predicate_id": "Y03.1",
+      "label": "Connected",
+      "definition": "Node has at least one incident edge / none in the specified graph; declares whether self-loops count."
+    },
+    {
+      "predicate_id": "Y03.2",
+      "label": "Isolated",
+      "definition": "Node has at least one incident edge / none in the specified graph; declares whether self-loops count."
+    },
+    {
+      "predicate_id": "Y04.1",
+      "label": "On a cycle",
+      "definition": "Node participates / does not participate in a cycle under the declared directed/undirected graph definition."
+    },
+    {
+      "predicate_id": "Y04.2",
+      "label": "Not on a cycle",
+      "definition": "Node participates / does not participate in a cycle under the declared directed/undirected graph definition."
+    },
+    {
+      "predicate_id": "Y05.1",
+      "label": "Reachable",
+      "definition": "Node has / lacks an allowed path from a specified source/root set in the available graph."
+    },
+    {
+      "predicate_id": "Y05.2",
+      "label": "Unreachable",
+      "definition": "Node has / lacks an allowed path from a specified source/root set in the available graph."
+    },
+    {
+      "predicate_id": "Y06.1",
+      "label": "Self-reference",
+      "definition": "A non-null referenced node identifier equals / differs from the subject's own identifier."
+    },
+    {
+      "predicate_id": "Y06.2",
+      "label": "No self-reference",
+      "definition": "A non-null referenced node identifier equals / differs from the subject's own identifier."
+    },
+    {
+      "predicate_id": "Y07.1",
+      "label": "Depth within bounds",
+      "definition": "Defined node depth lies / does not lie inside a chosen interval. Root set, path convention and cycle treatment must be specified."
+    },
+    {
+      "predicate_id": "Y07.2",
+      "label": "Depth outside bounds",
+      "definition": "Defined node depth lies / does not lie inside a chosen interval. Root set, path convention and cycle treatment must be specified."
+    },
+    {
+      "predicate_id": "J01.1",
+      "label": "Document syntax valid",
+      "definition": "Payload parses / fails to parse under the selected JSON/XML/other syntax. Native validated storage may make the negative member unreachable."
+    },
+    {
+      "predicate_id": "J01.2",
+      "label": "Document syntax invalid",
+      "definition": "Payload parses / fails to parse under the selected JSON/XML/other syntax. Native validated storage may make the negative member unreachable."
+    },
+    {
+      "predicate_id": "J02.1",
+      "label": "Path present",
+      "definition": "A selected path exists / does not exist in a parsed document. A present JSON null is not an absent path."
+    },
+    {
+      "predicate_id": "J02.2",
+      "label": "Path absent",
+      "definition": "A selected path exists / does not exist in a parsed document. A present JSON null is not an absent path."
+    },
+    {
+      "predicate_id": "J03.1",
+      "label": "Expected node type",
+      "definition": "Existing node has / lacks the expected scalar/object/array/etc. type."
+    },
+    {
+      "predicate_id": "J03.2",
+      "label": "Unexpected node type",
+      "definition": "Existing node has / lacks the expected scalar/object/array/etc. type."
+    },
+    {
+      "predicate_id": "J04.1",
+      "label": "Document contract conforming",
+      "definition": "Parsed document meets / fails declared required paths, types and other structural constraints."
+    },
+    {
+      "predicate_id": "J04.2",
+      "label": "Document contract nonconforming",
+      "definition": "Parsed document meets / fails declared required paths, types and other structural constraints."
+    },
+    {
+      "predicate_id": "J05.1",
+      "label": "Collection size within bounds",
+      "definition": "Parsed array/collection member count lies / does not lie in a specified interval."
+    },
+    {
+      "predicate_id": "J05.2",
+      "label": "Collection size outside bounds",
+      "definition": "Parsed array/collection member count lies / does not lie in a specified interval."
+    },
+    {
+      "predicate_id": "J06.1",
+      "label": "JSON null",
+      "definition": "An existing parsed JSON node is the JSON null literal / another value."
+    },
+    {
+      "predicate_id": "J06.2",
+      "label": "Non-null JSON node",
+      "definition": "An existing parsed JSON node is the JSON null literal / another value."
+    },
+    {
+      "predicate_id": "W01.1",
+      "label": "Verification recorded",
+      "definition": "Qualifying verification evidence is / is not attached to a data subject for a named rule and scope. This says nothing about whether verification passed."
+    },
+    {
+      "predicate_id": "W01.2",
+      "label": "No verification recorded",
+      "definition": "Qualifying verification evidence is / is not attached to a data subject for a named rule and scope. This says nothing about whether verification passed."
+    },
+    {
+      "predicate_id": "W02.1",
+      "label": "Approved provenance",
+      "definition": "Known source belongs / does not belong to a declared approved-source set. Unknown source is handled by P02."
+    },
+    {
+      "predicate_id": "W02.2",
+      "label": "Unapproved provenance",
+      "definition": "Known source belongs / does not belong to a declared approved-source set. Unknown source is handled by P02."
+    },
+    {
+      "predicate_id": "W03.1",
+      "label": "Evidence agrees",
+      "definition": "Available independent records agree / disagree on the specified assertion under a defined reconciliation rule."
+    },
+    {
+      "predicate_id": "W03.2",
+      "label": "Evidence conflicts",
+      "definition": "Available independent records agree / disagree on the specified assertion under a defined reconciliation rule."
+    },
+    {
+      "predicate_id": "SC01.1",
+      "label": "Expected object present",
+      "definition": "Expected table/column/constraint exists / does not exist in the imported metadata inventory."
+    },
+    {
+      "predicate_id": "SC01.2",
+      "label": "Expected object absent",
+      "definition": "Expected table/column/constraint exists / does not exist in the imported metadata inventory."
+    },
+    {
+      "predicate_id": "SC02.1",
+      "label": "Declared type matches",
+      "definition": "Imported datatype agrees / disagrees with the selected expected type. Separate from V02's content conversion."
+    },
+    {
+      "predicate_id": "SC02.2",
+      "label": "Declared type differs",
+      "definition": "Imported datatype agrees / disagrees with the selected expected type. Separate from V02's content conversion."
+    },
+    {
+      "predicate_id": "SC03.1",
+      "label": "Declared nullability matches",
+      "definition": "Imported nullability agrees / disagrees with the expected declaration."
+    },
+    {
+      "predicate_id": "SC03.2",
+      "label": "Declared nullability differs",
+      "definition": "Imported nullability agrees / disagrees with the expected declaration."
+    },
+    {
+      "predicate_id": "SC04.1",
+      "label": "Required constraint declared",
+      "definition": "Required key/reference/check constraint appears / does not appear in supplied metadata. Declaration does not prove enablement or historical validation."
+    },
+    {
+      "predicate_id": "SC04.2",
+      "label": "Required constraint undeclared",
+      "definition": "Required key/reference/check constraint appears / does not appear in supplied metadata. Declaration does not prove enablement or historical validation."
+    },
+    {
+      "predicate_id": "SC05.1",
+      "label": "Constraint enabled",
+      "definition": "A known constraint's imported enablement status is enabled / disabled. Missing status is indeterminate."
+    },
+    {
+      "predicate_id": "SC05.2",
+      "label": "Constraint disabled",
+      "definition": "A known constraint's imported enablement status is enabled / disabled. Missing status is indeterminate."
+    },
+    {
+      "predicate_id": "SC06.1",
+      "label": "Constraint validated",
+      "definition": "A known constraint's imported validation status indicates validation / nonvalidation."
+    },
+    {
+      "predicate_id": "SC06.2",
+      "label": "Constraint not validated",
+      "definition": "A known constraint's imported validation status indicates validation / nonvalidation."
+    },
+    {
+      "predicate_id": "SC07.1",
+      "label": "Structure unchanged",
+      "definition": "Selected metadata properties agree / disagree between aligned schema snapshots."
+    },
+    {
+      "predicate_id": "SC07.2",
+      "label": "Structure changed",
+      "definition": "Selected metadata properties agree / disagree between aligned schema snapshots."
+    },
+    {
+      "predicate_id": "LC01.1",
+      "label": "All component predicates hold",
+      "definition": "On a common population with determinate components, every selected predicate is true / at least one is false."
+    },
+    {
+      "predicate_id": "LC01.2",
+      "label": "At least one fails",
+      "definition": "On a common population with determinate components, every selected predicate is true / at least one is false."
+    },
+    {
+      "predicate_id": "LC02.1",
+      "label": "At least one component holds",
+      "definition": "At least one selected predicate is true / all are false."
+    },
+    {
+      "predicate_id": "LC02.2",
+      "label": "None holds",
+      "definition": "At least one selected predicate is true / all are false."
+    },
+    {
+      "predicate_id": "LC03.1",
+      "label": "Exactly one component holds",
+      "definition": "Exactly one selected predicate is true / zero or more than one are true."
+    },
+    {
+      "predicate_id": "LC03.2",
+      "label": "Not exactly one holds",
+      "definition": "Exactly one selected predicate is true / zero or more than one are true."
+    },
+    {
+      "predicate_id": "LC04.1",
+      "label": "Conditional rule satisfied",
+      "definition": "Among subjects where condition P is true, Q is true / false. Subjects where P is false are outside this investigation's population."
+    },
+    {
+      "predicate_id": "LC04.2",
+      "label": "Conditional rule violated",
+      "definition": "Among subjects where condition P is true, Q is true / false. Subjects where P is false are outside this investigation's population."
+    }
+  ]
+}

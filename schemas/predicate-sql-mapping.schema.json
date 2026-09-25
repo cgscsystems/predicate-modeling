@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Predicate to Oracle SQL mapping",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format_version",
+    "mapping_revision",
+    "catalogue_version",
+    "catalogue_sha256",
+    "catalogue_inventory",
+    "predicates"
+  ],
+  "properties": {
+    "format_version": {
+      "const": "1.0"
+    },
+    "mapping_revision": {
+      "const": 6
+    },
+    "catalogue_version": {
+      "const": "1.0.0"
+    },
+    "catalogue_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "catalogue_inventory": {
+      "type": "array",
+      "minItems": 364,
+      "maxItems": 364,
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "predicates": {
+      "type": "array",
+      "minItems": 364,
+      "maxItems": 364,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "predicate_id",
+          "label",
+          "planned_pattern_id",
+          "implementation"
+        ],
+        "properties": {
+          "predicate_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "planned_pattern_id": {
+            "type": "string"
+          },
+          "implementation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "template_id",
+              "template_revision",
+              "slots",
+              "source_batch",
+              "rendered_sql_sha256",
+              "parameters"
+            ],
+            "properties": {
+              "template_id": {
+                "type": "string",
+                "pattern": "^oracle\\.[a-z0-9_]+$"
+              },
+              "template_revision": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "slots": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "source_batch": {
+                "type": "string",
+                "pattern": "^[0-9]{2}$"
+              },
+              "rendered_sql_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "parameters": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

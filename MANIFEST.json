@@ -1,0 +1,95 @@
+{
+  "package": "Predicate-Catalog-Application-Handoff",
+  "packageVersion": "1.0.0",
+  "catalogueVersion": "1.0.0",
+  "graphRevision": 2,
+  "libraryRevision": 6,
+  "mappingRevision": 6,
+  "created": "2026-09-25",
+  "files": [
+    {
+      "path": "docs/SQL-Implementation-Contracts.md",
+      "bytes": 68348,
+      "sha256": "338ae4e68cb018c851380f445fa88a38a6261a1c000192be4e44ff7a4c233d64"
+    },
+    {
+      "path": "docs/SQL-Library-README.md",
+      "bytes": 6106,
+      "sha256": "70f651e6764652bdae764197766b8dc104cd658a6da326006998ec719bcc57c5"
+    },
+    {
+      "path": "examples/P01.1-bindings.example.json",
+      "bytes": 244,
+      "sha256": "d69cee2ea797080ddab1eab1c12f844baa71af45169a12f1f67159d657d874e0"
+    },
+    {
+      "path": "graph/Predicate-Catalogue-Enumeration-v1.0.md",
+      "bytes": 54343,
+      "sha256": "a4021e1b175f95c685a1bfe58fab5f3b6cf8ec8a1e69ec30c544c15b0fb5b778"
+    },
+    {
+      "path": "graph/Predicate-Catalogue-Graph-v1.0.0-sql-enriched.json",
+      "bytes": 1424299,
+      "sha256": "4ca82cd7b7fe0a1d3e79fbc1556f59abd3cec1d55544a3c65eda696fbe62db8a"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3286,
+      "sha256": "d78db12864e749ee28d313fa5b9416750cabd3f36236ee8c40392255698166f2"
+    },
+    {
+      "path": "runtime/render_predicate.py",
+      "bytes": 3907,
+      "sha256": "789c6028b6154bb8f0052e172b1f8a6e29f7dac67867b794cc34cb435e047b36"
+    },
+    {
+      "path": "runtime/validate_package.py",
+      "bytes": 8097,
+      "sha256": "e557ffe97b494ce238e8541c9fb19d9d7572500c8ffcb31dc62d386e202bdf2a"
+    },
+    {
+      "path": "schemas/oracle-sql-library.schema.json",
+      "bytes": 1899,
+      "sha256": "e0abf94ea9d10a88dc688a4e74f8749657ed8f6008b13bbcd6cbe830050af7fd"
+    },
+    {
+      "path": "schemas/predicate-catalogue-graph.schema.json",
+      "bytes": 10074,
+      "sha256": "81cc7ee8d880aae06791932c7f6a3baed4ca476c8dd60e14650b9ba9600e5c37"
+    },
+    {
+      "path": "schemas/predicate-sql-mapping.schema.json",
+      "bytes": 2704,
+      "sha256": "7d713decb0e4d4266846cf6c3e0861cb23158cd5f23efe9513ce1795ccc4b5b3"
+    },
+    {
+      "path": "schemas/runtime-bindings.schema.json",
+      "bytes": 936,
+      "sha256": "40419e73a8bbaec03fa1c7a6223b428d06307f87d9c34707cdf049c37ce0c852"
+    },
+    {
+      "path": "sql/Frozen-Predicate-Inventory.json",
+      "bytes": 77452,
+      "sha256": "2db568b89d31924bdb1b6342fe41f3f6bc03d2b6d5cd9fd07cfd19e83b2fc168"
+    },
+    {
+      "path": "sql/Oracle-SQL-Library.json",
+      "bytes": 105716,
+      "sha256": "7a0024b20bb24d5b81264df79176952c35fe5a82822d3730e1d0a038f08bb76b"
+    },
+    {
+      "path": "sql/Predicate-SQL-Mapping.json",
+      "bytes": 317848,
+      "sha256": "f8f302c0f5fc642251ac6c3256faa1ec65b274187903fcdc0c8572e60006a5cb"
+    },
+    {
+      "path": "sql/SQL-Tag-Contract.json",
+      "bytes": 53435,
+      "sha256": "74915d59e70edffd75de44a7e6489254fb5c9f16accfe6ee3b6c8f988c156829"
+    }
+  ],
+  "excludedFromManifest": [
+    "MANIFEST.json (self-reference)",
+    "VALIDATION.json (validator output)"
+  ]
+}

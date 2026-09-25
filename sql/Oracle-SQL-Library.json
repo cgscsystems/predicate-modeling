@@ -1,0 +1,634 @@
+{
+  "format_version": "1.0",
+  "library_revision": 6,
+  "catalogue_version": "1.0.0",
+  "sql_dialect": "oracle",
+  "authority": "Canonical SQL bodies; graph and historical batch files are not current SQL authoring sources.",
+  "source_batches": {
+    "01": {
+      "file_name": "Oracle-Occurrence-Templates.sql",
+      "library_file_id": "libfile_2d6e814743448191b9ea4b252c115c8c",
+      "sha256": "146196906f44a0de489c60df996c5f8bdfab079c225c9779d09a921b50e536f1",
+      "usage_notes": "-- Oracle occurrence-count predicates U01-U03\n-- Replace placeholders before running. Run one SELECT at a time.\n-- Key/record columns must be eligible Oracle PARTITION BY expressions.\n\n\n-- # Oracle occurrence-count predicates — first authored pattern\n-- \n-- One base pattern supplies six predicates. Catalogue release 1.0.0 remains frozen.\n-- \n-- | Axis | Group by | Once | More than once |\n-- |---|---|---|---|\n-- | U01 | One selected column | U01.1 Uniqueness | U01.2 Non-uniqueness |\n-- | U02 | Selected composite-key columns | U02.1 Composite uniqueness | U02.2 Composite non-uniqueness |\n-- | U03 | Explicit record-comparison projection | U03.1 Record uniqueness | U03.2 Record duplication |\n-- \n-- All six return original rows plus `profile_occurrence_count`. The two branches select count = 1 and count > 1. Every member of a repeated group is returned, including its first occurrence. There is no DISTINCT, representative-row selection or concatenation of key columns.\n-- \n-- ## Customization\n-- \n-- `{{schema_name}}`, `{{table_name}}` and `{{column_name}}` are identifier placeholders. `{{key_columns}}` and `{{comparison_columns}}` are comma-separated, alias-qualified column lists, such as `t.COL1, t.COL2`. The application supplies those names later. Quote individual identifiers when required by the database. These braces are substitution markers, not Oracle SQL syntax or bind variables.\n-- \n-- Change `WHERE 1 = 1` inside the inner query to restrict the population, for example `WHERE t.ELECTION_ID = :election_id`. Both branches must use the same restriction. To exclude nulls from an investigation, add the appropriate non-null condition there; the supplied default deliberately includes null groups. For a composite key, decide explicitly whether all components must be non-null.\n-- \n-- U03 compares the declared projection, not every displayed field automatically. A unique row identifier or audit timestamp should be included only if it belongs to the intended definition of record equality. Source rows are still returned in full so they can be inspected.\n-- \n-- The derived alias `profile_occurrence_count` must not collide with a source column. If it does, change it both where calculated and where filtered. Unsupported partition types, including LOB content, need a separate variant; no implicit truncation or hashing is supplied.\n-- \n-- ## Meaning and validation\n-- \n-- The default includes null-key groups, in accordance with the approved catalogue. Composite keys are compared as tuples. Empty populations return no rows. No case/whitespace normalization or conversion is introduced; Oracle's datatype and collation semantics govern grouping.\n-- \n-- The local fixture checks duplicates, null groups, partial-null tuples, distinct tuples that would collide under naive concatenation, changing comparison projections, filtering before counting, excluding nulls, singleton-null input, and empty input. The exact generated query structures were run using SQLite window functions as a portable logic check. **They have not been run against Oracle.** SQLite checks do not establish Oracle collation, datatype or optimizer behavior.\n-- \n-- \n-- ## Primary references\n-- \n-- - [Oracle 19c COUNT](https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/COUNT.html): COUNT(*) counts all rows, including rows containing nulls.\n-- - [Oracle 19c analytic functions](https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/Analytic-Functions.html): multi-expression partitions and filtering analytic results in an outer query.\n-- ",
+      "prior_portable_checks_reported": 12,
+      "historical_test_rerun": false,
+      "historical_usage_notes": "-- Oracle occurrence-count predicates U01-U03\n-- Replace placeholders before running. Run one SELECT at a time.\n-- Key/record columns must be eligible Oracle PARTITION BY expressions.\n\n\n-- # Oracle occurrence-count predicates — first authored pattern\n-- \n-- One base pattern supplies six predicate SQL properties. Catalogue release 1.0.0 remains frozen; the graph advances to revision 2.\n-- \n-- | Axis | Group by | Once | More than once |\n-- |---|---|---|---|\n-- | U01 | One selected column | U01.1 Uniqueness | U01.2 Non-uniqueness |\n-- | U02 | Selected composite-key columns | U02.1 Composite uniqueness | U02.2 Composite non-uniqueness |\n-- | U03 | Explicit record-comparison projection | U03.1 Record uniqueness | U03.2 Record duplication |\n-- \n-- All six return original rows plus `profile_occurrence_count`. The two branches select count = 1 and count > 1. Every member of a repeated group is returned, including its first occurrence. There is no DISTINCT, representative-row selection or concatenation of key columns.\n-- \n-- ## Customization\n-- \n-- `{{schema_name}}`, `{{table_name}}` and `{{column_name}}` are identifier placeholders. `{{key_columns}}` and `{{comparison_columns}}` are comma-separated, alias-qualified column lists, such as `t.COL1, t.COL2`. The application supplies those names later. Quote individual identifiers when required by the database. These braces are substitution markers, not Oracle SQL syntax or bind variables.\n-- \n-- Change `WHERE 1 = 1` inside the inner query to restrict the population, for example `WHERE t.ELECTION_ID = :election_id`. Both branches must use the same restriction. To exclude nulls from an investigation, add the appropriate non-null condition there; the supplied default deliberately includes null groups. For a composite key, decide explicitly whether all components must be non-null.\n-- \n-- U03 compares the declared projection, not every displayed field automatically. A unique row identifier or audit timestamp should be included only if it belongs to the intended definition of record equality. Source rows are still returned in full so they can be inspected.\n-- \n-- The derived alias `profile_occurrence_count` must not collide with a source column. If it does, change it both where calculated and where filtered. Unsupported partition types, including LOB content, need a separate variant; no implicit truncation or hashing is supplied.\n-- \n-- ## Meaning and validation\n-- \n-- The default includes null-key groups, in accordance with the approved catalogue. Composite keys are compared as tuples. Empty populations return no rows. No case/whitespace normalization or conversion is introduced; Oracle's datatype and collation semantics govern grouping.\n-- \n-- The local fixture checks duplicates, null groups, partial-null tuples, distinct tuples that would collide under naive concatenation, changing comparison projections, filtering before counting, excluding nulls, singleton-null input, and empty input. The exact generated query structures were run using SQLite window functions as a portable logic check. **They have not been run against Oracle.** SQLite checks do not establish Oracle collation, datatype or optimizer behavior. A separate read-only `Oracle-Occurrence-Smoke-Test.sql` is supplied for an Oracle-side check; it creates no database objects.\n-- \n-- The graph integrity validator still checks the frozen catalogue and relationships. It now permits authored SQL and requires each authored query to have a nonempty template, while unfilled predicates retain a null template. All six queries remain stored directly in the corresponding predicates' `attributes.sql.template` properties.\n-- \n-- ## Primary references\n-- \n-- - [Oracle 19c COUNT](https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/COUNT.html): COUNT(*) counts all rows, including rows containing nulls.\n-- - [Oracle 19c analytic functions](https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/Analytic-Functions.html): multi-expression partitions and filtering analytic results in an outer query.\n-- \n-- Next pattern: population uniqueness (U04 and U07) can reuse the occurrence-count idea but returns a population-level result, so it will be authored separately."
+    },
+    "02": {
+      "file_name": "Oracle-Batch-02-Population-Uniqueness.sql",
+      "library_file_id": "libfile_9fc8c9e5432c8191bd8f77703eaa1d93",
+      "sha256": "28ce45fe5a79933a87d3a747c86c08320ed86d6e251fd32b4c7c0d55b9b16c82",
+      "usage_notes": "-- Oracle SQL batch 02: population uniqueness (U04) and key candidates (U07).\n-- Catalogue: frozen 1.0.0. Pattern: population_uniqueness.\n-- Status: authored for human review; not executed against Oracle.\n-- Local verification: all four queries passed 12 fixtures (48 checks) using\n-- SQLite 3.53.1 for portable logic only: unique/duplicate populations, single\n-- and repeated nulls, partial-null tuples, scalar vs composite grouping,\n-- concatenation-collision examples, empty input and filtering before counting.\n-- This does not test Oracle datatype, collation or execution-plan behavior.\n-- Stable BEGIN/END markers identify queries for later code-based integration.\n-- Run one statement at a time after replacing placeholders.\n--\n-- Bindings:\n--   {{schema_name}} / {{table_name}}: individually quoted where required.\n--   {{key_columns}}: alias-qualified column list, e.g. t.COL1\n--                    or t.COL1, t.COL2. Use separate columns, not concatenation.\n--   {{any_key_null_condition}}: one IS NULL test per selected key component,\n--                    joined with OR: t.COL1 IS NULL OR t.COL2 IS NULL.\n--                    Required only by U07. Must cover the same key as above.\n-- These are application substitution markers, not Oracle bind variables.\n--\n-- Result: one summary row when the predicate holds; zero rows otherwise.\n-- Empty input returns zero rows for both members (NO DATA, not a pass/fail).\n-- For an unconditional diagnostic summary, remove the entire HAVING clause.\n-- A diagnostic row with population_rows=0 and maximum_occurrences=NULL is empty.\n-- duplicate_rows counts ALL rows belonging to repeated groups, not just extras.\n-- null_key_rows counts rows with ANY null component, not null cells.\n--\n-- Scope/null rules:\n--   Add cohort filters inside the subquery, before the analytic count.\n--   Use identical filters/key columns for both members of a pair.\n--   U04 defaults to including null groups, as in the occurrence-count batch.\n--   U07 checks nulls as evidence of key failure: do not first discard null-key\n--   rows when assessing the full intended population. Explicitly narrowing the\n--   population only establishes a key candidate within that narrower scope.\n--   Native datatype/collation grouping applies; no normalization is implicit.\n--   Key columns must support Oracle PARTITION BY (no unchecked LOB truncation\n--   or hashing). This does not assert future uniqueness or minimality of a key.\n--\n-- Reference syntax: Oracle Database 19c COUNT and Aggregate Functions:\n-- https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/COUNT.html\n-- https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/Aggregate-Functions.html\n\n",
+      "prior_portable_checks_reported": 48,
+      "historical_test_rerun": false
+    },
+    "03": {
+      "file_name": "Oracle-Batch-03-Distinct-Cardinality.sql",
+      "library_file_id": "libfile_f4e2043297d88191b7beabeb7eb68a48",
+      "sha256": "2e681141798566faf0970c7e2ec30f249b76f06cf3204f5b2b2812c89faeabe0",
+      "usage_notes": "-- Oracle SQL batch 03: distinct cardinality.\n-- Catalogue: frozen 1.0.0. Pattern: distinct_cardinality.\n-- Predicates: U05, U06, L02, L03, A02, A03 (12 member queries).\n-- Authored for human review; Oracle execution has not been performed.\n-- Verification: 52 local SQLite logic checks passed, covering null/excluded\n-- inputs, empty/zero cardinality, repeated values, composite group/value keys,\n-- boundary inclusion, and accepted-vs-admissible classification filters.\n-- SQLite verification does not establish Oracle type/collation behavior.\n-- Standalone work: integrate by BEGIN/END predicate ID markers at completion.\n--\n-- Common operation: select distinct values/tuples, then count them. Repeated\n-- source rows do not increase a count. Tuple fields remain separate columns.\n-- No concatenation, approximate count, implicit normalization or hashing.\n--\n-- Placeholders (replace before executing one SELECT at a time):\n-- {{schema_name}}, {{table_name}}: source table/view identifier components.\n-- {{value_columns}}: unqualified column names, e.g. COL1 or COL1, COL2.\n-- {{values_nonnull_condition}}: matching IS NOT NULL tests joined with AND,\n--     e.g. COL1 IS NOT NULL AND COL2 IS NOT NULL.\n-- {{group_columns}}: unqualified determinant/subject column names, possibly\n--     composite, e.g. ENTITY_ID or REGION_ID, ENTITY_ID.\n-- {{groups_nonnull_condition}}: IS NOT NULL for each grouping component.\n-- {{min_cardinality}}, {{max_cardinality}}: inclusive nonnegative integer\n--     bounds, with minimum <= maximum. Required by U06 only.\n-- {{accepted_assignment_condition}}: A02 filter selecting accepted assignments\n--     in the intended scheme/time scope; 1 = 1 only for an already scoped view.\n-- {{admissible_candidate_condition}}: A03 filter selecting admissible candidate\n--     classes in a fixed scheme/scope that requires one class per subject.\n--     Use 1 = 1 only when the input has already been prepared on that basis.\n--\n-- Column lists are unqualified because they appear at both query levels;\n-- quote each identifier when required. If group and value lists share column\n-- names, first give those operand roles distinct aliases in a source view or\n-- edited subquery. Avoid collisions with the derived output count alias too.\n-- All projected/grouped fields must support Oracle DISTINCT/GROUP BY.\n--\n-- Null policy: this batch's supplied eligibility conditions exclude nulls in\n-- required value/subject components. Incomplete tuples are outside evaluation.\n-- Use consistent eligibility in both members. U05 and L02 may be explicitly\n-- adapted to count null as a category by relaxing the corresponding condition;\n-- the findings then apply to that declared null policy. Do not interpret an\n-- absent entity/class identifier as a related entity or classification.\n--\n-- Population queries U05/U06 return a summary row only when the predicate holds.\n-- U05 returns neither member for zero eligible values. U06 deliberately counts\n-- zero and selects the appropriate bounds branch, even on an empty source.\n-- U06's count alone cannot distinguish an empty source from all values excluded.\n--\n-- Group queries L02/L03/A02/A03 return matching determinant/subject groups and\n-- their distinct count, not individual source rows. Groups with zero eligible\n-- values are absent from both branches. They need presence/coverage predicates.\n-- L02 detects one vs multiple dependent tuples per determinant; a global X->Y\n-- claim requires all intended groups, not merely one returned conforming group.\n-- A02 counts accepted classes; A03 counts admissible competing candidates.\n-- A02 multiplicity need not be an error. A03 applies only to single-class schemes.\n-- Pin class identity/scheme and time scope in the source/filter as appropriate.\n-- Source may be a prepared relationship/assignment/evidence view; these queries\n-- do not infer joins or derive semantic acceptance from column names.\n--\n-- References: Oracle 19c COUNT and Aggregate Functions:\n-- https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/COUNT.html\n-- https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/Aggregate-Functions.html\n\n",
+      "prior_portable_checks_reported": 52,
+      "historical_test_rerun": false
+    },
+    "04": {
+      "file_name": "Oracle-Batch-04-Equality-and-Membership.sql",
+      "library_file_id": "libfile_022a973aa03c81919f2ad28a9f1b042f",
+      "sha256": "d0baf150ea04c7fa6d83e8ebd277ccfc280754f33ab6bb8e2dee71f1d313cd6c",
+      "usage_notes": "-- Oracle SQL batch 04: scalar equality and set membership.\n-- Catalogue 1.0.0; P04, M01, P05, M02, M03, M04, A05 (15 predicates).\n-- Standalone templates for later code-based integration. Oracle not executed.\n-- Local verification: 52 SQLite logic checks passed (matching/nonmatching/null\n-- sources, duplicate/null/empty sets, all three Boolean classes, assignment\n-- scope, multiple assignments, and empty source). Oracle type/collation/empty-\n-- string semantics were not executed in this portable check.\n-- Run one marked query after replacing its placeholders.\n--\n-- Common identifiers: {{schema_name}}, {{table_name}}, {{column_name}}.\n-- Quote each identifier component if required. Source alias is t.\n-- {{default_value}}, {{selected_value}}: typed non-null Oracle literals or\n-- bind expressions, e.g. :selected_value, 1, 'A', DATE '2025-04-28'.\n-- Bind actual values with matching types; no implicit datatype conversion is\n-- intended. A null selected/default parameter makes comparison indeterminate;\n-- null testing belongs to P01. Default-valued does not prove default insertion.\n--\n-- Set placeholders: {{sentinel_set_query}}, {{selected_set_query}},\n-- {{allowed_set_query}}, {{true_set_query}}, {{false_set_query}},\n-- {{category_set_query}}. Each is a SELECT returning one comparable column\n-- named member_value, with no trailing semicolon. Examples:\n--   SELECT 'A' AS member_value FROM dual\n--   UNION ALL SELECT 'B' AS member_value FROM dual\n-- or:\n--   SELECT CODE AS member_value FROM REF_SCHEMA.APPROVED_CODES\n--   WHERE SCHEME_ID = :scheme_id\n-- Explicit empty text set:\n--   SELECT CAST(NULL AS VARCHAR2(100)) AS member_value FROM dual WHERE 1 = 0\n-- Use the matching datatype for other domains. An unprovided set definition\n-- is missing input, NOT a known empty set. Small literal sets may be edited\n-- into IN lists for convenience if null/empty-set behavior is preserved.\n--\n-- EXISTS/NOT EXISTS tests membership. Null set rows cannot match a non-null\n-- subject and duplicate set rows do not multiply output. A known empty set\n-- has no members; all eligible subjects are outside it. All scalar queries\n-- exclude null source values on BOTH sides. No sentinel/case/space rule is\n-- silently added. Native Oracle equality and collation semantics apply.\n-- Oracle ordinary empty strings are nulls, not independent category values.\n--\n-- M04 true/false sets MUST be disjoint under the actual comparison rules.\n-- Null flags are excluded from all three branches. Unknown codes are the\n-- non-null values in neither set. Overlapping sets are invalid configuration,\n-- not an opportunity to guess precedence. NULL rows in either set are ignored.\n--\n-- A05 applies to subject rows, not individual assignment rows. Additional\n-- bindings: {{assignment_schema}}, {{assignment_table}}, {{category_column}}.\n-- {{subject_match_condition}}: matching subject/key fields using aliases a/t,\n-- e.g. a.SUBJECT_ID = t.SUBJECT_ID (use AND for composite keys).\n-- {{assignment_scope_condition}}: accepted assignments in the selected scheme\n-- and time scope, using alias a; 1 = 1 only for an already scoped source.\n-- {{classification_evaluable_condition}}: which subject rows have sufficiently\n-- known classification to judge membership; include required non-null subject\n-- keys. Example for a prepared complete population: t.SUBJECT_ID IS NOT NULL.\n-- Whether subjects with no assignments are known outside or unresolved is\n-- decided by this explicit eligibility condition, consistently for both sides.\n-- {{category_set_query}} specifies the selected category (normally singleton)\n-- or its defined member codes. No hierarchy/descendant expansion is inferred.\n-- Subjects can have several assignments: NOT EXISTS avoids misclassifying a\n-- subject as outside A merely because another assignment is B. Assignment\n-- duplicates do not duplicate subject results. The source preserves its rows.\n--\n-- Result: matching source/subject rows (t.*), with no added quality verdict.\n-- Add cohort filters at the final WHERE level, identically for paired members.\n--\n-- References:\n-- https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/IN-Condition.html\n-- https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/Nulls.html\n\n",
+      "prior_portable_checks_reported": 52,
+      "historical_test_rerun": false
+    },
+    "05": {
+      "file_name": "Oracle-Batch-05-Related-Existence.sql",
+      "library_file_id": null,
+      "provenance": "Authored directly in standalone canonical template library; this batch SQL is a derived view.",
+      "usage_notes": "-- Oracle batch 05: related-row existence. 18 predicates, one shared body.\n-- User review/customization required; no Oracle execution has been performed.\n-- Return matching subject-side rows (t.*), not joined combinations. Duplicate\n-- related rows do not multiply subjects; duplicate subject rows are retained.\n-- A predicate's positive/negative branches share identical subject eligibility,\n-- key matching and related scope. An empty subject population returns neither.\n--\n-- Table slots expand to {{ROLE_schema}}.{{ROLE_table}}. Quote each identifier\n-- component as needed. Alias t ALWAYS denotes the subject being classified;\n-- alias r ALWAYS denotes the related row whose existence is tested.\n--\n-- Eligibility placeholders are SQL conditions in alias t, normally requiring\n-- every relevant subject/key component to be non-null. Required non-null key\n-- checks use AND, including composite keys. Do not treat a null foreign key as\n-- an orphan unless the separate domain rule explicitly requires that meaning.\n-- Match placeholders use alias r/t, for example r.ID = t.PARENT_ID, with AND\n-- for composite keys. Use compatible native types; no implicit normalization.\n-- Scope placeholders are explicit qualifying conditions in r (and t if needed).\n-- 1 = 1 is appropriate only for a deliberately unrestricted/pre-scoped source.\n-- All conditions must define a known, evaluable investigation; unavailable\n-- sources, incomplete reference coverage or missing rule parameters are not\n-- automatically evidence of absence. No live joins are inferred from names.\n--\n-- E03: t=subjects, r=events. Supply the required event kind and fixed observation\n-- window in event_scope_condition, including time-boundary/timezone rules.\n-- Example: r.EVENT_TYPE = :required_type AND r.EVENT_TIME >= :window_start\n--          AND r.EVENT_TIME < :window_end. Missing events are classified only\n-- relative to this explicit window and available observation coverage.\n-- K01: t=source values/tuples, r=designated reference population.\n-- K02: REVERSE direction: t=reference-side keys, r=source rows using those keys.\n-- K03: t=children, r=parents. Exclude legitimate roots/null parent-key tuples\n-- through child_parent_key_nonnull_condition. Reuse the declared parent scope.\n-- K07: t=source values, r=crosswalk mappings. The mapping_scope_condition must\n-- select actual available translations, not placeholder mapping rows with no\n-- usable target. Uniqueness/ambiguity of mappings is a separate investigation.\n-- A01: t=subjects, r=assignments. accepted_assignment_condition must select\n-- accepted assignments with genuine class identity in the stated scheme/time\n-- scope (e.g. r.CLASS_ID IS NOT NULL AND r.ACCEPTED = 1 AND r.SCHEME = :scheme).\n-- An evaluable subject with zero such assignments is unclassified, not ambiguous.\n-- G02: t=values/combinations identifying geography, r=chosen reference release.\n-- The negative result means unknown TO THIS REFERENCE, not nonexistent globally.\n-- G03: t=subjects, r=spatial mappings. usable_spatial_mapping_condition must\n-- require a usable point/geometry representation under the chosen rules, not\n-- merely any row with the matching subject. Coordinate domain/geometry validity\n-- evidence can be pre-profiled or included here; existence alone does not prove it.\n-- H03: t=EXPECTED domain members, r=observed facts. Start from the expected list\n-- so absent fact rows can be detected. For one output per expected member, make\n-- that expected input unique on the selected member key; otherwise repeats stay.\n-- A known empty related population returns all eligible subjects on the negative\n-- side. Unknown reference coverage is an investigation limitation to record.\n--\n-- Oracle reference:\n-- https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/EXISTS-Condition.html\n",
+      "prior_portable_checks_reported": 0,
+      "historical_test_rerun": false,
+      "sha256": "dea03e28f67f3f790016da5df2f09b34e5c48f176822470f5ed1c05bd980f3f7"
+    },
+    "06": {
+      "file_name": "Oracle-Batch-06-Join-Multiplicity.sql",
+      "library_file_id": null,
+      "provenance": "Authored directly in canonical library; batch file is a derived view.",
+      "usage_notes": "-- Oracle batch 06: join-match multiplicity. Five predicates, one shared body.\n-- Derived from Oracle-SQL-Library.json and Predicate-SQL-Mapping.json.\n-- Customize placeholders and run one SELECT at a time. Oracle execution pending.\n--\n-- K04.1/.2/.3 classify eligible source rows by zero, one or multiple matches.\n-- L05.1/.2 classify the same counts as <= or > the declared match allowance.\n-- A match is a RECORD in the chosen reference population under the supplied\n-- join condition and scope. COUNT(*) includes duplicate reference records and\n-- records with null non-key fields. Distinct target identities are not counted.\n-- This is the multiplicity of an inner join for each source row; zero matches\n-- stays zero even though a LEFT JOIN would emit one null-extended output row.\n--\n-- Output: every selected source row, with profile_match_count appended.\n-- Source duplicates remain separate. No source primary key or GROUP BY over\n-- source columns is required, and related rows do not multiply the result.\n-- profile_match_count must not already be a source column name; rename it in\n-- both the inner SELECT and outer condition if needed. Alias p denotes the\n-- profiled source rows, t the source, and r the reference.\n--\n-- source_eligibility_condition: the declared evaluable population in alias t.\n-- For ordinary value/key matching require every source key component non-null,\n-- e.g. t.KEY_A IS NOT NULL AND t.KEY_B IS NOT NULL, plus investigation filters.\n-- Null-key rows are excluded, not silently labeled zero matches. A separately\n-- declared null-safe join can use a broader eligible population consistently.\n-- source_reference_match_condition: explicit condition in aliases t/r; e.g.\n-- r.KEY_A = t.KEY_A AND r.KEY_B = t.KEY_B. Non-equality joins also work.\n-- reference_scope_condition: accepted rows in r, with t allowed for correlated\n-- scope such as an effective date. Use 1 = 1 only for a known unrestricted\n-- population. A missing/unavailable reference is not a known empty population.\n-- All branches must use identical eligibility, join and reference scope.\n-- Match/scope expressions must be evaluable and stable for the investigation.\n-- Use compatible datatypes; do not rely on implicit parsing or normalization.\n--\n-- match_allowance (L05 only): a finite, nonnegative integer Oracle NUMBER bind\n-- or literal, e.g. replace every {{match_allowance}} with :maximum_matches.\n-- Zero is valid. NULL, negative and fractional allowances produce neither\n-- branch; treat this as invalid investigation input, not a passed test. Supply\n-- a numeric value, not unvalidated text. NaN/infinity are outside this contract.\n-- A single allowance applies to the investigation; no row-varying expression.\n-- The explicit guards use TRUNC to exclude fractional allowances.\n--\n-- Empty source: no rows. Known empty reference: all eligible source rows have\n-- count zero, so K04.1 and L05.1 (any valid allowance) select those rows.\n-- COUNT(*) without GROUP BY returns one aggregate count, including zero. Do\n-- not replace it with COUNT(nullable_column), COUNT(DISTINCT ...), or add a\n-- GROUP BY/HAVING that could remove its zero-count row.\n-- This is a customizable correctness template, not a performance guarantee;\n-- inspect Oracle plans on representative data before large-scale execution.\n--\n-- Oracle references:\n-- https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/COUNT.html\n-- https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/Scalar-Subquery-Expressions.html\n",
+      "prior_portable_checks_reported": 0,
+      "historical_test_rerun": false,
+      "sha256": "8d9362cb5b24690e813d93a3fba1479435f129378a0c3d5b1b3ebe7ba793fe59"
+    },
+    "07": {
+      "file_name": "Oracle-Batch-07-Relationship-Cardinality.sql",
+      "library_file_id": null,
+      "provenance": "Authored in canonical library; batch file is a derived view.",
+      "usage_notes": "-- Oracle batch 07: observed relationship cardinality. L01.1-L01.4.\n-- Four predicates, one canonical body. Derived SQL; customize placeholders\n-- and execute one SELECT at a time. Oracle execution has not been performed.\n--\n-- This is a POPULATION predicate: return one summary row when its class holds,\n-- otherwise no row. It does not select individual entities or join records.\n-- The result reports distinct pairs, participating left/right entity counts,\n-- maximum distinct rights per left, and maximum distinct lefts per right.\n--\n-- Fixed orientation: 1:M means some LEFT entity has multiple RIGHT entities\n-- and each participating right has exactly one left. M:1 is the reverse.\n-- 1:1: both degree maxima = 1. M:M: both degree maxima > 1.\n-- Each nonempty eligible population belongs to exactly one branch. Different\n-- disconnected components can supply the two maxima: their combined population\n-- is M:M even without one component exhibiting both branching directions.\n--\n-- entity_pair_query: a SELECT without a trailing semicolon, yielding observed\n-- relationships and any columns needed for eligibility/scope filtering. It can\n-- read a bridge table or join sources using the explicitly chosen relationship.\n-- Do not manufacture a Cartesian product to represent unobserved pairs.\n-- Choose the same snapshot, time window, orientation and entity identity for\n-- all four branches. Missing observation coverage is not proof of absence.\n--\n-- left_entity_columns/right_entity_columns: nonempty comma-separated lists of\n-- SIMPLE columns qualified with e, e.g. e.LEFT_ID or e.LEFT_KEY_A, e.LEFT_KEY_B.\n-- Give every identity column a unique output name in entity_pair_query, with\n-- disjoint left/right names. Those names must survive into profile_pairs.\n-- Precompute expressions in entity_pair_query with explicit aliases. Do not\n-- put AS aliases, concatenations, functions or extra descriptive attributes in\n-- these column lists. Composite identities remain separate tuple components.\n-- Example input: SELECT a.ID AS LEFT_ID, b.ID AS RIGHT_ID FROM ...\n-- then left_entity_columns=e.LEFT_ID, right_entity_columns=e.RIGHT_ID.\n--\n-- entity_pair_eligibility_condition: explicit condition using e, requiring ALL\n-- left and right identity components non-null, plus investigation scope, e.g.\n-- e.LEFT_ID IS NOT NULL AND e.RIGHT_ID IS NOT NULL AND e.ACCEPTED = 1.\n-- An outer-join row with a missing endpoint is not an observed relationship.\n-- A null or partial-null identity is not silently treated as an extra entity.\n-- DISTINCT uses only the identity tuples, so duplicate observations or join\n-- records do not increase degree, even when their descriptive fields differ.\n-- Use comparable Oracle scalar key components supported by DISTINCT/GROUP BY;\n-- LOB/object identities need another representation. No lossy concatenation,\n-- hashing, implicit conversion or normalization is introduced by this template.\n--\n-- Empty eligible edge population: all four branches return no row. No empty\n-- relationship is declared 1:1. Entities with no observed edge are outside this\n-- axis; coverage/mandatory participation require separate predicates.\n-- This describes the chosen OBSERVATIONS, not a declared schema constraint or\n-- proof that the relationship must retain this cardinality on future data.\n-- Reference: https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/Aggregate-Functions.html\n",
+      "prior_portable_checks_reported": 0,
+      "historical_test_rerun": false,
+      "sha256": "4bdff54424cf0abf7ee00007255f844665681307b48f58daefa28435c4a48770"
+    },
+    "08": {
+      "file_name": "Oracle-Batch-08-Population-Coverage.sql",
+      "library_file_id": null,
+      "provenance": "Authored in canonical library; batch file is a derived view.",
+      "usage_notes": "-- Oracle batch 08: required relationship and expected-domain coverage.\n-- L04.1/.2 and H04.1/.2; four predicates, one shared population-summary body.\n-- Derived from the standalone canonical library. Replace placeholders and run\n-- one SELECT at a time. Native Oracle execution remains pending.\n--\n-- Return ONE summary row if the selected coverage predicate holds, otherwise\n-- no row. Output: profile_subject_row_count, profile_covered_row_count,\n-- profile_missing_row_count. Each eligible subject contributes either one\n-- covered row or one missing row. Duplicate related records never multiply it.\n-- Full coverage means covered count = subject count; incomplete means less.\n-- These are universal population tests built on the existence operation used\n-- in batch 5, with a different output contract from its row-selection queries.\n--\n-- Empty-population policy: the frozen L04/H04 definitions say EVERY subject,\n-- with no nonempty restriction. A KNOWN empty eligible/expected population\n-- therefore selects the positive branch with all three counts zero. It does\n-- not select the negative branch. This is vacuous coverage, not evidence that\n-- any real subject exists. To require existence as well, combine with a separate\n-- nonempty-population predicate. Do not silently change this shared definition.\n--\n-- L04: t is the subject population required to have a relation; r contains the\n-- related records. subject_eligibility_condition defines who owes the relation,\n-- e.g. t.SUBJECT_ID IS NOT NULL AND t.REQUIRES_RELATION = 1.\n-- subject_relation_match_condition explicitly joins t/r, e.g.\n-- r.ID = t.REQUIRED_PARENT_ID. A required subject with a NULL foreign-key value\n-- is still uncovered when no relation is found: do not exclude it merely because\n-- its link key is null. Legitimate optional relationships must be excluded by\n-- the declared eligibility rule. A subject's own identity and its link key are\n-- different roles; require non-null subject identity components where needed.\n-- required_relation_scope_condition chooses qualifying relations, including\n-- any required type/status/time window. Any matching row is sufficient only if\n-- that row satisfies the complete declared relation requirement.\n--\n-- H04: t is the EXPECTED domain population; r is the OBSERVED evidence.\n-- Start from expected rows, never only from observed facts. Supply all non-null\n-- expected identity components in expected_member_eligibility_condition, and\n-- use AND for composite-key matches in expected_observed_match_condition.\n-- observed_scope_condition specifies the observation period/type/status.\n-- Unexpected observed members do not reduce coverage; detecting those is a\n-- separate domain-membership investigation. H04 checks missing expected members.\n--\n-- Both axes: {{ROLE_schema}}.{{ROLE_table}} can name a table or prepared view.\n-- Alias t always means the subject/expected row; r means the related/observed\n-- row. Eligibility uses t. Match uses t/r. Scope uses r and may refer to t for\n-- a declared correlated window. All complementary branches use identical inputs,\n-- eligibility, match, scope and snapshot. Use compatible datatypes and evaluable\n-- predicates; no implicit normalization or conversion is added here.\n-- A known empty related source leaves every eligible subject uncovered. Missing\n-- access, unknown reference/observation coverage, or absent requirement parameters\n-- make the investigation unevaluable; do not substitute empty sources or 1 = 1\n-- for that missing knowledge. Broader required evidence than one qualifying\n-- match needs an explicitly prepared satisfaction view/condition.\n--\n-- Counts describe ROWS in the supplied subject/expected population, not DISTINCT\n-- identities. Repeated subject rows remain repeated contributions; full/incomplete\n-- is unchanged if identical rows are duplicated. For one contribution per entity,\n-- provide a subject view unique on the complete identity tuple. If duplicate\n-- records disagree on the requirement, resolve that meaning before deduplication.\n-- Do not invent a population by joining expected subjects to existing evidence;\n-- that would remove the very missing relations these queries must detect.\n--\n-- CASE contributes 1 only for a qualifying match. COUNT ignores the implicit\n-- NULL from an unmatched row, and returns zero for empty inputs. No SUM(NULL)\n-- or left-join null-extension count is used.\n-- Oracle references:\n-- https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/CASE-Expressions.html\n-- https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/COUNT.html\n-- https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/EXISTS-Condition.html\n",
+      "prior_portable_checks_reported": 0,
+      "historical_test_rerun": false,
+      "sha256": "fa09dc332364f86aff03222cbac21b829b2b399ef7dac06184f7026e4e3dfa02"
+    },
+    "09": {
+      "file_name": "Oracle-Batch-09-presence-text.sql",
+      "library_file_id": null,
+      "provenance": "Reviewed canonical fragment; batch SQL is a derived view.",
+      "usage_notes": "-- Batch 09: presence, completeness and text. Oracle 19c baseline.\n-- Source output is t.* with original row multiplicity. Population queries return\n-- one summary row iff the selected nonempty population satisfies the predicate.\n-- population_condition selects a column/group scope; use 1=1 for the whole table.\n-- All text is VARCHAR2/NVARCHAR2; Oracle treats the zero-length string as NULL.\n-- Null text is excluded from both text branches. CHAR padding remains significant.\n-- missing_condition is a SQL condition, e.g. t.v IS NULL OR TRIM(t.v) IS NULL\n-- OR t.v IN ('N/A','UNKNOWN'). Use exactly the same rule in complementary queries.\n-- required_fields_present_condition example: NOT (t.a IS NULL OR t.b IS NULL).\n-- presence_combination_condition examples: t.email IS NOT NULL OR t.phone IS NOT NULL;\n-- or (t.latitude IS NULL AND t.longitude IS NULL) OR\n-- (t.latitude IS NOT NULL AND t.longitude IS NOT NULL) for both-or-neither.\n-- Unknown conditions remain unclassified. Population completeness requires every\n-- selected row's missing rule to evaluate true or false; unknown rows block output.\n-- field_required_condition is the declared requirement scope; unknown is excluded.\n-- length_function is LENGTH (characters), LENGTHB (database-encoding bytes),\n-- or LENGTH4 (Unicode code points on supported scalar types); choose one per pair.\n-- Length bounds are inclusive nonnegative integers; completeness threshold is [0,1].\n-- Regex member parameters are SQL expressions yielding bracket-class CONTENTS,\n-- not full patterns. Escape class metacharacters correctly. Each must be nonempty.\n-- Example whitespace_members: ' ' || CHR(9) || CHR(10) || CHR(11) || CHR(12) || CHR(13).\n-- ASCII letter_members default: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.\n-- digit_members: '0123456789'; alphanumeric_members: the union of both strings.\n-- uppercase_members: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; lowercase_members: 'abcdefghijklmnopqrstuvwxyz'.\n-- Disjoint upper/lower repertoires are required; choose locale-specific alphabets\n-- deliberately. No Unicode titlecase category is silently assigned to upper/lower.\n-- allowed_members and control_members are declared repertoires; control default\n-- POSIX ':cntrl:' means [[:cntrl:]] when bracketed, or provide an explicit set.\n-- token_members default ASCII letters/digits plus underscore; escaped_token_pattern\n-- is a regex-escaped literal token, e.g. 'cat', not an unrestricted regex program.\n-- title_case_pattern default: '[A-Z][a-z]*([ ][A-Z][a-z]*)*' (ASCII words, single spaces).\n-- Pattern mode is 'full' or 'substring'; regex_flags is c/i/cn/in (never m/x).\n-- All other regexes use c, with anchors applying to the entire string, not each line.\n-- X13 token_case_flag is c or i. X14-X16 use literal sequences, never LIKE wildcards.\n-- X15 includes the source-length guard inside the complemented condition, so a\n-- sequence longer than the source classifies as a mismatch despite NULL SUBSTR.\n-- Set a documented binary collation environment for literal comparisons and ASCII\n-- ranges (NLS_COMP=BINARY, NLS_SORT=BINARY, binary source collation), or record a\n-- deliberate alternative. POSIX classes and language alphabets need Oracle validation.\n-- Regexes including wrappers must fit Oracle's 512-byte limit and be syntactically valid.\n-- X04 measures ASCIISTR expansion, avoiding false non-ASCII hits on literal backslashes.\n-- Its expanded scalar return must fit Oracle NVARCHAR2 limits; longer inputs need\n-- chunked evaluation. This is a scalar text variant, not a CLOB-wide character scan.\n-- No normalization/case folding/trim is applied unless explicitly part of the rule.\n-- No Oracle runtime is available; portable checks emulate documented scalar functions.\n",
+      "sha256": "921216c3b03ff73cb4e6222bdd4ce73b8bd99c1e682f65bf614f049e6d712106",
+      "limitations": [
+        "No Oracle runtime execution; regular expressions, database encoding, collation and datatype limits require Oracle validation.",
+        "Text variants use scalar VARCHAR2/NVARCHAR2 and declared alphabets, whitespace and title/token conventions; not a universal Unicode linguistic analyzer. X04 ASCIISTR expansion must fit Oracle NVARCHAR2 limits; longer values require chunked evaluation.",
+        "C01/C03/C05 require declared field presence and requirement conditions; explicit examples supplied. Unknown rule results are unclassified.",
+        "Population queries select one scope/group per invocation and exclude empty scopes; F04 measures non-null values only."
+      ],
+      "prior_portable_checks_reported": 0,
+      "historical_test_rerun": false
+    },
+    "10": {
+      "file_name": "Oracle-Batch-10-numeric-statistics.sql",
+      "library_file_id": null,
+      "provenance": "Reviewed canonical fragment; batch SQL is a derived view.",
+      "usage_notes": "-- Batch 10: numeric rules, intervals, frequency and explicit statistical variants.\n-- Oracle 19c; parameters are SQL fragments, never bind arbitrary untrusted text.\n-- See AUTHORING-NOTES.md for types, output grain, nulls, sample/variance policy,\n-- numeric safety envelope and precise algorithm definitions.\n-- All paired members share the same population and parameters.\n-- Row predicates preserve source duplicates; summaries are explicitly grouped.\n-- No Oracle execution is claimed. Local checks label emulated built-ins.\n",
+      "sha256": "69d76c9e495ae64fac7cd8731603d45945828f9a094ad4c06d6395fa785a4374",
+      "limitations": [
+        "No native Oracle execution; floating-point IS NAN / IS INFINITE are static-checked or explicitly emulated in portable fixtures.",
+        "Numeric operational parameters must be NUMBER-typed, finite and deterministic; interval operands are prepared typed values. Binary-to-decimal conversion precision and underflow are outside the supported arithmetic input contract.",
+        "Arithmetic/aggregate variants require prepared NUMBER values (or explicit upstream normalization to NUMBER semantics) with absolute magnitude at most 1e60; arithmetic guards exclude values outside this envelope. Sign, integrality, parity, extrema and finite-class tests do not impose this envelope.",
+        "S03 uses population-SD z-scores and requires nonzero variance; S04 uses STDDEV_POP. S05 uses categorical total-variation distance, S06 absolute mean drift, S07 Shannon entropy, S08 absolute Pearson r. These are declared supported variants, not universal tests for every distribution/statistic.",
+        "Q04 and Z03 implement sum reconciliation across two available scoped populations; a control value is supplied as a one-row control relation. Empty or null-valued sums are undefined and excluded.",
+        "R02/R03/T03/E02 require pretyped consistently ordered operands (finite NUMBER or same-zone DATE/TIMESTAMP); text parsing and timezone conversion occur before these queries.",
+        "Category frequency/entropy/distribution/representation exclude null categories explicitly. Representation requires a complete unique declared domain; unexpected categories make the baseline unevaluable.",
+        "G01 implements rectangular legal coordinate bounds, with caller-declared CRS and axis order; nonrectangular domains need a separate spatial variant."
+      ],
+      "prior_portable_checks_reported": 0,
+      "historical_test_rerun": false
+    },
+    "11": {
+      "file_name": "Oracle-Batch-11-temporal-reference.sql",
+      "library_file_id": null,
+      "provenance": "Reviewed canonical fragment; batch SQL is a derived view.",
+      "usage_notes": "-- Batch 11: temporal and reference predicates. Oracle 19c baseline.\n-- Operational substitutions are SQL identifiers/expressions; never concatenate untrusted input.\n-- All scopes and parameter choices must be identical across complementary branches.\n-- Source row grain except reference predicates, which return subject/reference pairs.\n-- Reserve profile_* output names; supply source columns without these names.\n-- Total order must end with a unique immutable tie-breaker; composite entity keys stay tuples.\n-- LAG respects null rows: missing or invalid predecessors are not skipped. First rows excluded.\n-- E08 requires a complete known transition reference via transition_reference_known_condition;\n-- FALSE/UNKNOWN coverage is excluded before either classification, without changing adjacency.\n-- D03 has six required component slots (year/month/day/hour/minute/second); use literal 1\n-- for any component not required at the chosen granularity. Fractional seconds belong to second.\n-- D03 tests supply only, not parsing, calendar validity or timezone validity.\n-- D04 supports DATE or timezone-normalized TIMESTAMP at Oracle TRUNC format granularity;\n-- e.g. 'DD' (midnight), 'HH24', 'MI', 'MM', 'YYYY'. Fractional seconds remain in left operand.\n-- D05 evidence is a preserved original timezone field/metadata, never inferred session timezone.\n-- Normalize timezone-bearing inputs to the declared UTC or civil-calendar zone before use.\n-- Never compare naive local times across zones; do not let implicit text/date conversions apply.\n-- E04/E05 default to nonempty half-open intervals [start,end). Boundary touch is nonoverlap\n-- in E04 and contiguous in E05. E04 invalid/empty intervals are outside both branches.\n-- Reference pairs: preserve every matched record; reference_record_id identifies its version.\n-- K05/G08 require explicit known nonempty validity bounds; unknown/unbounded nulls excluded.\n-- Use an explicit canonical bound/view if the domain declares null to mean open-ended.\n-- G08 reference_use_condition is the known applicable-use rule on t/r; SQL UNKNOWN excluded.\n-- K06 approved/deprecated sets must be disjoint; other means other supplied status.\n-- T04 reference match uses the subject date in the chosen calendar zone and a fixed calendar;\n-- missing calendar rows are unknown, not Other. One row per date/calendar is normal contract.\n-- B05 requires the complete declared chain: filter scheduled future revisions before ranking,\n-- and sort eligible revisions descending by authoritative revision precedence plus tie-breaker.\n-- Missing effective dates/order/keys are excluded by the chain eligibility contract.\n-- T05/T07 concrete arithmetic variant uses Oracle DATE endpoints and NUMBER allowance_days.\n-- DATE subtraction returns days (including fractions); fractional-second TIMESTAMP durations\n-- require a separately typed INTERVAL comparison variant, described in AUTHORING-NOTES.md.\n-- Freeze fixed_as_of/cutoff once for the run; do not substitute a changing execution-time clock.\n-- Empty input returns no classified rows. No Oracle execution has been performed.\n",
+      "sha256": "9ab817d5cd36c41eb8c3d0f98322a1159efc97bd1788e5bcaf11a578ba8c0b05",
+      "limitations": [
+        "Oracle runtime execution pending.",
+        "D04 granularity truncation requires DATE or normalized naive TIMESTAMP; timezone evidence must be preserved separately.",
+        "Duration bodies are DATE/NUMBER-days variants; TIMESTAMP precision requires the documented INTERVAL adaptation.",
+        "K05/G08/K06/T04 classify matched pairs; ambiguous subject reference matches may yield multiple classifications across pairs.",
+        "D03 six component slots cover conventional civil date/time; non-required slots use nonnull constant.",
+        "Complete chains, deterministic total order, trustworthy reference/calendar coverage and disjoint lifecycle sets are input contracts."
+      ],
+      "prior_portable_checks_reported": 0,
+      "historical_test_rerun": false
+    },
+    "12": {
+      "file_name": "Oracle-Batch-12-conversion-documents.sql",
+      "library_file_id": null,
+      "provenance": "Reviewed canonical fragment; batch SQL is a derived view.",
+      "usage_notes": "-- Batch 12: conversion, representation, documents and spatial evidence.\n-- Output: original row plus profile_evidence; source duplicates survive.\n-- {{row_scope_condition}} is only population scope, never a precomputed pass flag.\n-- SQL NULL / missing evidence is excluded from both branches. Oracle empty text is NULL.\n-- Read AUTHORING-NOTES.md before binding: supported variants are deliberately explicit.\n-- Default contracts: NUMBER grammar; text-to-NUMBER-to-TM9 representation roundtrip;\n-- UPPER(TRIM(text)); strict ASCII bytes; SHA256 over RAW; comma-delimited NO-QUOTING;\n-- selected complete script rules; DATE format alternatives; Oracle native SDO geometry;\n-- strict unique-key JSON object/array documents, exact single-node paths.\n-- SQL/JSON paths and format/regex literals are trusted authoring inputs, not user data.\n-- Oracle19c execution NOT performed. See test-results.json for static/emulated split.\n",
+      "sha256": "bf69ddabbefbfcffaf29cb9e95c19ef21ec18fa64c62fb445257fef5e6ee9672",
+      "limitations": [
+        "Oracle 19c syntax reviewed against primary documentation; no Oracle execution available.",
+        "Conversion/JSON/Spatial native functions require Oracle acceptance tests; portable evidence does not certify these implementations.",
+        "Variant-specific scope and adapters for other grammars, encodings, checksum algorithms, CSV quoting, calendars/timezones, JSON contracts and non-Oracle geometry are documented in AUTHORING-NOTES.md."
+      ],
+      "prior_portable_checks_reported": 0,
+      "historical_test_rerun": false
+    },
+    "13": {
+      "file_name": "Oracle-Batch-13-reconciliation-graph.sql",
+      "library_file_id": null,
+      "provenance": "Reviewed canonical fragment; batch SQL is a derived view.",
+      "usage_notes": "-- Batch 13: reconciliation, provenance and graph predicates (Oracle 19c).\n-- Paired branches share scopes and evidence eligibility. SQL UNKNOWN is unclassified.\n-- Operational {{parameters}} are SQL fragments chosen using AUTHORING-NOTES.md.\n-- Q03 computes the supplied deterministic expression and absolute tolerance in SQL.\n-- Policy-set complements require a complete applicable policy set; missing policy is unknown.\n-- B04 requires explicit PERMIT or DENY evidence and rejects conflicting/unknown decisions.\n-- Z01/Z04 return one key tuple in the union; Z05 source=current,target=history.\n-- Z02 computes multiplicity before comparison and excludes ambiguous matched keys.\n-- Graph traversal: numeric unique dictionary node IDs; directed default; edges point parent to child.\n-- walk_step_condition defaults to 1=1; undirected simple graph uses symmetric edges and\n-- (w.previous_id IS NULL OR e.target_id <> w.previous_id). Self-loops count as cycles.\n-- Roots have depth zero; depth is shortest unweighted root distance. Unreachable depth is unknown.\n-- Y01 uses declared assignments including dangling parents; traversal uses observed vertices only.\n-- Actual Oracle execution remains pending. Tests clearly separate portable from translated CYCLE checks.\n",
+      "sha256": "018f79e9c2376940d1061f423340b442c4f84419a924f2076351b730adde1d36",
+      "limitations": [
+        "Oracle 19c native recursive CYCLE syntax is documented and statically checked, not executed in Oracle.",
+        "Directed graphs and simple undirected graphs supported; parallel-edge undirected 2-cycles require an edge-ID trail variant and are not supported.",
+        "Traversal enumerates simple paths; dense graphs can be expensive. No depth truncation is silently applied.",
+        "Policy, authoritative classification and independent evidence relations are required external facts, not inferred from missing records.",
+        "Graph node IDs use a lossless numeric dictionary for composite keys; delimiter concatenation or hashing is not sufficient."
+      ],
+      "prior_portable_checks_reported": 0,
+      "historical_test_rerun": false
+    },
+    "14": {
+      "file_name": "Oracle-Batch-14-policy-metadata-logic.sql",
+      "library_file_id": null,
+      "provenance": "Reviewed canonical fragment; batch SQL is a derived view.",
+      "usage_notes": "-- # Policy, metadata and logical composition\n-- \n-- Oracle 19c templates. No graph/ZIP access. No native Oracle execution. Run one rendered SELECT at a time after substitution. All queries return original source rows (plus diagnostic rule truth/counts where shown), except SC07 which returns one population summary when the predicate holds. Source fields must not collide with generated profile_* diagnostic aliases; rename conflicting fields in the supplied source query.\n-- \n-- ## Declared business rules\n-- \n-- B01 is the explicitly named rule extension point; B02 is an as-of lifecycle rule; B03 is the declared eligibility rule. `subject_query` supplies the evidence with alias t. Conditions are SQL conditions, not stored boolean guesses. Their evaluability conditions must establish required inputs and knowledge. Example B01: `t.AMOUNT <= t.LIMIT_AMOUNT` with both inputs nonnull. Example B02: `t.STATUS = 'ACTIVE' AND t.START_AT <= :as_of AND (t.END_AT IS NULL OR :as_of < t.END_AT)` when NULL end explicitly means open-ended, with known status and start/as-of inputs. Bind one fixed as-of instant and consistent timezones. B03 can use `t.SCORE >= :required_score AND t.REQUIRED_TRAINING = 'Y'`; null knowledge stays unevaluable. Unknown conditions produce NULL truth and neither branch. Conditions must be safe to evaluate independently of WHERE predicate order; prepared safe parsed inputs where necessary.\n-- \n-- B06 requires an available marker interpretation. Example `t.DELETED_FLAG = 'Y'` with known marker scope `t.DELETED_FLAG IN ('Y','N')`. Unexpected/null codes are not presumed non-deleted; an explicitly meaningful null encoding can be declared. Does not detect physically removed records.\n-- \n-- ## Imported metadata\n-- \n-- SC01 starts from expected objects and EXISTS/NOT EXISTS in a complete supplied inventory. SC04 starts from required constraints. Match full owner/schema/object identity and object kind, not just names; constraints can match normalized requirement descriptors including ordered column tuples and referenced objects/check definitions where applicable. Completeness of the imported inventory is mandatory for absence claims; missing privileges or an incomplete extract is not evidence of absence. Source/reference aliases t/r match the existing related-existence template. Scope is the same on both branches. SC04 only tests declaration, not enabled/validated behavior.\n-- \n-- SC02/SC03 use an unambiguously aligned actual/expected metadata input query. Supply nonnull normalized complete type descriptors (e.g. NUMBER(10,2), VARCHAR2(20 CHAR)) for actual_type_expression/expected_type_expression. If comparing only DATA_TYPE, explicitly label the narrower base-type investigation. Use source metadata, not inference from row values. Nullability expressions similarly normalize known declarations, e.g. t.NULLABLE and t.EXPECTED_NULLABLE using Y/N. Unknown descriptors are excluded. Oracle scalar equality/collation applies; normalize descriptors deliberately in the supplied query, preserving byte/character semantics.\n-- \n-- SC05/SC06 reuse scalar equality: schema_name/table_name point to prepared known-constraint metadata; column_name is the normalized enablement/validation column. SC05 accepts only ENABLED/DISABLED; SC06 only VALIDATED/NOT VALIDATED. Other and null values select neither member. Status alone does not prove historic data correctness, constraint type, or enforcement at other times.\n-- \n-- SC07 compares the sets of selected metadata tuples using MINUS in both directions. old_metadata_query/new_metadata_query expose the same uniquely named columns; metadata_columns is a nonempty unqualified column list including object identity and every selected property. No lossy concatenation. Use comparable Oracle scalar fields, excluding raw LONG/LOB fields unless safely represented by an appropriate full comparison strategy. Set semantics intentionally ignore duplicate identical inventory rows. Null properties compare as equal in set operations, but unavailability of an entire required property makes snapshot_scope_known_condition false. Align owner filters, relevant extraction times and completeness; include identity so additions/removals are counted. Both known empty sets are unchanged. Output old-only and new-only tuple counts, not changed-object counts.\n-- \n-- ## Logical components\n-- \n-- LC01-LC03: subject_query yields subject_id and source fields. subject_id is a stable nonnull identity on a common population; composite identities can use a collision-free surrogate mapping, not concatenation/hashing. Repeated source rows remain repeated output rows. component_definition_query supplies the selected component_id set; duplicates are deduplicated, and NULL component IDs are outside the selected set and are ignored. component_result_query supplies subject_id,component_id,truth_value, with truth_value using a numeric datatype (for example Oracle NUMBER), where 1=true,0=false,NULL=unknown. Normalize text encodings safely before supplying this query; the template does not parse arbitrary text truth values. Select a fixed rule set, scope and evaluation version. Exactly one evaluation per required component and subject is required: missing evaluations, duplicate evaluations (even agreeing), null or invalid truth codes exclude the subject from both branches. Unselected component results are ignored. Input components must describe the same subject population and snapshot. Empty selected component sets use mathematical identities: ALL=true, ANY=false, EXACTLY_ONE=false. Counts make that fact visible; it does not prove a substantive rule was checked.\n-- \n-- LC04 uses the rule classifier: conditional_scope_condition establishes common evidence scope, antecedent_condition is P, consequent_condition is Q. Only true P enters; false/unknown P and unknown Q select neither branch. An implication with false P is not treated as satisfied because the frozen definition excludes it.\n-- \n-- ## References\n-- \n-- - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/CASE-Expressions.html\n-- - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/The-UNION-ALL-INTERSECT-MINUS-Operators.html\n-- - https://docs.oracle.com/en/database/oracle/oracle-database/19/refrn/ALL_CONSTRAINTS.html\n",
+      "sha256": "b721788c1e3789ecdf4bb9ebd3b0a93233a5a849947635ea946186bae09c00b9",
+      "limitations": [
+        "Native Oracle execution pending. SC07 MINUS and DUAL are translated to SQLite EXCEPT/one-row fixture only in portable tests.",
+        "Business/lifecycle/eligibility/marker definitions and metadata inventory completeness remain explicit caller inputs."
+      ],
+      "prior_portable_checks_reported": 0,
+      "historical_test_rerun": false
+    }
+  },
+  "templates": [
+    {
+      "id": "oracle.occurrence_rows",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT p.* FROM ( SELECT t.*, COUNT(*) OVER ( PARTITION BY [[partition_columns]] ) AS profile_occurrence_count FROM {{schema_name}}.{{table_name}} t WHERE 1 = 1 ) p WHERE p.profile_occurrence_count [[test]];",
+      "description": "occurrence rows",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.population_unique",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT COUNT(*) AS population_rows, MAX(p.occurrences) AS maximum_occurrences, COUNT(CASE WHEN p.occurrences > 1 THEN 1 END) AS duplicate_rows FROM ( SELECT COUNT(*) OVER ( PARTITION BY {{key_columns}} ) AS occurrences FROM {{schema_name}}.{{table_name}} t WHERE 1 = 1 ) p HAVING [[test]];",
+      "description": "population unique",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.key_candidate",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT COUNT(*) AS population_rows, MAX(p.occurrences) AS maximum_occurrences, COUNT(CASE WHEN p.occurrences > 1 THEN 1 END) AS duplicate_rows, COUNT(CASE WHEN p.has_null_key = 1 THEN 1 END) AS null_key_rows FROM ( SELECT COUNT(*) OVER ( PARTITION BY {{key_columns}} ) AS occurrences, CASE WHEN ({{any_key_null_condition}}) THEN 1 ELSE 0 END AS has_null_key FROM {{schema_name}}.{{table_name}} t WHERE 1 = 1 ) p HAVING [[test]];",
+      "description": "key candidate",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.distinct_population",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT COUNT(*) AS distinct_value_count FROM ( SELECT DISTINCT {{value_columns}} FROM {{schema_name}}.{{table_name}} WHERE ({{values_nonnull_condition}}) ) d HAVING [[test]];",
+      "description": "distinct population",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.distinct_per_subject",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT {{group_columns}}, COUNT(*) AS [[count_alias]] FROM ( SELECT DISTINCT {{group_columns}}, {{value_columns}} FROM {{schema_name}}.{{table_name}} WHERE ({{groups_nonnull_condition}}) AND ({{values_nonnull_condition}})[[extra_scope]] ) d GROUP BY {{group_columns}} HAVING COUNT(*) [[test]];",
+      "description": "distinct per subject",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.scalar_equality",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT t.* FROM {{schema_name}}.{{table_name}} t WHERE t.{{column_name}} IS NOT NULL AND t.{{column_name}} [[operator]] [[reference_value]] ;",
+      "description": "scalar equality",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.scalar_membership",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT t.* FROM {{schema_name}}.{{table_name}} t WHERE t.{{column_name}} IS NOT NULL AND [[existence]] ( SELECT 1 FROM ( [[set_query]] ) s WHERE s.member_value = t.{{column_name}} ) ;",
+      "description": "scalar membership",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.unrecognized_boolean",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT t.* FROM {{schema_name}}.{{table_name}} t WHERE t.{{column_name}} IS NOT NULL AND NOT EXISTS ( SELECT 1 FROM ( {{true_set_query}} ) s WHERE s.member_value = t.{{column_name}} ) AND NOT EXISTS ( SELECT 1 FROM ( {{false_set_query}} ) s WHERE s.member_value = t.{{column_name}} ) ;",
+      "description": "unrecognized boolean",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.subject_category",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT t.* FROM {{schema_name}}.{{table_name}} t WHERE ({{classification_evaluable_condition}}) AND [[existence]] ( SELECT 1 FROM {{assignment_schema}}.{{assignment_table}} a WHERE ({{subject_match_condition}}) AND ({{assignment_scope_condition}}) AND EXISTS ( SELECT 1 FROM ( {{category_set_query}} ) s WHERE s.member_value = a.{{category_column}} ) ) ;",
+      "description": "subject category",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.related_existence",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT t.*\nFROM [[subject_table]] t\nWHERE ([[eligibility]])\n  AND [[existence]] (\n      SELECT 1\n      FROM [[related_table]] r\n      WHERE ([[match]])\n        AND ([[scope]])\n  );",
+      "description": "Subject-side existence/absence of a qualifying related row; fixed source direction and eligibility.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.join_match_count",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT p.*\nFROM (\n    SELECT t.*,\n           (\n               SELECT COUNT(*)\n               FROM {{reference_schema}}.{{reference_table}} r\n               WHERE ({{source_reference_match_condition}})\n                 AND ({{reference_scope_condition}})\n           ) AS profile_match_count\n    FROM {{source_schema}}.{{source_table}} t\n    WHERE ({{source_eligibility_condition}})\n) p\nWHERE [[test]];",
+      "description": "Count matching reference records per eligible source row, then classify that count.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.relationship_degree",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_pairs AS (\n    SELECT DISTINCT {{left_entity_columns}}, {{right_entity_columns}}\n    FROM (\n        {{entity_pair_query}}\n    ) e\n    WHERE ({{entity_pair_eligibility_condition}})\n),\nprofile_left_degrees AS (\n    SELECT COUNT(*) AS profile_degree\n    FROM profile_pairs e\n    GROUP BY {{left_entity_columns}}\n),\nprofile_right_degrees AS (\n    SELECT COUNT(*) AS profile_degree\n    FROM profile_pairs e\n    GROUP BY {{right_entity_columns}}\n),\nprofile_summary AS (\n    SELECT (SELECT COUNT(*) FROM profile_pairs) AS profile_pair_count,\n           l.profile_left_entity_count,\n           r.profile_right_entity_count,\n           l.profile_max_rights_per_left,\n           r.profile_max_lefts_per_right\n    FROM (\n        SELECT COUNT(*) AS profile_left_entity_count,\n               MAX(profile_degree) AS profile_max_rights_per_left\n        FROM profile_left_degrees\n    ) l\n    CROSS JOIN (\n        SELECT COUNT(*) AS profile_right_entity_count,\n               MAX(profile_degree) AS profile_max_lefts_per_right\n        FROM profile_right_degrees\n    ) r\n)\nSELECT p.*\nFROM profile_summary p\nWHERE p.profile_pair_count > 0\n  AND [[test]];",
+      "description": "Classify a nonempty deduplicated entity-pair population by both degree maxima.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.population_coverage",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT p.*,\n       p.profile_subject_row_count - p.profile_covered_row_count AS profile_missing_row_count\nFROM (\n    SELECT COUNT(*) AS profile_subject_row_count,\n           COUNT(\n               CASE WHEN EXISTS (\n                   SELECT 1\n                   FROM [[related_table]] r\n                   WHERE ([[match]])\n                     AND ([[scope]])\n               ) THEN 1 END\n           ) AS profile_covered_row_count\n    FROM [[subject_table]] t\n    WHERE ([[eligibility]])\n) p\nWHERE [[test]];",
+      "description": "Summarize per-subject qualifying existence and classify universal coverage, including known empty populations.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.selected_row_rule",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT t.*\nFROM {{schema_name}}.{{table_name}} t\nWHERE ({{population_condition}})\n  AND ([[eligibility]])\n  AND ([[condition]]);",
+      "description": "Classifies source rows using explicit null-aware presence rules or concrete character operations supplied by the predicate binding. SQL UNKNOWN is excluded.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.selected_text_regex",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT t.*\nFROM {{schema_name}}.{{table_name}} t\nWHERE ({{population_condition}})\n  AND t.{{column_name}} IS NOT NULL\n  AND ([[eligibility]])\n  AND [[negation]] REGEXP_LIKE(t.{{column_name}}, [[pattern]], [[flags]]);",
+      "description": "Non-null text classification with explicit regular expression, case and newline semantics; source duplicates retained.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.selected_length_comparison",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT t.*\nFROM {{schema_name}}.{{table_name}} t\nWHERE ({{population_condition}})\n  AND t.{{column_name}} IS NOT NULL\n  AND ([[eligibility]])\n  AND {{length_function}}(t.{{column_name}}) [[test]];",
+      "description": "Length comparison with character/byte measurement selected explicitly.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.population_presence_counts",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT p.*,\n       p.profile_present_count * 1.0 / NULLIF(p.profile_row_count, 0) AS profile_present_fraction\nFROM (\n    SELECT COUNT(*) AS profile_row_count,\n           COUNT(CASE WHEN ({{missing_condition}}) THEN 1 END) AS profile_missing_count,\n           COUNT(CASE WHEN NOT ({{missing_condition}}) THEN 1 END) AS profile_present_count\n    FROM {{schema_name}}.{{table_name}} t\n    WHERE ({{population_condition}})\n) p\nWHERE p.profile_row_count > 0\n  AND p.profile_missing_count + p.profile_present_count = p.profile_row_count\n  AND ([[test]]);",
+      "description": "Nonempty selected population counts present and missing evidence separately; populations with unknown missingness are unclassified, not silently counted as missing.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.population_length_diversity",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT COUNT(*) AS profile_value_count,\n       COUNT(DISTINCT {{length_function}}(t.{{column_name}})) AS profile_distinct_length_count,\n       MIN({{length_function}}(t.{{column_name}})) AS profile_min_length,\n       MAX({{length_function}}(t.{{column_name}})) AS profile_max_length\nFROM {{schema_name}}.{{table_name}} t\nWHERE ({{population_condition}})\n  AND t.{{column_name}} IS NOT NULL\nHAVING COUNT(*) > 0\n   AND COUNT(DISTINCT {{length_function}}(t.{{column_name}})) [[test]];",
+      "description": "Uniform/varying length of a nonempty non-null text population.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.finite_numeric_rule",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_input AS (\n    SELECT t.*,\n           CASE WHEN {{value_expression}} IS NOT NAN\n                     AND {{value_expression}} IS NOT INFINITE\n                THEN {{value_expression}} END AS profile_value\n    FROM {{schema_name}}.{{table_name}} t\n    WHERE ({{population_scope_condition}})\n)\nSELECT p.*\nFROM profile_input p\nWHERE p.profile_value IS NOT NULL\n  AND ([[test]]);",
+      "description": "Finite numeric source rows; concrete sign, decimal/grid or source-transform rule is supplied by the mapping. Unknown calculations are excluded from all branches.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.floating_value_class",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT t.*\nFROM {{schema_name}}.{{table_name}} t\nWHERE ({{population_scope_condition}})\n  AND {{value_expression}} IS NOT NULL\n  AND [[test]];",
+      "description": "Native Oracle floating-point classification; NULL is outside the three-way finite/infinite/NaN partition.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.ordered_interval_rule",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT t.*\nFROM {{schema_name}}.{{table_name}} t\nWHERE ({{population_scope_condition}})\n  AND ([[eligibility]])\n  AND ([[test]]);",
+      "description": "Ordered typed numeric/date/timestamp intervals with explicit endpoints and unknown/invalid input exclusion.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.population_numeric_extreme",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_values AS (\n    SELECT t.*, CASE WHEN {{value_expression}} IS NOT NAN\n                          AND {{value_expression}} IS NOT INFINITE\n                     THEN {{value_expression}} END AS profile_value\n    FROM {{schema_name}}.{{table_name}} t\n    WHERE ({{population_scope_condition}})\n), profile_extremes AS (\n    SELECT p.*, MIN(profile_value) OVER () AS profile_minimum,\n           MAX(profile_value) OVER () AS profile_maximum\n    FROM profile_values p\n)\nSELECT p.* FROM profile_extremes p\nWHERE p.profile_value IS NOT NULL AND [[test]];",
+      "description": "Observed finite numeric minimum/maximum across the selected population; all ties retained.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.coordinate_rectangle",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT t.*\nFROM {{schema_name}}.{{table_name}} t\nWHERE ({{population_scope_condition}})\n  AND {{x_coordinate}} IS NOT NULL AND {{y_coordinate}} IS NOT NULL\n  AND {{x_coordinate}} IS NOT NAN AND {{x_coordinate}} IS NOT INFINITE\n  AND {{y_coordinate}} IS NOT NAN AND {{y_coordinate}} IS NOT INFINITE\n  AND {{x_min}} <= {{x_max}} AND {{y_min}} <= {{y_max}}\n  AND ([[test]]);",
+      "description": "Rectangular legal coordinate bounds for a declared CRS, e.g. EPSG:4326 longitude/latitude in degrees. No geometry validity claim.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.population_row_volume",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT COUNT(*) AS profile_row_count\nFROM {{schema_name}}.{{table_name}} t\nWHERE ({{population_scope_condition}})\nHAVING [[test]];",
+      "description": "Selected population row count including zero rows; grouped empty domains require invocation per declared group.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.category_frequency_profile",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_counts AS (\n    SELECT {{category_columns}}, COUNT(*) AS profile_frequency\n    FROM {{schema_name}}.{{table_name}} t\n    WHERE ({{population_scope_condition}}) AND ({{category_nonnull_condition}})\n    GROUP BY {{category_columns}}\n), profile_frequencies AS (\n    SELECT c.*, SUM(profile_frequency) OVER () AS profile_population_count,\n           MAX(profile_frequency) OVER () AS profile_modal_frequency\n    FROM profile_counts c\n)\nSELECT p.*,\n       1.0 * p.profile_frequency / NULLIF(p.profile_population_count, 0) AS profile_share\nFROM profile_frequencies p\nWHERE [[test]];",
+      "description": "One row per observed category tuple; count/share frequency thresholds and all tied modes.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.numeric_population_statistics",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_values AS (\n    SELECT t.*, CASE WHEN ({{value_expression}} IS NOT NULL AND {{value_expression}} IS NOT NAN AND {{value_expression}} IS NOT INFINITE) AND ABS({{value_expression}}) <= 1e60 THEN CAST({{value_expression}} AS NUMBER) END AS profile_value\n    FROM {{schema_name}}.{{table_name}} t\n    WHERE ({{population_scope_condition}})\n), profile_summary AS (\n    SELECT COUNT(*) AS profile_selected_count,\n           COUNT(profile_value) AS profile_sample_count,\n           AVG(profile_value) AS profile_mean,\n           STDDEV_POP(profile_value) AS profile_population_sd\n    FROM profile_values\n)\n[[selection]]\nWHERE p.profile_selected_count = p.profile_sample_count\n  AND p.profile_sample_count >= {{minimum_sample_size}}\n  AND {{minimum_sample_size}} >= 1\n  AND ([[test]]);",
+      "description": "Population mean and SD over finite NUMBER-convertible values in |x|<=1e60; missing/invalid values invalidate the selected summary. Concrete z-score and population-SD variants.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.aligned_numeric_aggregate_comparison",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_left_values AS (\n    SELECT CASE WHEN ({{left_value_expression}} IS NOT NULL AND {{left_value_expression}} IS NOT NAN AND {{left_value_expression}} IS NOT INFINITE) AND ABS({{left_value_expression}}) <= 1e60 THEN CAST({{left_value_expression}} AS NUMBER) END AS profile_value\n    FROM {{left_schema}}.{{left_table}} l\n    WHERE ({{left_scope_condition}})\n), profile_right_values AS (\n    SELECT CASE WHEN ({{right_value_expression}} IS NOT NULL AND {{right_value_expression}} IS NOT NAN AND {{right_value_expression}} IS NOT INFINITE) AND ABS({{right_value_expression}}) <= 1e60 THEN CAST({{right_value_expression}} AS NUMBER) END AS profile_value\n    FROM {{right_schema}}.{{right_table}} r\n    WHERE ({{right_scope_condition}})\n), profile_summaries AS (\n    SELECT a.profile_left_selected, a.profile_left_count, a.profile_left_measure,\n           b.profile_right_selected, b.profile_right_count, b.profile_right_measure\n    FROM (SELECT COUNT(*) AS profile_left_selected,\n                 COUNT(profile_value) AS profile_left_count,\n                 [[aggregate]](profile_value) AS profile_left_measure\n          FROM profile_left_values) a\n    CROSS JOIN (SELECT COUNT(*) AS profile_right_selected,\n                       COUNT(profile_value) AS profile_right_count,\n                       [[aggregate]](profile_value) AS profile_right_measure\n                FROM profile_right_values) b\n)\nSELECT p.*, ABS(p.profile_left_measure - p.profile_right_measure) AS profile_difference\nFROM profile_summaries p\nWHERE p.profile_left_selected = p.profile_left_count\n  AND p.profile_right_selected = p.profile_right_count\n  AND p.profile_left_count >= {{minimum_sample_size}}\n  AND p.profile_right_count >= {{minimum_sample_size}}\n  AND {{minimum_sample_size}} >= 1\n  AND {{difference_tolerance}} BETWEEN 0 AND 1e60\n  AND [[test]];",
+      "description": "Actual SUM reconciliation or AVG drift across two explicitly aligned populations; all selected values must be finite and nonmissing; empty evidence is undefined.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.categorical_total_variation",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_observed AS (\n    SELECT {{observed_category}} AS profile_category, COUNT(*) AS profile_count\n    FROM {{schema_name}}.{{table_name}} t\n    WHERE ({{population_scope_condition}}) AND {{observed_category}} IS NOT NULL\n    GROUP BY {{observed_category}}\n), profile_baseline_input AS (\n    SELECT {{baseline_category}} AS profile_category,\n           CASE WHEN {{baseline_weight}} IS NOT NAN AND {{baseline_weight}} IS NOT INFINITE\n                          AND {{baseline_weight}} BETWEEN 0 AND 1e60\n                THEN CAST({{baseline_weight}} AS NUMBER) END AS profile_weight\n    FROM {{baseline_schema}}.{{baseline_table}} b\n    WHERE ({{baseline_scope_condition}})\n), profile_baseline AS (\n    SELECT profile_category, SUM(profile_weight) AS profile_weight\n    FROM profile_baseline_input GROUP BY profile_category\n), profile_totals AS (\n    SELECT (SELECT SUM(profile_count) FROM profile_observed) AS profile_observed_count,\n           (SELECT SUM(profile_weight) FROM profile_baseline) AS profile_baseline_weight,\n           (SELECT COUNT(*) FROM profile_baseline_input\n            WHERE profile_category IS NULL OR profile_weight IS NULL\n               OR profile_weight < 0 OR profile_weight > 1e60\n               OR profile_weight IS NAN OR profile_weight IS INFINITE) AS profile_invalid_baseline\n    FROM DUAL\n), profile_categories AS (\n    SELECT profile_category FROM profile_observed\n    UNION SELECT profile_category FROM profile_baseline\n), profile_comparison AS (\n    SELECT SUM(ABS(1.0 * COALESCE(o.profile_count, 0) / NULLIF(t.profile_observed_count, 0)\n                   - 1.0 * COALESCE(b.profile_weight, 0) / NULLIF(t.profile_baseline_weight, 0))) / 2 AS profile_total_variation,\n           MAX(t.profile_observed_count) AS profile_observed_count,\n           MAX(t.profile_baseline_weight) AS profile_baseline_weight,\n           MAX(t.profile_invalid_baseline) AS profile_invalid_baseline\n    FROM profile_categories c\n    LEFT JOIN profile_observed o ON o.profile_category = c.profile_category\n    LEFT JOIN profile_baseline b ON b.profile_category = c.profile_category\n    CROSS JOIN profile_totals t\n)\nSELECT p.* FROM profile_comparison p\nWHERE p.profile_invalid_baseline = 0 AND p.profile_baseline_weight > 0\n  AND p.profile_observed_count >= {{minimum_sample_size}} AND {{minimum_sample_size}} >= 1\n  AND {{total_variation_limit}} BETWEEN 0 AND 1\n  AND [[test]];",
+      "description": "Categorical total-variation distance between empirical frequencies and normalized declared baseline weights over the union of categories. Duplicate baseline categories contribute additive weights.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.category_shannon_entropy",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_counts AS (\n    SELECT {{category_columns}}, COUNT(*) AS profile_count\n    FROM {{schema_name}}.{{table_name}} t\n    WHERE ({{population_scope_condition}}) AND ({{category_nonnull_condition}})\n    GROUP BY {{category_columns}}\n), profile_shares AS (\n    SELECT 1.0 * profile_count / NULLIF(SUM(profile_count) OVER (), 0) AS profile_probability,\n           SUM(profile_count) OVER () AS profile_population_count\n    FROM profile_counts\n), profile_entropy AS (\n    SELECT -SUM(profile_probability * LN(profile_probability)) /\n           NULLIF(LN(CASE WHEN {{log_base}} > 1 AND {{log_base}} <= 1e60\n                          THEN {{log_base}} END), 0) AS profile_entropy,\n           MAX(profile_population_count) AS profile_population_count\n    FROM profile_shares\n)\nSELECT p.* FROM profile_entropy p\nWHERE p.profile_population_count >= {{minimum_sample_size}} AND {{minimum_sample_size}} >= 1\n  AND {{entropy_lower}} >= 0 AND {{entropy_upper}} >= {{entropy_lower}}\n  AND [[test]];",
+      "description": "Shannon entropy of explicit category tuples or prepared bin identifiers; log base >1; no categories implies undefined entropy.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.pearson_association",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_pairs AS (\n    SELECT CASE WHEN ({{x_expression}} IS NOT NULL AND {{x_expression}} IS NOT NAN AND {{x_expression}} IS NOT INFINITE) AND ABS({{x_expression}}) <= 1e60 THEN CAST({{x_expression}} AS NUMBER) END AS profile_x,\n           CASE WHEN ({{y_expression}} IS NOT NULL AND {{y_expression}} IS NOT NAN AND {{y_expression}} IS NOT INFINITE) AND ABS({{y_expression}}) <= 1e60 THEN CAST({{y_expression}} AS NUMBER) END AS profile_y\n    FROM {{schema_name}}.{{table_name}} t\n    WHERE ({{population_scope_condition}})\n), profile_association AS (\n    SELECT COUNT(*) AS profile_selected_count,\n           COUNT(CASE WHEN profile_x IS NOT NULL AND profile_y IS NOT NULL THEN 1 END) AS profile_pair_count,\n           STDDEV_POP(profile_x) AS profile_x_sd,\n           STDDEV_POP(profile_y) AS profile_y_sd,\n           CORR(profile_x, profile_y) AS profile_pearson_r\n    FROM profile_pairs\n)\nSELECT p.* FROM profile_association p\nWHERE p.profile_selected_count = p.profile_pair_count\n  AND p.profile_pair_count >= {{minimum_sample_size}} AND {{minimum_sample_size}} >= 2\n  AND p.profile_x_sd > 0 AND p.profile_y_sd > 0\n  AND {{association_threshold}} BETWEEN 0 AND 1\n  AND [[test]];",
+      "description": "Absolute Pearson correlation threshold on paired finite values, adequate complete selected population, and nonzero variance in both variables.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.category_representation_intervals",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_observed AS (\n    SELECT {{observed_category}} AS profile_category, COUNT(*) AS profile_count\n    FROM {{schema_name}}.{{table_name}} t\n    WHERE ({{population_scope_condition}}) AND {{observed_category}} IS NOT NULL\n    GROUP BY {{observed_category}}\n), profile_domain AS (\n    SELECT {{baseline_category}} AS profile_category,\n           CASE WHEN {{baseline_share}} BETWEEN 0 AND 1\n                          AND {{baseline_share}} IS NOT NAN AND {{baseline_share}} IS NOT INFINITE\n                THEN CAST({{baseline_share}} AS NUMBER) END AS profile_baseline_share,\n           CASE WHEN {{share_allowance}} BETWEEN 0 AND 1\n                          AND {{share_allowance}} IS NOT NAN AND {{share_allowance}} IS NOT INFINITE\n                THEN CAST({{share_allowance}} AS NUMBER) END AS profile_allowance\n    FROM {{baseline_schema}}.{{baseline_table}} b\n    WHERE ({{baseline_scope_condition}})\n), profile_totals AS (\n    SELECT (SELECT SUM(profile_count) FROM profile_observed) AS profile_population_count,\n           (SELECT COUNT(*) FROM profile_domain) AS profile_domain_count,\n           (SELECT COUNT(*) FROM profile_domain\n            WHERE profile_category IS NULL OR profile_baseline_share IS NULL\n               OR profile_baseline_share < 0 OR profile_baseline_share > 1\n               OR profile_allowance IS NULL OR profile_allowance < 0 OR profile_allowance > 1\n               OR profile_baseline_share IS NAN OR profile_allowance IS NAN) AS profile_invalid_count,\n           (SELECT COUNT(*) FROM (SELECT profile_category FROM profile_domain GROUP BY profile_category HAVING COUNT(*) > 1) d) AS profile_duplicate_count,\n           (SELECT SUM(profile_baseline_share) FROM profile_domain) AS profile_baseline_total,\n           (SELECT COUNT(*) FROM profile_observed o WHERE NOT EXISTS\n                (SELECT 1 FROM profile_domain b WHERE b.profile_category = o.profile_category)) AS profile_undeclared_count\n    FROM DUAL\n), profile_representation AS (\n    SELECT b.profile_category, b.profile_baseline_share,\n           GREATEST(0, b.profile_baseline_share - b.profile_allowance) AS profile_lower_share,\n           LEAST(1, b.profile_baseline_share + b.profile_allowance) AS profile_upper_share,\n           1.0 * COALESCE(o.profile_count, 0) / NULLIF(t.profile_population_count, 0) AS profile_observed_share,\n           t.*\n    FROM profile_domain b LEFT JOIN profile_observed o ON o.profile_category = b.profile_category\n    CROSS JOIN profile_totals t\n    WHERE t.profile_population_count >= {{minimum_sample_size}} AND {{minimum_sample_size}} >= 1\n      AND t.profile_domain_count > 0 AND t.profile_invalid_count = 0 AND t.profile_duplicate_count = 0\n      AND t.profile_undeclared_count = 0\n      AND {{baseline_sum_tolerance}} BETWEEN 0 AND 1\n      AND ABS(t.profile_baseline_total - 1) <= {{baseline_sum_tolerance}}\n)\n[[selection]]\n[[filter]];",
+      "description": "Declared exhaustive category domain with baseline shares and symmetric absolute allowances. Missing observed categories receive zero share. H05 returns domain categories; H06 returns a population balance summary.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.temporal_row_filter",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT t.*\nFROM {{schema_name}}.{{table_name}} t\nWHERE ([[eligibility]])\n  AND ([[test]]);",
+      "description": "Row-preserving temporal/component expression filter; mapped slots contain actual arithmetic, presence or interval comparisons.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.predecessor_profile",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT p.*\nFROM (\n    SELECT t.*,\n           ROW_NUMBER() OVER (PARTITION BY {{entity_columns}} ORDER BY {{total_order}}) AS profile_position,\n           LAG([[value]]) OVER (PARTITION BY {{entity_columns}} ORDER BY {{total_order}}) AS profile_previous_value,\n           LAG([[valid]]) OVER (PARTITION BY {{entity_columns}} ORDER BY {{total_order}}) AS profile_previous_valid\n    FROM {{schema_name}}.{{table_name}} t\n    WHERE ({{chain_scope_condition}})\n      AND ({{entity_and_order_known_condition}})\n) p\nWHERE p.profile_position > 1\n  AND p.profile_previous_valid = 1\n  AND ([[eligibility]])\n  AND ([[test]]);",
+      "description": "Immediate predecessor retained including null/invalid evidence; no skipping missing states. Total order required.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.row_position_profile",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT p.*\nFROM (\n    SELECT t.*,\n           ROW_NUMBER() OVER (PARTITION BY {{entity_columns}} ORDER BY [[order]]) AS profile_position\n    FROM {{schema_name}}.{{table_name}} t\n    WHERE ({{chain_scope_condition}})\n      AND ({{entity_and_order_known_condition}})\n      AND ([[scope]])\n) p\nWHERE p.profile_position [[test]];",
+      "description": "Deterministic first/latest row of declared complete chain; current version scopes scheduled revisions before ranking.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.reference_pair_filter",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT t.*, r.{{reference_record_id}} AS profile_reference_record_id\nFROM {{schema_name}}.{{table_name}} t\nJOIN {{reference_schema}}.{{reference_table}} r\n  ON ({{reference_match_condition}})\nWHERE ({{subject_scope_condition}})\n  AND ({{reference_scope_condition}})\n  AND ([[eligibility]])\n  AND ([[test]]);",
+      "description": "Matched subject/reference-pair grain. Multiple matched versions retained and identifiable; unmatched rows outside this family.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.computed_document_evidence",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT p.*\nFROM (\n    SELECT t.*, [[evidence]] AS profile_evidence\n    FROM {{schema_name}}.{{table_name}} t\n    WHERE ({{row_scope_condition}})\n) p\nWHERE [[test]];",
+      "description": "Evaluate concrete conversion, document, representation or spatial evidence; branch only over known evidence. Operation SQL is resolved from internal mapping slots.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.evaluable_agreement",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT p.*\nFROM (\n    SELECT t.*,\n           CASE WHEN ([[agreement]]) THEN 1\n                WHEN NOT ([[agreement]]) THEN 0 END AS profile_agreement\n    FROM ( [[input_query]] ) t\n    WHERE ([[eligibility]])\n) p\nWHERE p.profile_agreement = [[branch]];",
+      "description": "Evaluate an explicit equality, deterministic derivation or reconciliation rule; UNKNOWN remains unclassified.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.explicit_authorization",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT t.*\nFROM ( {{authorization_subject_query}} ) t\nWHERE ({{authorization_evaluable_condition}})\n  AND EXISTS (\n      SELECT 1 FROM ( {{authorization_relation_query}} ) r\n      WHERE ({{authorization_match_condition}})\n        AND ({{authorization_scope_condition}})\n        AND r.decision_code = [[decision]]\n  )\n  AND NOT EXISTS (\n      SELECT 1 FROM ( {{authorization_relation_query}} ) r\n      WHERE ({{authorization_match_condition}})\n        AND ({{authorization_scope_condition}})\n        AND (r.decision_code <> [[decision]] OR r.decision_code IS NULL)\n  );",
+      "description": "Require explicit PERMIT/DENY evidence; absent, conflicting and unknown decisions are indeterminate.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.extract_union_counts",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_occurrences AS (\n    SELECT {{key_columns}}, 1 AS profile_source, 0 AS profile_target\n    FROM ( {{source_extract_query}} ) s\n    WHERE ({{source_key_eligibility_condition}})\n    UNION ALL\n    SELECT {{key_columns}}, 0 AS profile_source, 1 AS profile_target\n    FROM ( {{target_extract_query}} ) s\n    WHERE ({{target_key_eligibility_condition}})\n), profile_counts AS (\n    SELECT {{key_columns}}, SUM(profile_source) AS source_count,\n           SUM(profile_target) AS target_count\n    FROM profile_occurrences\n    GROUP BY {{key_columns}}\n)\nSELECT p.* FROM profile_counts p\nWHERE [[test]];",
+      "description": "Symmetric union population with per-extract occurrence counts; tuple columns remain separate, including null grouping when enabled.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.unique_extract_agreement",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_source AS (\n    SELECT s.*, COUNT(*) OVER (PARTITION BY {{source_key_columns}}) AS profile_key_count\n    FROM ( {{source_record_query}} ) s\n    WHERE ({{source_record_eligibility_condition}})\n), profile_target AS (\n    SELECT t.*, COUNT(*) OVER (PARTITION BY {{target_key_columns}}) AS profile_key_count\n    FROM ( {{target_record_query}} ) t\n    WHERE ({{target_record_eligibility_condition}})\n), profile_comparison AS (\n    SELECT {{comparison_output_columns}},\n           CASE WHEN ({{record_agreement_condition}}) THEN 1\n                WHEN NOT ({{record_agreement_condition}}) THEN 0 END AS profile_agreement\n    FROM profile_source s JOIN profile_target t ON ({{record_key_match_condition}})\n    WHERE s.profile_key_count = 1 AND t.profile_key_count = 1\n      AND ({{record_comparison_evaluable_condition}})\n)\nSELECT p.* FROM profile_comparison p WHERE p.profile_agreement = [[branch]];",
+      "description": "Compare only keys occurring exactly once on each side; agreement has three-valued semantics.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.graph_cycle_participation",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_nodes AS (\n    SELECT DISTINCT node_id FROM ( {{node_query}} ) n WHERE node_id IS NOT NULL\n), profile_edges AS (\n    SELECT DISTINCT e.source_id, e.target_id\n    FROM ( {{traversal_edge_query}} ) e\n    JOIN profile_nodes a ON a.node_id = e.source_id\n    JOIN profile_nodes b ON b.node_id = e.target_id\n), profile_walk (origin_id, node_id, previous_id, path_depth) AS (\n    SELECT n.node_id, n.node_id, CAST(NULL AS NUMBER), 0\n    FROM profile_nodes n\n    WHERE [[anchor]]\n    UNION ALL\n    SELECT w.origin_id, e.target_id, w.node_id, w.path_depth + 1\n    FROM profile_walk w JOIN profile_edges e ON e.source_id = w.node_id\n    WHERE ({{walk_step_condition}})\n)\nCYCLE node_id SET profile_cycle TO 'Y' DEFAULT 'N'\nSELECT n.node_id\nFROM profile_nodes n\nWHERE [[existence]] (\n    SELECT 1 FROM profile_walk w\n    WHERE w.origin_id = n.node_id AND w.node_id = n.node_id\n      AND w.path_depth > 0 AND w.profile_cycle = 'Y'\n);",
+      "description": "All-origin walk tests return to that origin, not mere reachability of some cycle. Directed or simple undirected with no immediate backtracking.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.graph_rooted_reachability",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_nodes AS (\n    SELECT DISTINCT node_id FROM ( {{node_query}} ) n WHERE node_id IS NOT NULL\n), profile_edges AS (\n    SELECT DISTINCT e.source_id, e.target_id\n    FROM ( {{traversal_edge_query}} ) e\n    JOIN profile_nodes a ON a.node_id = e.source_id\n    JOIN profile_nodes b ON b.node_id = e.target_id\n), profile_walk (origin_id, node_id, previous_id, path_depth) AS (\n    SELECT n.node_id, n.node_id, CAST(NULL AS NUMBER), 0\n    FROM profile_nodes n\n    WHERE [[anchor]]\n    UNION ALL\n    SELECT w.origin_id, e.target_id, w.node_id, w.path_depth + 1\n    FROM profile_walk w JOIN profile_edges e ON e.source_id = w.node_id\n    WHERE ({{walk_step_condition}})\n)\nCYCLE node_id SET profile_cycle TO 'Y' DEFAULT 'N'\nSELECT n.node_id\nFROM profile_nodes n\nWHERE [[existence]] (SELECT 1 FROM profile_walk w WHERE w.node_id = n.node_id);",
+      "description": "Root set reachability includes zero-length root paths; cycle detection makes walks finite.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.graph_shortest_depth",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_nodes AS (\n    SELECT DISTINCT node_id FROM ( {{node_query}} ) n WHERE node_id IS NOT NULL\n), profile_edges AS (\n    SELECT DISTINCT e.source_id, e.target_id\n    FROM ( {{traversal_edge_query}} ) e\n    JOIN profile_nodes a ON a.node_id = e.source_id\n    JOIN profile_nodes b ON b.node_id = e.target_id\n), profile_walk (origin_id, node_id, previous_id, path_depth) AS (\n    SELECT n.node_id, n.node_id, CAST(NULL AS NUMBER), 0\n    FROM profile_nodes n\n    WHERE [[anchor]]\n    UNION ALL\n    SELECT w.origin_id, e.target_id, w.node_id, w.path_depth + 1\n    FROM profile_walk w JOIN profile_edges e ON e.source_id = w.node_id\n    WHERE ({{walk_step_condition}})\n)\nCYCLE node_id SET profile_cycle TO 'Y' DEFAULT 'N'\n, profile_depth AS (\n    SELECT node_id, MIN(path_depth) AS profile_depth\n    FROM profile_walk WHERE profile_cycle = 'N'\n    GROUP BY node_id\n)\nSELECT p.* FROM profile_depth p\nWHERE {{minimum_depth}} >= 0\n  AND {{maximum_depth}} >= {{minimum_depth}}\n  AND [[test]];",
+      "description": "Shortest unweighted path from the root set. Unreachable nodes have undefined depth and are in neither branch.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.declared_condition_rows",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "SELECT p.*\nFROM (\n    SELECT t.*,\n           CASE WHEN ([[condition]]) THEN 1\n                WHEN NOT ([[condition]]) THEN 0 END AS profile_rule_truth\n    FROM ({{subject_query}}) t\n    WHERE ([[eligibility]])\n) p\nWHERE p.profile_rule_truth = [[truth]];",
+      "description": "Three-valued declared-rule evaluation; only determinate true/false rows classified.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.metadata_set_difference",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_old AS (\n    {{old_metadata_query}}\n), profile_new AS (\n    {{new_metadata_query}}\n), profile_old_only AS (\n    SELECT {{metadata_columns}} FROM profile_old\n    MINUS\n    SELECT {{metadata_columns}} FROM profile_new\n), profile_new_only AS (\n    SELECT {{metadata_columns}} FROM profile_new\n    MINUS\n    SELECT {{metadata_columns}} FROM profile_old\n), profile_counts AS (\n    SELECT (SELECT COUNT(*) FROM profile_old_only) AS profile_old_only_count,\n           (SELECT COUNT(*) FROM profile_new_only) AS profile_new_only_count\n    FROM DUAL\n)\nSELECT p.* FROM profile_counts p\nWHERE ({{snapshot_scope_known_condition}})\n  AND [[test]];",
+      "description": "Symmetric set difference of aligned selected metadata tuples, including additions and removals.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    },
+    {
+      "id": "oracle.component_truth_aggregation",
+      "revision": 1,
+      "dialect": "oracle",
+      "status": "drafted",
+      "body": "WITH profile_subjects AS (\n    {{subject_query}}\n), profile_keys AS (\n    SELECT DISTINCT subject_id FROM profile_subjects WHERE subject_id IS NOT NULL\n), profile_required AS (\n    SELECT DISTINCT component_id FROM ({{component_definition_query}}) WHERE component_id IS NOT NULL\n), profile_evaluations AS (\n    SELECT r.subject_id, r.component_id, COUNT(*) AS evaluation_count,\n           MIN(r.truth_value) AS truth_value\n    FROM ({{component_result_query}}) r\n    JOIN profile_required c ON c.component_id = r.component_id\n    GROUP BY r.subject_id, r.component_id\n), profile_counts AS (\n    SELECT s.subject_id, COUNT(c.component_id) AS profile_required_count,\n           COUNT(CASE WHEN v.evaluation_count = 1 AND v.truth_value IN (0,1) THEN 1 END) AS profile_known_count,\n           COUNT(CASE WHEN v.evaluation_count = 1 AND v.truth_value = 1 THEN 1 END) AS profile_true_count\n    FROM profile_keys s\n    LEFT JOIN profile_required c ON 1 = 1\n    LEFT JOIN profile_evaluations v ON v.subject_id = s.subject_id AND v.component_id = c.component_id\n    GROUP BY s.subject_id\n)\nSELECT t.*, p.profile_required_count, p.profile_known_count, p.profile_true_count\nFROM profile_subjects t JOIN profile_counts p ON p.subject_id = t.subject_id\nWHERE p.profile_known_count = p.profile_required_count\n  AND [[test]];",
+      "description": "Combine a defined set of determinate predicate results; missing/duplicate/unknown components exclude the subject.",
+      "review_status": "reviewed",
+      "oracle_test_status": "not_run"
+    }
+  ]
+}

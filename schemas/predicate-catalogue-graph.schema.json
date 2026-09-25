@@ -1,0 +1,383 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SQL-enriched predicate catalogue graph projection",
+  "description": "Structural contract only; validate_graph.py checks graph integrity and frozen content.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "documentId",
+    "revision",
+    "catalogueVersion",
+    "catalogueStatus",
+    "graphStatus",
+    "source",
+    "conventions",
+    "edgeContracts",
+    "nodes",
+    "edges",
+    "extensions"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.1.0"
+    },
+    "documentId": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "catalogueVersion": {
+      "const": "1.0.0"
+    },
+    "catalogueStatus": {
+      "const": "frozen"
+    },
+    "graphStatus": {
+      "type": "string"
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "filename",
+        "sha256",
+        "approval"
+      ],
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "approval": {
+          "type": "string"
+        }
+      }
+    },
+    "conventions": {
+      "type": "object"
+    },
+    "edgeContracts": {
+      "type": "object"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "revision",
+          "label",
+          "attributes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "enum": [
+              "ApplicabilityRule",
+              "PredicateDefinition",
+              "PredicateFamily",
+              "PredicateGroup",
+              "QueryPattern",
+              "SemanticType",
+              "StorageClass"
+            ]
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "label": {
+            "type": "string"
+          },
+          "attributes": {
+            "type": "object"
+          },
+          "provenance": {
+            "type": "object"
+          },
+          "extensions": {
+            "type": "object"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "PredicateDefinition"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "attributes": {
+                  "required": [
+                    "catalogueRef",
+                    "catalogueVersion",
+                    "definition",
+                    "definitionReading",
+                    "sql",
+                    "frozen"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "PredicateGroup"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "attributes": {
+                  "required": [
+                    "catalogueAxis",
+                    "kind",
+                    "definition",
+                    "domainPolicy",
+                    "intendedExclusive",
+                    "intendedExhaustive"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "PredicateFamily"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "attributes": {
+                  "required": [
+                    "membershipMeaning"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "SemanticType"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "attributes": {
+                  "required": [
+                    "definition"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "StorageClass"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "attributes": {
+                  "required": [
+                    "definition"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "ApplicabilityRule"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "attributes": {
+                  "required": [
+                    "semanticApplicability",
+                    "storageApplicability",
+                    "universalSemanticApplicability",
+                    "automationStatus"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "QueryPattern"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "attributes": {
+                  "required": [
+                    "dialect",
+                    "status",
+                    "description",
+                    "sqlTemplate"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "PredicateDefinition"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "attributes": {
+                  "properties": {
+                    "catalogueVersion": {
+                      "const": "1.0.0"
+                    },
+                    "frozen": {
+                      "const": true
+                    },
+                    "sql": {
+                      "type": "object",
+                      "required": [
+                        "dialect",
+                        "status",
+                        "template",
+                        "templateRevision",
+                        "mappingRevision",
+                        "sourceBatch",
+                        "renderedSqlSha256",
+                        "parameters",
+                        "internalSlotsResolved",
+                        "oracleTestStatus"
+                      ],
+                      "properties": {
+                        "dialect": {
+                          "const": "oracle"
+                        },
+                        "status": {
+                          "const": "authored"
+                        },
+                        "template": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "templateRevision": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "mappingRevision": {
+                          "const": 6
+                        },
+                        "sourceBatch": {
+                          "type": "string",
+                          "pattern": "^[0-9]{2}$"
+                        },
+                        "renderedSqlSha256": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        },
+                        "parameters": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+                          },
+                          "uniqueItems": true
+                        },
+                        "internalSlotsResolved": {
+                          "const": true
+                        },
+                        "oracleTestStatus": {
+                          "const": "not_run"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "source",
+          "target",
+          "attributes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "COMPLEMENT_OF",
+              "COMPOSED_FROM",
+              "GOVERNS_DEFINITION",
+              "GROUP_HAS_MEMBER",
+              "IN_FAMILY",
+              "MENTIONS_STORAGE_CLASS",
+              "RECOMMENDS_FOR_TYPE",
+              "SPECIALIZES",
+              "USES_QUERY_PATTERN"
+            ]
+          },
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "attributes": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "extensions": {
+      "type": "object"
+    }
+  }
+}
